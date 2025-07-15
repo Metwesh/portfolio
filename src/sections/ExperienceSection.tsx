@@ -60,7 +60,7 @@ export function ExperienceSection() {
               </div>
 
               <li
-                className="group flex flex-col items-center gap-6 backdrop-blur-md sm:flex-row sm:items-start sm:gap-8"
+                className="group flex flex-col items-center gap-6 rounded-2xl backdrop-blur-md sm:flex-row sm:items-start sm:gap-8"
                 style={{
                   transform: `translateY(${
                     Math.sin(index + timelineFloat / 8) * 8

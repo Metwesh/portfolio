@@ -62,7 +62,7 @@ export function Header() {
     >
       <a className="group flex items-center gap-4" href="#" aria-label="Home">
         <img
-          src="/favicons/logo.svg"
+          src="./favicons/logo.svg"
           alt="Logo"
           className="h-10 w-10 drop-shadow-lg"
         />
