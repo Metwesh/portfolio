@@ -21,13 +21,13 @@ jobs:
           check-latest: true
 
       - name: Install dependencies 📦
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: Lint & compile 🧹
-        run: npm run lint && npm run compile
+        run: yarn lint && yarn compile
 
       - name: Build project 🏗️
-        run: npm run build
+        run: yarn build
         env: 
           VITE_SERVICE_ID: ${{ secrets.VITE_SERVICE_ID }}
           VITE_TEMPLATE_ID: ${{ secrets.VITE_TEMPLATE_ID }}

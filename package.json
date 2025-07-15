@@ -9,8 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "prettier": "prettier --write .",
-    "typecheck": "tsc --noEmit",
-    "check": "yarn lint && yarn typecheck && yarn prettier",
+    "compile": "tsc --noEmit",
+    "check": "yarn lint && yarn compile && yarn prettier",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/favicons/logo.svg"
