@@ -9,7 +9,8 @@ interface SassyMLogoProps {
 }
 
 export function MLogo({ scrollY }: SassyMLogoProps) {
-  const { scene } = useGLTF("/m-logo/M-logo.gltf");
+  const { scene } = useGLTF("./m-logo/M-logo.gltf");
+
   const group = useRef<THREE.Group>(null);
 
   // Enter animation: scale and opacity
