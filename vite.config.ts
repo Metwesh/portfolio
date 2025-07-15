@@ -4,13 +4,14 @@ import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 const getBasePath = (mode: string) =>
-  mode === "development" ? undefined : "/portfolio/";
+  mode === "development" ? "/" : "/portfolio/";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: getBasePath(mode),
+  base: mode === "development" ? undefined : "/portfolio/",
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       injectRegister: null,
       minify: true,
@@ -69,6 +70,5 @@ export default defineConfig(({ mode }) => ({
       },
       selfDestroying: true,
     }),
-    tailwindcss(),
   ],
 }));
