@@ -18,7 +18,7 @@ export function MLogo({ scrollY }: SassyMLogoProps) {
     from: { scale: [0, 0, 0], opacity: 0 },
     to: { scale: [2.2, 2.2, 2.2], opacity: 1 },
     config: { duration: 2200, easing: (t: number) => 1 - Math.pow(1 - t, 3) },
-    delay: 200,
+    delay: 500,
   });
 
   useEffect(() => {
@@ -65,5 +65,3 @@ export function MLogo({ scrollY }: SassyMLogoProps) {
   );
 }
 
-// Preload the model
-useGLTF.preload("/m-logo/M-logo.gltf");

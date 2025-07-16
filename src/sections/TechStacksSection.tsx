@@ -1,4 +1,6 @@
+import { ScrollHelper } from "../components";
 import TechCanvas from "../components/TechCanvas";
+import { navLinks } from "../constants";
 
 export function TechStacksSection() {
   return (
@@ -12,6 +14,13 @@ export function TechStacksSection() {
       <div className="h-[420px] w-full max-w-4xl md:h-[520px] lg:h-[600px]">
         <TechCanvas />
       </div>
+      <a
+        href={navLinks[3].href}
+        aria-label="Scroll to projects"
+        className="mx-auto mt-2 flex w-fit justify-center"
+      >
+        <ScrollHelper />
+      </a>
     </section>
   );
 }

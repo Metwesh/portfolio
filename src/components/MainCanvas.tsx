@@ -1,9 +1,4 @@
-import {
-  Environment,
-  Float,
-  OrbitControls,
-  PerspectiveCamera,
-} from "@react-three/drei";
+import { Environment, Float, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useState } from "react";
 import { AnimatedStars } from "./AnimatedStars";
@@ -45,7 +40,6 @@ export function MainCanvas() {
             <MLogo scrollY={scrollY} />
           </Float>
           <Environment preset="sunset" background={false} />
-          <OrbitControls enableZoom={false} enablePan={false} />
         </Suspense>
       </Canvas>
     </div>

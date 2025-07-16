@@ -1,14 +1,20 @@
+import { useGLTF } from "@react-three/drei";
 import { Footer, Header, MainCanvas } from "./components";
-import { CertificatesSection } from "./sections/CertificatesSection";
-import { ExperienceSection } from "./sections/ExperienceSection";
-import { HeroSection } from "./sections/HeroSection";
-import { ProjectsSection } from "./sections/ProjectsSection";
-import { TechStacksSection } from "./sections/TechStacksSection";
+import {
+  CertificatesSection,
+  ExperienceSection,
+  HeroSection,
+  ProjectsSection,
+  TechStacksSection,
+} from "./sections";
+
+// Preload the model
+useGLTF.preload("./m-logo/M-logo.gltf");
 
 // Track scroll position for 3D parallax
 export default function App() {
   return (
-    <div className="mx-4">
+    <div className="mx-4 overflow-hidden">
       {/* Fixed 3D Canvas */}
       <MainCanvas />
 

@@ -30,36 +30,23 @@ export function Header() {
     return () => controller.abort();
   }, [menuOpen]);
 
-  // Prevent background scroll when menu is open
-  useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = "hidden";
-      // Focus trap for accessibility
-      // const navOverlay = document.getElementById("mobile-nav-overlay");
-      // if (navOverlay) navOverlay.click();
+  const handleMenuOpen = () => {
+    setMenuOpen((prev) => !prev);
+    if (!menuOpen) {
+      document.body.style.overflow = "hidden"; // Prevent background scroll
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = ""; // Restore background scroll
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [menuOpen]);
+  };
 
   // Close menu on nav click (mobile)
   const handleNavClick = () => setMenuOpen(false);
 
   return (
-    <header
-      className={`pointer-events-auto fixed top-0 left-0 z-40 flex w-full items-center justify-between px-4 py-4 transition-all duration-500 md:px-8 ${
-        headerBg
-          ? "bg-gradient-to-b from-black/80 to-black/0 shadow-lg backdrop-blur-md"
-          : "backdrop-blur-0 bg-transparent shadow-none"
-      }`}
-      style={{
-        WebkitBackdropFilter: headerBg ? "blur(12px)" : "none",
-        backdropFilter: headerBg ? "blur(12px)" : "none",
-      }}
-    >
+    <header className="pointer-events-auto fixed top-0 left-0 z-40 flex w-full items-center justify-between px-4 py-4 md:px-8">
+      <div
+        className={`to-black-0 absolute inset-0 bg-gradient-to-b from-black/80 shadow-lg backdrop-blur-md transition-opacity duration-500 ${headerBg ? "opacity-100" : "opacity-0"}`}
+      />
       <a className="group flex items-center gap-4" href="#" aria-label="Home">
         <svg
           viewBox="0 0 478 478"
@@ -71,7 +58,11 @@ export function Header() {
             fill="#00D3F2"
           />
         </svg>
-        <span className="animate-gradient-x bg-gradient-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent drop-shadow-lg md:text-3xl">
+        <span
+          className={`bg-gradient-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent drop-shadow-lg transition-opacity delay-1000 duration-1000 md:text-3xl ${
+            headerBg ? "opacity-100" : "opacity-0"
+          }`}
+        >
           Mohamed H. Aly
         </span>
       </a>
@@ -79,7 +70,7 @@ export function Header() {
       <button
         className="fixed top-4 right-4 flex h-10 w-10 flex-col items-center justify-center shadow-lg md:hidden"
         aria-label={menuOpen ? "Close menu" : "Open menu"}
-        onClick={() => setMenuOpen((v) => !v)}
+        onClick={handleMenuOpen}
       >
         <span
           className={`block h-0.5 w-7 rounded bg-white transition-all duration-300 ${
@@ -98,7 +89,7 @@ export function Header() {
         />
       </button>
       {/* Desktop nav */}
-      <nav className="hidden gap-6 text-lg font-semibold md:flex">
+      <nav className="relative z-40 hidden gap-6 text-lg font-semibold md:flex">
         {navLinks.map((link) => (
           <a
             key={link.href}

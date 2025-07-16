@@ -31,7 +31,9 @@ export function Footer() {
       </div>
       <p>
         <span>&copy;&nbsp;{new Date().getFullYear()}&nbsp;</span>
-        <span className="text-cyan-400">Mohamed H. Aly</span>
+        <a href="#" aria-label="scroll-to-top" className="text-cyan-400">
+          Mohamed H. Aly
+        </a>
         <span>&nbsp;All rights reserved.</span>
       </p>
     </footer>
