@@ -81,7 +81,15 @@ export default function TechBox(props: TechBoxProps) {
         receiveShadow
         // position is now animated in useFrame
         rotation={meshRotation}
-        onClick={props.onClick}
+        onClick={(e) => {
+          if (
+            e.intersections &&
+            e.intersections[0]?.object === meshRef.current
+          ) {
+            e.stopPropagation();
+            props.onClick();
+          }
+        }}
       >
         <boxGeometry args={[1, 1, 1]} />
         <BoxShader data={props.data} />

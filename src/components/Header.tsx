@@ -2,33 +2,17 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { navLinks } from "../constants";
 
-export function Header() {
+export function Header({ scrollY }: { scrollY: number }) {
   const [headerBg, setHeaderBg] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const controller = new AbortController();
-    let ticking = false;
-    // Only close menu if user scrolls after menu is already open
-    let lastScrollY = window.scrollY;
-    const updateScroll = () => {
-      setHeaderBg(window.scrollY > 8);
-      ticking = false;
-      if (menuOpen && window.scrollY !== lastScrollY) setMenuOpen(false);
-      lastScrollY = window.scrollY;
-    };
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateScroll);
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", handleScroll, {
-      signal: controller.signal,
-    });
-    updateScroll();
-    return () => controller.abort();
-  }, [menuOpen]);
+    if (scrollY > 8 && !headerBg) {
+      setHeaderBg(true);
+    } else if (scrollY <= 8 && headerBg) {
+      setHeaderBg(false);
+    }
+  }, [scrollY, headerBg]);
 
   const handleMenuOpen = () => {
     setMenuOpen((prev) => !prev);

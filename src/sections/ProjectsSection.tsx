@@ -68,8 +68,8 @@ export function ProjectsSection() {
                 transform: `rotateY(${tilt.x * 12}deg) rotateX(${-tilt.y * 12}deg) scale(${1 + Math.abs(tilt.x) * 0.05 + Math.abs(tilt.y) * 0.05})`,
                 transition: "transform 0.5s cubic-bezier(.23,1.12,.32,1)",
               }}
-              onMouseMove={(e) => handleCardMouseMove(e, proj.name)}
-              onMouseLeave={() => handleCardMouseLeave(proj.name)}
+              onPointerEnter={(e) => handleCardMouseMove(e, proj.name)}
+              onPointerLeave={() => handleCardMouseLeave(proj.name)}
             >
               {/* Decorative blurred image background */}
               {proj.image && (
@@ -81,14 +81,14 @@ export function ProjectsSection() {
                 />
               )}
               <div
-                className="absolute -top-10 -right-10 h-32 w-32 rounded-full opacity-30 blur-2xl transition-all duration-700 group-hover:blur-lg"
+                className="absolute -top-10 -right-10 h-32 w-32 rounded-full opacity-30 blur-2xl transition-all duration-700 group-hover:opacity-0 group-hover:blur-lg"
                 style={{ background: proj.color, zIndex: 1 }}
               />
               <div className="relative z-10 flex h-full flex-col">
-                <h3 className="mb-3 text-2xl font-bold text-white drop-shadow-lg transition-opacity group-hover:opacity-0">
+                <h3 className="mb-3 text-2xl font-bold text-white drop-shadow-lg transition-opacity group-hover:pointer-events-none group-hover:opacity-0">
                   {proj.name}
                 </h3>
-                <p className="mb-4 font-medium text-white/80 transition-opacity group-hover:opacity-0">
+                <p className="mb-4 font-medium text-white/80 transition-opacity group-hover:pointer-events-none group-hover:opacity-0">
                   {proj.description}
                 </p>
                 {/* <div className="mt-auto flex items-center justify-between">

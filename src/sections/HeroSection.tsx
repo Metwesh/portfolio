@@ -1,30 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { ScrollHelper } from "../components";
 import { navLinks } from "../constants";
 
-export function HeroSection() {
-  const [scrollY, setScrollY] = useState(0);
+export function HeroSection({ scrollY }: { scrollY: number }) {
   const initialHeight = useRef(window.innerHeight);
-  useEffect(() => {
-    const controller = new AbortController();
-    let ticking = false;
-    // Cache initial height on mount
-    const updateScroll = () => {
-      setScrollY(window.scrollY);
-      ticking = false;
-    };
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateScroll);
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", handleScroll, {
-      signal: controller.signal,
-    });
-    updateScroll();
-    return () => controller.abort();
-  }, []);
 
   return (
     <section
@@ -34,8 +13,8 @@ export function HeroSection() {
       <div
         className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500"
         style={{
-          transform: `translateY(-${scrollY * 0.6}px)`,
-          opacity: 1 - Math.min(scrollY / (initialHeight.current * 0.7), 1),
+          transform: `translateY(-${Math.min(scrollY * 0.6, 400)}px)`,
+          opacity: 1 - Math.min(scrollY / (initialHeight.current * 0.6), 1),
           pointerEvents: "auto",
         }}
       >

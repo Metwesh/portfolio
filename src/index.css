@@ -47,6 +47,8 @@
   --animate-header-gradient-move: header-gradient-move 5s ease-in-out infinite;
   --animate-header-gradient-move-pulse:
     header-gradient-move 5s ease-in-out infinite, pulse 2s infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-2: float-2 6s ease-in-out infinite;
 }
 
 :root {
@@ -99,6 +101,24 @@
   .animate-header-gradient-move,
   .animate-header-gradient-move-pulse {
     background-position: 0% 50%;
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(16px);
+    }
+  }
+  @keyframes float-2 {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(18px);
+    }
   }
   @keyframes bounce-dot {
     0%,
