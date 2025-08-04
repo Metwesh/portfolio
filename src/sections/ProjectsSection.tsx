@@ -60,7 +60,7 @@ export function ProjectsSection() {
           return (
             <div
               key={proj.name}
-              className="group relative transform-gpu overflow-hidden rounded-3xl bg-white/10 p-10 shadow-2xl backdrop-blur-lg transition-transform duration-500 hover:shadow-2xl"
+              className="group relative transform-gpu overflow-hidden rounded-3xl bg-white/5 p-10 shadow-2xl backdrop-blur-lg transition-transform duration-500 hover:bg-white/2 hover:shadow-2xl"
               style={{
                 boxShadow: `0 8px 32px 0 ${proj.color}33`,
                 perspective: 1200,

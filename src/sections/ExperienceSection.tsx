@@ -41,9 +41,8 @@ export function ExperienceSection() {
                 animationDelay: `${index * 2}s`,
               }}
             >
-              {/* Icon with blur for mobile */}
               <div
-                className="mx-auto h-14 w-14 rounded-full bg-white/10 backdrop-blur-md max-sm:mb-4 sm:min-h-16 sm:min-w-16"
+                className="mx-auto h-14 w-14 rounded-full bg-white/5 backdrop-blur-md hover:bg-white/2 max-sm:mb-4 sm:min-h-16 sm:min-w-16"
                 style={{
                   boxShadow: `0 0 24px 4px ${experience.color}88`,
                 }}
@@ -62,7 +61,7 @@ export function ExperienceSection() {
                 }}
               >
                 {/* Card with blur */}
-                <div className="w-full rounded-2xl bg-white/10 p-4 shadow-xl backdrop-blur-md transition-all group-hover:bg-white/5 sm:p-8">
+                <div className="w-full rounded-2xl bg-white/5 p-4 shadow-xl backdrop-blur-md transition-all group-hover:bg-white/2 sm:p-8">
                   <h3 className="mb-1 text-lg font-bold text-white drop-shadow-lg sm:text-xl">
                     {experience.company}
                   </h3>

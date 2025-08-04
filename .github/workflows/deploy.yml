@@ -28,7 +28,7 @@ jobs:
 
       - name: Build project 🏗️
         run: yarn build
-        env: 
+        env:
           VITE_SERVICE_ID: ${{ secrets.VITE_SERVICE_ID }}
           VITE_TEMPLATE_ID: ${{ secrets.VITE_TEMPLATE_ID }}
           VITE_PUBLIC_KEY: ${{ secrets.VITE_PUBLIC_KEY }}

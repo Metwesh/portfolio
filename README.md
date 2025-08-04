@@ -35,14 +35,12 @@
   <summary>🔎 See More</summary>
 
 - **THE ADDRESS HOLDING**
-
   - Built CRMs/HRMs with Next.js, focusing on performance and scalability.
   - Led property listing e-commerce site (85%+ code authored).
   - SEO: SSR & dynamic routing for organic visibility.
   - Collaborated with designers & backend for seamless UI/UX.
 
 - **SIDEUP**
-
   - Mentored engineers, led dashboard direction, optimized workflows.
   - Built B2C shipping dashboard (React, TypeScript, Bootstrap).
   - Ensured robust code quality and system reliability.

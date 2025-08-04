@@ -14,7 +14,7 @@ export function CertificatesSection() {
           {certificates.map((cert) => (
             <li
               key={cert.title}
-              className="group relative transform-gpu cursor-pointer p-2 overflow-hidden rounded-3xl bg-white/5 shadow-2xl backdrop-blur-lg hover:scale-[1.03] hover:shadow-2xl"
+              className="group relative transform-gpu cursor-pointer overflow-hidden rounded-3xl bg-white/5 p-2 shadow-2xl backdrop-blur-lg hover:scale-[1.03] hover:shadow-2xl"
               style={{
                 boxShadow: `0 8px 32px 0 ${cert.color}33`,
                 perspective: 1200,

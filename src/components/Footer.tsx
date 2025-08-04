@@ -31,7 +31,11 @@ export function Footer() {
       </div>
       <p>
         <span>&copy;&nbsp;{new Date().getFullYear()}&nbsp;</span>
-        <a href="#" aria-label="scroll-to-top" className="text-cyan-400">
+        <a
+          href="#"
+          aria-label="scroll-to-top"
+          className="inline-block font-semibold text-cyan-400 transition-colors hover:text-cyan-300 hover:underline"
+        >
           Mohamed H. Aly
         </a>
         <span>&nbsp;All rights reserved.</span>
