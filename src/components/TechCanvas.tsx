@@ -39,6 +39,7 @@ export default function TechCanvas() {
       dpr={[1, 2]}
       camera={{ position: [0, 0, 35], fov: 90 }}
       frameloop="always"
+      performance={{ min: 0.5 }}
       className="cursor-grab active:cursor-grabbing"
     >
       <Controls
@@ -60,6 +61,12 @@ function Controls({
   selectedIndex: number | null;
   setSelectedIndex: (i: number | null) => void;
 }) {
+  // Memoize offscreen positions to avoid creating new Vector3 objects on every render
+  const offscreenPositions = useMemo(
+    () => points.map((pos) => new THREE.Vector3(pos.x, pos.y, -500)),
+    [points],
+  );
+
   return (
     <group>
       <directionalLight
@@ -78,8 +85,6 @@ function Controls({
         {points.map((pos, index) => {
           // Animate unselected boxes off and back on screen
           const isSelected = selectedIndex === index;
-          // Store the offscreen position in a ref to avoid creating a new Vector3 every render
-          const offscreenPos = new THREE.Vector3(pos.x, pos.y, -500);
           // If selected, lerp to offscreen; if not, lerp to original
           // We'll pass both positions and let TechBox animate between them
           return (
@@ -90,7 +95,9 @@ function Controls({
               onClick={() => setSelectedIndex(index)}
               scale={isSelected ? 10 : undefined}
               animateTo={
-                selectedIndex !== null && !isSelected ? offscreenPos : pos
+                selectedIndex !== null && !isSelected
+                  ? offscreenPositions[index]
+                  : pos
               }
             />
           );

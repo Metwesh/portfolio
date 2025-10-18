@@ -781,7 +781,7 @@ const projects = [
   },
 ];
 
-const getBasePath = () => (import.meta.env.DEV ? "" : "/threejs-portfolio");
+const getBasePath = () => (import.meta.env.DEV ? "" : "/portfolio");
 
 const certificates = [
   {

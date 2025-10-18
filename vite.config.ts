@@ -1,7 +1,9 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { visualizer } from "rollup-plugin-visualizer";
+import path from "path";
 
 const getBasePath = (mode: string) =>
   mode === "development" ? undefined : "/portfolio/";
@@ -9,9 +11,35 @@ const getBasePath = (mode: string) =>
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   base: getBasePath(mode),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          three: ["three", "@react-three/fiber", "@react-three/drei"],
+          vendor: ["react", "react-dom"],
+        },
+      },
+    },
+    sourcemap: mode === "development",
+  },
   plugins: [
     react(),
     tailwindcss(),
+    ...(mode === "analyze"
+      ? [
+          visualizer({
+            open: true,
+            filename: "dist/stats.html",
+            gzipSize: true,
+            brotliSize: true,
+          }) as Plugin,
+        ]
+      : []),
     VitePWA({
       injectRegister: null,
       minify: true,

@@ -1,18 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { navLinks } from "../constants";
 
 export function Header({ scrollY }: { scrollY: number }) {
-  const [headerBg, setHeaderBg] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    if (scrollY > 8 && !headerBg) {
-      setHeaderBg(true);
-    } else if (scrollY <= 8 && headerBg) {
-      setHeaderBg(false);
-    }
-  }, [scrollY, headerBg]);
+  // Derive header background state from scrollY instead of using effect
+  const headerBg = scrollY > 8;
 
   const handleMenuOpen = () => {
     setMenuOpen((prev) => !prev);
@@ -23,8 +18,26 @@ export function Header({ scrollY }: { scrollY: number }) {
     }
   };
 
-  // Close menu on nav click (mobile)
-  const handleNavClick = () => setMenuOpen(false);
+  // Close menu on nav click (mobile) and restore focus
+  const handleNavClick = () => {
+    setMenuOpen(false);
+    document.body.style.overflow = "";
+    // Restore focus to menu button for better keyboard navigation
+    setTimeout(() => menuButtonRef.current?.focus(), 100);
+  };
+
+  // Close menu on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && menuOpen) {
+        handleNavClick();
+      }
+    };
+    if (menuOpen) {
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }
+  }, [menuOpen]);
 
   return (
     <header className="pointer-events-auto fixed top-0 left-0 z-40 flex w-full items-center justify-between px-4 py-4 md:px-8">
@@ -52,8 +65,10 @@ export function Header({ scrollY }: { scrollY: number }) {
       </a>
       {/* Hamburger for mobile */}
       <button
+        ref={menuButtonRef}
         className="fixed top-4 right-4 flex h-10 w-10 flex-col items-center justify-center shadow-lg md:hidden"
         aria-label={menuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={menuOpen}
         onClick={handleMenuOpen}
       >
         <span

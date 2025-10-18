@@ -4,9 +4,13 @@ export function ExperienceSection() {
   return (
     <section
       id="experience"
+      aria-labelledby="experience-heading"
       className="flex min-h-screen flex-col items-center justify-center py-24 sm:px-8 md:py-32"
     >
-      <h2 className="mb-12 bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-center text-3xl font-extrabold tracking-tight text-transparent drop-shadow-lg sm:text-4xl">
+      <h2
+        id="experience-heading"
+        className="mb-12 bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-center text-3xl font-extrabold tracking-tight text-transparent drop-shadow-lg sm:text-4xl"
+      >
         Experience
       </h2>
 

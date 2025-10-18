@@ -22,27 +22,57 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
     config: { duration: 2200, easing: (t: number) => 1 - Math.pow(1 - t, 3) },
     delay: 500,
   });
+
+  // Store mesh materials for animation
+  const meshMaterialsRef = useRef<THREE.MeshPhysicalMaterial[]>([]);
+
+  // Reuse color objects to avoid creating new ones every frame
+  const colorARef = useRef(new THREE.Color("#00eaff"));
+  const colorBRef = useRef(new THREE.Color("#e12afb"));
+  const targetColorRef = useRef(new THREE.Color());
+
+  // Smooth scroll values for weighted/inertial feel
+  const smoothScrollRef = useRef({ y: 0, z: 0, rot: 0 });
+
   // Camera parallax effect
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
+
+    // Smooth/lerp scroll values for weight/inertia (0.05 = heavy, 0.2 = light)
+    const damping = 0.08;
+    smoothScrollRef.current.y +=
+      (scrollY * -0.003 - smoothScrollRef.current.y) * damping;
+    smoothScrollRef.current.z +=
+      (scrollY * -0.01 - smoothScrollRef.current.z) * damping;
+    smoothScrollRef.current.rot +=
+      (scrollY * 0.002 - smoothScrollRef.current.rot) * damping;
+
     if (group.current) {
-      group.current.rotation.y = Math.sin(t * 0.7) * 0.7 + scrollY * 0.002;
+      group.current.rotation.y =
+        Math.sin(t * 0.7) * 0.7 + smoothScrollRef.current.rot;
       group.current.rotation.x = Math.cos(t * 0.5) * 0.2;
-      group.current.position.y = Math.sin(t * 1.2) * 0.2 - scrollY * 0.003;
-      group.current.position.z = -scrollY * 0.01;
+      group.current.position.y =
+        Math.sin(t * 1.2) * 0.2 + smoothScrollRef.current.y;
+      group.current.position.z = smoothScrollRef.current.z;
     }
-    // Subtle shimmer/pulse color effect
+    // Subtle shimmer/pulse color effect - reuse color objects
     const shimmer = 0.5 + 0.5 * Math.sin(t * 2.2);
-    const color = new THREE.Color().lerpColors(
-      new THREE.Color("#00eaff"),
-      new THREE.Color("#e12afb"),
+    targetColorRef.current.lerpColors(
+      colorARef.current,
+      colorBRef.current,
       shimmer * 0.5,
     );
-    meshMaterials.current.forEach((mat) => {
-      mat.color.copy(color);
-      mat.emissive.copy(color);
-      mat.emissiveIntensity = 0.18 + shimmer * 0.22;
-    });
+
+    const emissiveIntensity = 0.18 + shimmer * 0.22;
+    const materialsCount = meshMaterialsRef.current.length;
+
+    for (let i = 0; i < materialsCount; i++) {
+      const mat = meshMaterialsRef.current[i];
+      mat.color.copy(targetColorRef.current);
+      mat.emissive.copy(targetColorRef.current);
+      mat.emissiveIntensity = emissiveIntensity;
+    }
+
     if (cameraRef.current) {
       const targetX = mouse.current.x * 1.5;
       const targetY = mouse.current.y * 0.7;
@@ -54,12 +84,9 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
     }
   });
 
-  // Store mesh materials for animation
-  const meshMaterials = useRef<THREE.MeshPhysicalMaterial[]>([]);
-
   useEffect(() => {
     scene.rotation.set(-Math.PI / 2, 0, 0);
-    meshMaterials.current = [];
+    const materials: THREE.MeshPhysicalMaterial[] = [];
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh && (child as THREE.Mesh).material) {
         const mesh = child as THREE.Mesh;
@@ -74,9 +101,10 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
         mat.emissiveIntensity = 0.25;
         mat.color = new THREE.Color("#00eaff");
         mat.envMapIntensity = 1.5;
-        meshMaterials.current.push(mat);
+        materials.push(mat);
       }
     });
+    meshMaterialsRef.current = materials;
   }, [scene]);
 
   return (

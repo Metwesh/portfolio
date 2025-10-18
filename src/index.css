@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@source "../**/*.{html,js,ts,jsx,tsx}";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -111,7 +113,7 @@
   .rotate-y-180 {
     transform: rotateY(180deg);
   }
-  
+
   .animate-header-gradient-move,
   .animate-header-gradient-move-pulse {
     background-position: 0% 50%;

@@ -1,35 +1,73 @@
 import { useGLTF } from "@react-three/drei";
-import { Footer, Header, MainCanvas } from "./components";
 import {
-  CertificatesSection,
-  ExperienceSection,
-  HeroSection,
-  ProjectsSection,
-  TechStacksSection,
-} from "./sections";
-import { useEffect, useState } from "react";
+  Footer,
+  Header,
+  MainCanvas,
+  SkipToContent,
+  LoadingScreen,
+} from "./components";
+import { useEffect, useState, lazy, Suspense } from "react";
 
 // Preload the model
 useGLTF.preload("./m-logo/M-logo.gltf");
 
+// Lazy load sections for better performance
+const HeroSection = lazy(() =>
+  import("./sections").then((module) => ({ default: module.HeroSection })),
+);
+const ProjectsSection = lazy(() =>
+  import("./sections").then((module) => ({ default: module.ProjectsSection })),
+);
+const ExperienceSection = lazy(() =>
+  import("./sections").then((module) => ({
+    default: module.ExperienceSection,
+  })),
+);
+const TechStacksSection = lazy(() =>
+  import("./sections").then((module) => ({
+    default: module.TechStacksSection,
+  })),
+);
+const CertificatesSection = lazy(() =>
+  import("./sections").then((module) => ({
+    default: module.CertificatesSection,
+  })),
+);
+
 // Track scroll position for 3D parallax
 export default function App() {
   const [scrollY, setScrollY] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleCanvasReady = () => {
+    // Hide loader once MainCanvas is ready
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
     let ticking = false;
+    let lastScrollY = window.scrollY;
+
     const updateScroll = () => {
-      setScrollY(window.scrollY);
+      const currentScrollY = window.scrollY;
+      // Only update if scroll changed significantly (reduces re-renders)
+      if (Math.abs(currentScrollY - lastScrollY) > 1) {
+        setScrollY(currentScrollY);
+        lastScrollY = currentScrollY;
+      }
       ticking = false;
     };
+
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(updateScroll);
         ticking = true;
       }
     };
+
     window.addEventListener("scroll", handleScroll, {
+      passive: true,
       signal: controller.signal,
     });
     updateScroll();
@@ -37,26 +75,43 @@ export default function App() {
   }, []);
 
   return (
-    <div className="px-4">
-      {/* Fixed 3D Canvas */}
-      <MainCanvas scrollY={scrollY} />
+    <>
+      {isLoading && <LoadingScreen />}
 
-      {/* Sticky Header with Logo and lively text */}
-      <Header scrollY={scrollY} />
+      <div className="px-4">
+        {/* Skip to content for accessibility */}
+        <SkipToContent />
 
-      <HeroSection scrollY={scrollY} />
+        {/* Fixed 3D Canvas */}
+        <MainCanvas scrollY={scrollY} onReady={handleCanvasReady} />
 
-      <ProjectsSection />
+        {/* Sticky Header with Logo and lively text */}
+        <Header scrollY={scrollY} />
 
-      <ExperienceSection />
+        <main id="main-content">
+          <Suspense fallback={null}>
+            <HeroSection scrollY={scrollY} />
+          </Suspense>
 
-      <TechStacksSection />
+          <Suspense fallback={null}>
+            <ProjectsSection />
+          </Suspense>
 
-      <div className="relative z-10 bg-gradient-to-b from-black/0 to-black">
-        <CertificatesSection />
+          <Suspense fallback={null}>
+            <ExperienceSection />
+          </Suspense>
 
-        <Footer />
+          <TechStacksSection />
+
+          <div className="relative z-10 bg-gradient-to-b from-black/0 to-black">
+            <Suspense fallback={null}>
+              <CertificatesSection />
+            </Suspense>
+
+            <Footer />
+          </div>
+        </main>
       </div>
-    </div>
+    </>
   );
 }

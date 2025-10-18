@@ -1,9 +1,9 @@
-import { useRef } from "react";
+import { useState } from "react";
 import { ScrollHelper } from "../components";
 import { navLinks } from "../constants";
 
 export function HeroSection({ scrollY }: { scrollY: number }) {
-  const initialHeight = useRef(window.innerHeight);
+  const [initialHeight] = useState(() => window.innerHeight);
 
   return (
     <section
@@ -14,7 +14,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
         className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500"
         style={{
           transform: `translateY(-${Math.min(scrollY * 0.6, 400)}px)`,
-          opacity: 1 - Math.min(scrollY / (initialHeight.current * 0.6), 1),
+          opacity: 1 - Math.min(scrollY / (initialHeight * 0.6), 1),
           pointerEvents: "auto",
         }}
       >

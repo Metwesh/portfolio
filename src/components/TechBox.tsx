@@ -1,6 +1,6 @@
 import { Float } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useRef, useState } from "react";
 import * as THREE from "three";
 import BoxShader from "../shaders/BoxShader";
 
@@ -16,10 +16,15 @@ interface TechBoxProps {
   animateTo: THREE.Vector3;
 }
 
-export default function TechBox(props: TechBoxProps) {
-  const meshRotation = useMemo(
+export default function TechBox({
+  data,
+  position,
+  onClick,
+  scale,
+  animateTo,
+}: TechBoxProps) {
+  const [meshRotation] = useState(
     () => new THREE.Euler(Math.random(), Math.random(), Math.random()),
-    [],
   );
 
   const meshRef = useRef<THREE.Mesh>(null);
@@ -28,6 +33,8 @@ export default function TechBox(props: TechBoxProps) {
 
   const prevCameraPosition = useRef(new THREE.Vector3());
   const rotationSpeed = useRef(0);
+  // Reuse Vector3 object instead of creating new one every frame
+  const targetScaleRef = useRef(new THREE.Vector3());
 
   useFrame(() => {
     if (!meshRef.current || !camera) return;
@@ -44,21 +51,19 @@ export default function TechBox(props: TechBoxProps) {
     prevCameraPosition.current = camera.position.clone();
 
     // Animate position
-    const targetPos = props.animateTo || props.position;
+    const targetPos = animateTo || position;
     meshRef.current.position.lerp(
       targetPos,
-      props.animateTo.z === -500 ? 0.01 : 0.15, // Adjust lerp speed based on z position
+      animateTo.z === -500 ? 0.01 : 0.15, // Adjust lerp speed based on z position
     );
 
     // Scales boxes up to custom scale if provided, else default 3
-    const targetScale = new THREE.Vector3(
-      props.scale || 3,
-      props.scale || 3,
-      props.scale || 3,
-    );
+    // Reuse Vector3 object to avoid memory allocation every frame
+    const scaleValue = scale || 3;
+    targetScaleRef.current.set(scaleValue, scaleValue, scaleValue);
     meshRef.current.scale.lerp(
-      targetScale,
-      props.animateTo.z === -500 ? 0.01 : 0.025, // Adjust lerp speed based on z position
+      targetScaleRef.current,
+      animateTo.z === -500 ? 0.01 : 0.025, // Adjust lerp speed based on z position
     );
 
     // Rotates boxes around themselves
@@ -76,7 +81,7 @@ export default function TechBox(props: TechBoxProps) {
     >
       <mesh
         ref={meshRef}
-        name={props.data.name}
+        name={data.name}
         castShadow
         receiveShadow
         // position is now animated in useFrame
@@ -87,12 +92,12 @@ export default function TechBox(props: TechBoxProps) {
             e.intersections[0]?.object === meshRef.current
           ) {
             e.stopPropagation();
-            props.onClick();
+            onClick();
           }
         }}
       >
         <boxGeometry args={[1, 1, 1]} />
-        <BoxShader data={props.data} />
+        <BoxShader data={data} />
       </mesh>
     </Float>
   );

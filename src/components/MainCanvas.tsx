@@ -5,7 +5,13 @@ import { AnimatedStars } from "./AnimatedStars";
 import { MLogo } from "./MLogo";
 import * as THREE from "three";
 
-export function MainCanvas({ scrollY }: { scrollY: number }) {
+export function MainCanvas({
+  scrollY,
+  onReady,
+}: {
+  scrollY: number;
+  onReady?: () => void;
+}) {
   // Track mouse position for parallax
   const mouse = useRef({ x: 0, y: 0 });
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
@@ -34,6 +40,11 @@ export function MainCanvas({ scrollY }: { scrollY: number }) {
         dpr={[1, 2]}
         camera={{ fov: 60, position: [0, 0, 10] }}
         frameloop="always"
+        performance={{ min: 0.5 }}
+        onCreated={() =>
+          // Wait a bit for M logo to initialize, then signal ready
+          setTimeout(() => onReady?.(), 100)
+        }
       >
         <Suspense fallback={null}>
           <AnimatedStars scrollY={scrollY} />

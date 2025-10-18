@@ -17,8 +17,8 @@ export function TechStacksSection() {
         Tech Stacks
       </h2>
       <div
-        className={`w-full max-w-4xl scroll-mt-18 ${
-          !isList ? "h-[420px] md:h-[520px] lg:h-[600px]" : ""
+        className={`w-full max-w-6xl scroll-mt-18 ${
+          !isList ? "h-[520px] md:h-[650px] lg:h-[750px]" : ""
         }`}
         id="tech-stacks-container"
       >

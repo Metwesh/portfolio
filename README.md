@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Contact-mohamedh.aly@hotmail.com-green" />
   <br/>
   <a href="https://metwesh.github.io/portfolio/"><img src="https://img.shields.io/badge/Portfolio-Visit-blueviolet?logo=Firefox" /></a>
-  <a href="https://www.linkedin.com/in/your-linkedin-profile"><img src="https://img.shields.io/badge/LinkedIn-Connect-blue?logo=LinkedIn" /></a>
+  <a href="https://www.linkedin.com/in/mohamed-h-aly/"><img src="https://img.shields.io/badge/LinkedIn-Connect-blue?logo=LinkedIn" /></a>
 </div>
 
 ---
@@ -90,6 +90,58 @@
 ## 🏆 Projects & Certificates
 
 A comprehensive list of all the projects I've contributed to, including detailed descriptions and the technologies utilized, can be found in my [online portfolio](https://metwesh.github.io/portfolio/). Additionally, my completed courses and certificates are available there as well.
+
+---
+
+## 🛠️ Development
+
+### Prerequisites
+
+- Node.js 18+ or higher
+- Yarn package manager
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/Metwesh/portfolio.git
+cd portfolio
+
+# Install dependencies
+yarn install
+
+# Start development server
+yarn dev
+```
+
+### Available Scripts
+
+- `yarn dev` - Start development server
+- `yarn build` - Build for production
+- `yarn build:analyze` - Build with bundle analysis
+- `yarn preview` - Preview production build
+- `yarn test` - Run tests
+- `yarn test:ui` - Run tests with UI
+- `yarn test:coverage` - Generate test coverage
+- `yarn lint` - Lint code
+- `yarn prettier` - Format code
+- `yarn system:fix` - Run all checks and fixes
+
+### Tech Stack
+
+- **Framework**: React 19 + TypeScript
+- **Styling**: Tailwind CSS 4
+- **3D Graphics**: Three.js + React Three Fiber
+- **Build Tool**: Vite 7
+- **Testing**: Vitest + React Testing Library
+- **Code Quality**: ESLint + Prettier
+- **PWA**: Vite PWA Plugin
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
