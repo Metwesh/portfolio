@@ -878,6 +878,8 @@ const accentColors = [
   "#e11d48",
 ];
 
+const mainLogoPath = "./m-logo/main-logo.gltf";
+
 export {
   accentColors,
   certificates,
@@ -885,4 +887,5 @@ export {
   navLinks,
   projects,
   technologies,
+  mainLogoPath,
 };

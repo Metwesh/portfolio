@@ -2,9 +2,10 @@ import { useGLTF } from "@react-three/drei";
 import { Suspense, lazy } from "react";
 import { Footer, Header, MainCanvas, SkipToContent } from "./components";
 import { useScrollPosition } from "./hooks/useScrollPosition";
+import { mainLogoPath } from "./constants";
 
 // Preload the model
-useGLTF.preload("./m-logo/M-logo.gltf");
+useGLTF.preload(mainLogoPath);
 
 // Lazy load sections for better performance
 const HeroSection = lazy(() =>

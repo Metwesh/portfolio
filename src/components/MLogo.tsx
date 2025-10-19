@@ -3,6 +3,7 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { mainLogoPath } from "../constants";
 
 interface SassyMLogoProps {
   scrollY: number;
@@ -11,7 +12,7 @@ interface SassyMLogoProps {
 }
 
 export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
-  const { scene } = useGLTF("./m-logo/M-logo.gltf");
+  const { scene } = useGLTF(mainLogoPath);
 
   const group = useRef<THREE.Group>(null);
 
