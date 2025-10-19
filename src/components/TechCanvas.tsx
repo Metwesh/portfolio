@@ -9,7 +9,14 @@ import { WIP } from "../assets";
 
 const SPHERE_RADIUS = 20;
 
-export default function TechCanvas() {
+interface TechCanvasProps {
+  isInView: boolean;
+}
+
+export default function TechCanvas({ isInView }: TechCanvasProps) {
+  // Animation triggers every time isInView becomes true
+  const hasAnimated = isInView;
+
   // Golden Spiral algorithm
   const points = useMemo(() => {
     const temp = [];
@@ -38,7 +45,7 @@ export default function TechCanvas() {
     <Canvas
       dpr={[1, 2]}
       camera={{ position: [0, 0, 35], fov: 90 }}
-      frameloop="always"
+      frameloop={isInView ? "always" : "demand"}
       performance={{ min: 0.5 }}
       className="cursor-grab active:cursor-grabbing"
     >
@@ -46,6 +53,7 @@ export default function TechCanvas() {
         points={points}
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex}
+        hasAnimated={hasAnimated}
       />
     </Canvas>
   );
@@ -56,10 +64,12 @@ function Controls({
   points,
   selectedIndex,
   setSelectedIndex,
+  hasAnimated,
 }: {
   points: Array<THREE.Vector3>;
   selectedIndex: number | null;
   setSelectedIndex: (i: number | null) => void;
+  hasAnimated: boolean;
 }) {
   // Memoize offscreen positions to avoid creating new Vector3 objects on every render
   const offscreenPositions = useMemo(
@@ -87,6 +97,10 @@ function Controls({
           const isSelected = selectedIndex === index;
           // If selected, lerp to offscreen; if not, lerp to original
           // We'll pass both positions and let TechBox animate between them
+          const animateTo =
+            selectedIndex !== null && !isSelected
+              ? offscreenPositions[index]
+              : pos;
           return (
             <TechBox
               key={`technology-${index}`}
@@ -94,11 +108,8 @@ function Controls({
               data={technologies[index]}
               onClick={() => setSelectedIndex(index)}
               scale={isSelected ? 10 : undefined}
-              animateTo={
-                selectedIndex !== null && !isSelected
-                  ? offscreenPositions[index]
-                  : pos
-              }
+              hasAnimated={hasAnimated}
+              animateTo={animateTo}
             />
           );
         })}

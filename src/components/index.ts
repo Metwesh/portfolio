@@ -2,7 +2,6 @@ export * from "./AnimatedStars";
 export * from "./ErrorBoundary";
 export * from "./Footer";
 export * from "./Header";
-export * from "./LoadingScreen";
 export * from "./MainCanvas";
 export * from "./MLogo";
 export * from "./NotFound";

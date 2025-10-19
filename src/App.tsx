@@ -1,12 +1,7 @@
 import { useGLTF } from "@react-three/drei";
-import {
-  Footer,
-  Header,
-  MainCanvas,
-  SkipToContent,
-  LoadingScreen,
-} from "./components";
-import { useEffect, useState, lazy, Suspense } from "react";
+import { Suspense, lazy } from "react";
+import { Footer, Header, MainCanvas, SkipToContent } from "./components";
+import { useScrollPosition } from "./hooks/useScrollPosition";
 
 // Preload the model
 useGLTF.preload("./m-logo/M-logo.gltf");
@@ -36,48 +31,21 @@ const CertificatesSection = lazy(() =>
 
 // Track scroll position for 3D parallax
 export default function App() {
-  const [scrollY, setScrollY] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const scrollY = useScrollPosition();
 
   const handleCanvasReady = () => {
-    // Hide loader once MainCanvas is ready
-    setIsLoading(false);
+    // Hide the HTML loading screen when canvas is ready
+    const loadingScreen = document.getElementById("loading-screen");
+    if (!loadingScreen) return;
+    loadingScreen.classList.add("fade-out");
+    // Remove from DOM after transition completes
+    setTimeout(() => {
+      loadingScreen.remove();
+    }, 300);
   };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    let ticking = false;
-    let lastScrollY = window.scrollY;
-
-    const updateScroll = () => {
-      const currentScrollY = window.scrollY;
-      // Only update if scroll changed significantly (reduces re-renders)
-      if (Math.abs(currentScrollY - lastScrollY) > 1) {
-        setScrollY(currentScrollY);
-        lastScrollY = currentScrollY;
-      }
-      ticking = false;
-    };
-
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateScroll);
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-      signal: controller.signal,
-    });
-    updateScroll();
-    return () => controller.abort();
-  }, []);
 
   return (
     <>
-      {isLoading && <LoadingScreen />}
-
       <div className="px-4">
         {/* Skip to content for accessibility */}
         <SkipToContent />

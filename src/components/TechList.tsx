@@ -1,18 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { technologies } from "../constants";
 import { WIP } from "../assets";
 
-export default function TechList() {
+interface TechListProps {
+  isInView: boolean;
+}
+
+const getColumnCount = (width: number): number => {
+  if (width >= 1024)
+    return 5; // lg
+  else if (width >= 768)
+    return 4; // md
+  else if (width >= 640)
+    return 3; // sm
+  else return 2; // default
+};
+
+export default function TechList({ isInView }: TechListProps) {
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
+  const [columns, setColumns] = useState(getColumnCount(window.innerWidth));
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    window.addEventListener(
+      "resize",
+      () => setColumns(getColumnCount(window.innerWidth)),
+      {
+        signal: controller.signal,
+      },
+    );
+    return () => controller.abort();
+  }, []);
 
   const handleCardClick = (index: number) => {
     setFlippedCards((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
-      } else {
-        newSet.add(index);
-      }
+      if (newSet.has(index)) newSet.delete(index);
+      else newSet.add(index);
+
       return newSet;
     });
   };
@@ -21,11 +47,23 @@ export default function TechList() {
       <div className="relative z-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {technologies.map((tech, index) => {
           const isFlipped = flippedCards.has(index);
+          const row = Math.floor(index / columns);
+          const col = index % columns;
+          const staggerDelay = (row + col) * 0.08; // Diagonal stagger
+
           return (
             <div
               key={`tech-${index}`}
               className="group perspective-1000 relative h-32 cursor-pointer"
               onClick={() => handleCardClick(index)}
+              style={{
+                opacity: isInView ? 1 : 0,
+                transform: isInView
+                  ? "translate3d(0, 0, 0) scale(1)"
+                  : "translate3d(0, 50px, 0) scale(0.8)",
+                willChange: isInView ? "auto" : "transform, opacity",
+                transition: `opacity 0.6s ease-out ${staggerDelay}s, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${staggerDelay}s`,
+              }}
             >
               {/* Card container with flip transform */}
               <div

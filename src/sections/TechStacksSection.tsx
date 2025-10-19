@@ -4,9 +4,15 @@ import TechCanvas from "../components/TechCanvas";
 import { navLinks } from "../constants";
 import Switch from "../components/Switch";
 import TechList from "../components/TechList";
+import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 
 export function TechStacksSection() {
   const [isList, setIsList] = useState(window.innerWidth < 768);
+
+  const { targetRef, isIntersecting } = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: "50px 0px 200px 0px",
+  });
 
   return (
     <section
@@ -17,12 +23,19 @@ export function TechStacksSection() {
         Tech Stacks
       </h2>
       <div
-        className={`w-full max-w-6xl scroll-mt-18 ${
-          !isList ? "h-[520px] md:h-[650px] lg:h-[750px]" : ""
+        ref={targetRef}
+        className={`scroll-mt-18 ${
+          !isList
+            ? "-mx-4 h-[520px] w-screen md:h-[650px] lg:h-[750px]"
+            : "w-full max-w-6xl"
         }`}
         id="tech-stacks-container"
       >
-        {isList ? <TechList /> : <TechCanvas />}
+        {isList ? (
+          <TechList isInView={isIntersecting} />
+        ) : (
+          <TechCanvas isInView={isIntersecting} />
+        )}
       </div>
       <div className="mx-8 mt-2 grid w-full items-center gap-8 md:grid-cols-3 md:gap-4">
         <a

@@ -1,6 +1,6 @@
 import { Float } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import BoxShader from "../shaders/BoxShader";
 
@@ -14,6 +14,7 @@ interface TechBoxProps {
   onClick: () => void;
   scale: number | undefined;
   animateTo: THREE.Vector3;
+  hasAnimated: boolean;
 }
 
 export default function TechBox({
@@ -22,6 +23,7 @@ export default function TechBox({
   onClick,
   scale,
   animateTo,
+  hasAnimated,
 }: TechBoxProps) {
   const [meshRotation] = useState(
     () => new THREE.Euler(Math.random(), Math.random(), Math.random()),
@@ -35,9 +37,27 @@ export default function TechBox({
   const rotationSpeed = useRef(0);
   // Reuse Vector3 object instead of creating new one every frame
   const targetScaleRef = useRef(new THREE.Vector3());
+  const hasInitialized = useRef(false);
+
+  // Reset initialization when hasAnimated becomes false (so animation can re-trigger)
+  useEffect(() => {
+    if (!hasAnimated) {
+      hasInitialized.current = false;
+    }
+  }, [hasAnimated]);
 
   useFrame(() => {
     if (!meshRef.current || !camera) return;
+
+    // Initialize position off-screen if hasn't animated yet
+    if (!hasInitialized.current && !hasAnimated) {
+      meshRef.current.position.set(position.x, position.y, -500);
+      meshRef.current.scale.set(0.1, 0.1, 0.1);
+      hasInitialized.current = true;
+    }
+
+    // Only animate if has been triggered
+    if (!hasAnimated) return;
 
     // Randomly moves boxes around as you rotate
     const deltaPosition = camera.position

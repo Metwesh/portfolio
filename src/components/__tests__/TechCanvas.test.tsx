@@ -40,22 +40,22 @@ vi.mock("../../constants", () => ({
 
 describe("TechCanvas", () => {
   it("renders without crashing", () => {
-    const { getByTestId } = render(<TechCanvas />);
+    const { getByTestId } = render(<TechCanvas isInView={true} />);
     expect(getByTestId("mock-tech-canvas")).toBeInTheDocument();
   });
 
   it("renders with correct camera configuration", () => {
-    const { container } = render(<TechCanvas />);
+    const { container } = render(<TechCanvas isInView={true} />);
     expect(container).toBeInTheDocument();
   });
 
   it("renders TrackballControls for interaction", () => {
-    const { getByTestId } = render(<TechCanvas />);
+    const { getByTestId } = render(<TechCanvas isInView={true} />);
     expect(getByTestId("mock-controls")).toBeInTheDocument();
   });
 
   it("calculates golden spiral positions", () => {
     // Test that the component uses useMemo for points calculation
-    expect(() => render(<TechCanvas />)).not.toThrow();
+    expect(() => render(<TechCanvas isInView={true} />)).not.toThrow();
   });
 });

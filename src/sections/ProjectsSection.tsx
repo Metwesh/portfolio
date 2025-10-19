@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { projects } from "../constants";
+import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 
 export function ProjectsSection() {
+  const { targetRef, isIntersecting } = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: "50px 0px 0px",
+  });
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
 
   const toggleFlip = (title: string) => {
@@ -16,6 +21,7 @@ export function ProjectsSection() {
 
   return (
     <section
+      ref={targetRef}
       id="projects"
       aria-labelledby="projects-heading"
       className="relative z-10 flex min-h-screen flex-col items-center justify-center py-32"
@@ -23,12 +29,19 @@ export function ProjectsSection() {
       <h2
         id="projects-heading"
         className="mb-12 bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent drop-shadow-lg"
+        style={{
+          opacity: isIntersecting ? 1 : 0,
+          transform: `translateY(${isIntersecting ? 0 : 30}px)`,
+          transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
+        }}
       >
         Projects
       </h2>
       <div className="grid w-full max-w-5xl grid-cols-1 gap-12 md:grid-cols-2">
-        {projects.map((proj) => {
+        {projects.map((proj, index) => {
           const isFlipped = flippedCards.has(proj.name);
+          const isOdd = index % 2 === 1;
+          const translateX = isOdd ? 150 : -150;
 
           return (
             <div
@@ -37,6 +50,11 @@ export function ProjectsSection() {
               style={{
                 perspective: 1200,
                 minHeight: "20rem",
+                opacity: isIntersecting ? 1 : 0,
+                transform: isIntersecting
+                  ? "translateX(0) scale(1)"
+                  : `translateX(${translateX}px) scale(0.8)`,
+                transition: `all 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.15}s`,
               }}
             >
               {/* Inner container for flip effect */}
@@ -62,7 +80,7 @@ export function ProjectsSection() {
                       <img
                         src={proj.image}
                         alt={`${proj.name} preview`}
-                        className="h-full w-full scale-[0.85] object-contain opacity-10 transition-[scale,opacity] duration-500 group-hover:scale-90 group-hover:opacity-30"
+                        className="h-full w-full scale-[0.85] object-contain opacity-10 blur-[1px] transition-[scale,opacity] duration-500 group-hover:scale-90 group-hover:opacity-30"
                       />
                     </div>
                   )}

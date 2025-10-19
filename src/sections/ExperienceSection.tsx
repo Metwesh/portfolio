@@ -1,8 +1,15 @@
 import { experiences } from "../constants";
+import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 
 export function ExperienceSection() {
+  const { targetRef, isIntersecting } = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: "50px",
+  });
+
   return (
     <section
+      ref={targetRef}
       id="experience"
       aria-labelledby="experience-heading"
       className="flex min-h-screen flex-col items-center justify-center py-24 sm:px-8 md:py-32"
@@ -10,6 +17,12 @@ export function ExperienceSection() {
       <h2
         id="experience-heading"
         className="mb-12 bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-center text-3xl font-extrabold tracking-tight text-transparent drop-shadow-lg sm:text-4xl"
+        style={{
+          opacity: isIntersecting ? 1 : 0,
+          transform: `scale(${isIntersecting ? 1 : 0.5})`,
+          transition:
+            "opacity 1s ease-out, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        }}
       >
         Experience
       </h2>
@@ -23,6 +36,11 @@ export function ExperienceSection() {
             backgroundImage: `linear-gradient(to bottom, ${experiences
               .map((exp) => exp.color)
               .join(", ")})`,
+            opacity: isIntersecting ? 1 : 0,
+            transform: `scaleY(${isIntersecting ? 1 : 0})`,
+            transformOrigin: "top",
+            transition:
+              "opacity 0.8s ease-out, transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s",
           }}
         />
         <div
@@ -31,68 +49,79 @@ export function ExperienceSection() {
             backgroundImage: `linear-gradient(to bottom, ${experiences
               .map((exp) => exp.color)
               .join(", ")})`,
+            opacity: isIntersecting ? 1 : 0,
+            transform: `scaleY(${isIntersecting ? 1 : 0})`,
+            transformOrigin: "top",
+            transition:
+              "opacity 0.8s ease-out, transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s",
           }}
         />
 
         <ul className="relative z-10 space-y-16 py-12">
-          {experiences.map((experience, index) => (
-            <li
-              key={`experience-${experience.company}-${index}`}
-              className={`flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-8 ${
-                index % 2 === 0 ? "animate-float" : "animate-float-2"
-              }`}
-              style={{
-                animationDelay: `${index * 2}s`,
-              }}
-            >
-              <div
-                className="mx-auto h-14 w-14 rounded-full bg-white/5 backdrop-blur-md hover:bg-white/2 max-sm:mb-4 sm:min-h-16 sm:min-w-16"
-                style={{
-                  boxShadow: `0 0 24px 4px ${experience.color}88`,
-                }}
-              >
-                <img
-                  src={experience.icon}
-                  alt={`${experience.company}-logo`}
-                  className="h-full w-full rounded-full object-contain"
-                />
-              </div>
+          {experiences.map((experience, index) => {
+            const isEven = index % 2 === 0;
 
-              <div
-                className="group flex flex-col items-center gap-6 rounded-2xl backdrop-blur-md"
+            return (
+              <li
+                key={`experience-${experience.company}-${index}`}
+                className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-8"
                 style={{
-                  filter: `drop-shadow(0 0 16px ${experience.color}88)`,
+                  opacity: isIntersecting ? 1 : 0,
+                  transform: isIntersecting
+                    ? "translateY(0) scale(1) rotate(0deg)"
+                    : `translateY(100px) scale(0.85) rotate(${isEven ? -5 : 5}deg)`,
+                  transition: `all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.5 + index * 0.2}s`,
                 }}
               >
-                {/* Card with blur */}
-                <div className="w-full rounded-2xl bg-white/5 p-4 shadow-xl backdrop-blur-md transition-all group-hover:bg-white/2 sm:p-8">
-                  <h3 className="mb-1 text-lg font-bold text-white drop-shadow-lg sm:text-xl">
-                    {experience.company}
-                  </h3>
-                  <p
-                    className="mb-4 font-semibold"
-                    style={{ color: experience.color }}
-                  >
-                    {experience.title}
-                    <span className="text-white/60">
-                      &nbsp;&mdash;&nbsp;{experience.date}
-                    </span>
-                  </p>
-                  <ul className="space-y-2 text-sm text-white/80 sm:text-base">
-                    {experience.points.map((point) => (
-                      <li
-                        key={`experience-point-${point.title}`}
-                        className="list-inside list-disc"
-                      >
-                        <strong>{point.title}</strong>
-                        <span>&#58;&nbsp;{point.subtitle}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div
+                  className="mx-auto h-14 w-14 rounded-full bg-white/5 backdrop-blur-md hover:bg-white/2 max-sm:mb-4 sm:min-h-16 sm:min-w-16"
+                  style={{
+                    boxShadow: `0 0 24px 4px ${experience.color}88`,
+                  }}
+                >
+                  <img
+                    src={experience.icon}
+                    alt={`${experience.company}-logo`}
+                    className="h-full w-full rounded-full object-contain"
+                  />
                 </div>
-              </div>
-            </li>
-          ))}
+
+                <div
+                  className="group flex flex-col items-center gap-6 rounded-2xl backdrop-blur-md"
+                  style={{
+                    filter: `drop-shadow(0 0 16px ${experience.color}88)`,
+                  }}
+                >
+                  {/* Card with blur */}
+                  <div className="w-full rounded-2xl bg-white/5 p-4 shadow-xl backdrop-blur-md transition-all group-hover:bg-white/2 sm:p-8">
+                    <h3 className="mb-1 text-lg font-bold text-white drop-shadow-lg sm:text-xl">
+                      {experience.company}
+                    </h3>
+                    <p
+                      className="mb-4 font-semibold"
+                      style={{ color: experience.color }}
+                    >
+                      {experience.title}
+                      <span className="text-white/60">
+                        &nbsp;&mdash;&nbsp;{experience.date}
+                      </span>
+                    </p>
+                    <ul className="space-y-2 text-sm text-white/80 sm:text-base">
+                      {experience.points.map((point) => (
+                        <li
+                          key={`experience-point-${point.title}`}
+                          className="list-inside list-disc"
+                        >
+                          <strong>{point.title}</strong>
+                          <span>&#58;&nbsp;{point.subtitle}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>
