@@ -1,6 +1,11 @@
 import { TrackballControls, Html } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+  useRef,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import * as THREE from "three";
 import { technologies } from "../constants";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "../shaders/FogArguments";
@@ -48,6 +53,7 @@ export default function TechCanvas({ isInView }: TechCanvasProps) {
       frameloop={isInView ? "always" : "demand"}
       performance={{ min: 0.5 }}
       className="cursor-grab active:cursor-grabbing"
+      style={{ touchAction: "none" }}
     >
       <Controls
         points={points}
@@ -77,6 +83,43 @@ function Controls({
     [points],
   );
 
+  // Track touch/pointer events for close button to distinguish tap from drag
+  const buttonPointerDown = useRef<{
+    x: number;
+    y: number;
+    time: number;
+  } | null>(null);
+
+  const handleClose = () => {
+    setSelectedIndex(null);
+  };
+
+  const handleBoxClick = (index: number) => () => {
+    setSelectedIndex(index);
+  };
+
+  const handleButtonPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    buttonPointerDown.current = {
+      x: e.clientX,
+      y: e.clientY,
+      time: Date.now(),
+    };
+  };
+
+  const handleButtonPointerUp = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    if (!buttonPointerDown.current) return;
+
+    const deltaX = Math.abs(e.clientX - buttonPointerDown.current.x);
+    const deltaY = Math.abs(e.clientY - buttonPointerDown.current.y);
+    const deltaTime = Date.now() - buttonPointerDown.current.time;
+
+    // Consider it a tap if movement is minimal and time is short
+    const isTap = deltaX < 10 && deltaY < 10 && deltaTime < 300;
+
+    if (isTap) handleClose();
+
+    buttonPointerDown.current = null;
+  };
   return (
     <group>
       <directionalLight
@@ -106,7 +149,7 @@ function Controls({
               key={`technology-${index}`}
               position={pos}
               data={technologies[index]}
-              onClick={() => setSelectedIndex(index)}
+              onClick={handleBoxClick(index)}
               scale={isSelected ? 10 : undefined}
               hasAnimated={hasAnimated}
               animateTo={animateTo}
@@ -139,7 +182,9 @@ function Controls({
                 backgroundSize: "cover",
                 backgroundRepeat: "no-repeat",
               }}
-              onClick={() => setSelectedIndex(null)}
+              onPointerDown={handleButtonPointerDown}
+              onPointerUp={handleButtonPointerUp}
+              onClick={handleClose}
             >
               {technologies[selectedIndex].name}
               <div

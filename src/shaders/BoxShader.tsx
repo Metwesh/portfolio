@@ -4,6 +4,59 @@ import * as THREE from "three";
 import { useEffect, useMemo } from "react";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "./FogArguments";
 
+// Cache processed textures globally to avoid reprocessing the same texture multiple times
+const textureCache = new Map<string, THREE.Texture>();
+
+// Detect if we're on iOS (where the texture issues occur)
+const isIOS =
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
+
+const processTexture = (
+  texture: THREE.Texture,
+  cacheKey: string,
+): THREE.Texture => {
+  // Return cached texture if available
+  if (textureCache.has(cacheKey)) {
+    return textureCache.get(cacheKey)!;
+  }
+
+  // On non-iOS, just configure the texture normally (much faster)
+  if (!isIOS) {
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = false;
+    texture.needsUpdate = true;
+    textureCache.set(cacheKey, texture);
+    return texture;
+  }
+
+  // iOS: Process through canvas (expensive but necessary)
+  if (!texture || !texture.image) return texture;
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return texture;
+
+  canvas.width = texture.image.width || 250;
+  canvas.height = texture.image.height || 250;
+  ctx.drawImage(texture.image, 0, 0, canvas.width, canvas.height);
+
+  const newTexture = new THREE.CanvasTexture(canvas);
+  newTexture.wrapS = THREE.ClampToEdgeWrapping;
+  newTexture.wrapT = THREE.ClampToEdgeWrapping;
+  newTexture.minFilter = THREE.LinearFilter;
+  newTexture.magFilter = THREE.LinearFilter;
+  newTexture.generateMipmaps = false;
+  newTexture.anisotropy = 0;
+  newTexture.needsUpdate = true;
+
+  textureCache.set(cacheKey, newTexture);
+  return newTexture;
+};
+
 export default function BoxShader(props: {
   data: {
     icon: string;
@@ -12,9 +65,23 @@ export default function BoxShader(props: {
   };
 }) {
   // Load the decals & backgrounds
-  const decalTexture = useLoader(THREE.TextureLoader, props.data.icon);
-  const backgroundTexture = useLoader(THREE.TextureLoader, boxBg);
-  const wipTexture = useLoader(THREE.TextureLoader, WIP);
+  const rawDecalTexture = useLoader(THREE.TextureLoader, props.data.icon);
+  const rawBackgroundTexture = useLoader(THREE.TextureLoader, boxBg);
+  const rawWipTexture = useLoader(THREE.TextureLoader, WIP);
+
+  // Process textures with global caching and iOS detection
+  const decalTexture = useMemo(
+    () => processTexture(rawDecalTexture, props.data.icon),
+    [rawDecalTexture, props.data.icon],
+  );
+  const backgroundTexture = useMemo(
+    () => processTexture(rawBackgroundTexture, "background"),
+    [rawBackgroundTexture],
+  );
+  const wipTexture = useMemo(
+    () => processTexture(rawWipTexture, "wip"),
+    [rawWipTexture],
+  );
 
   // Define the options for the fog effect in the shader.
   // The color is determined by the first argument in FOG_ARGUMENTS. If it's a string, it's assumed to be a color and is converted to an RGB array. If it's not a string, a default color of "#202025" is used.
@@ -38,13 +105,14 @@ export default function BoxShader(props: {
   // lightPosition and lightColor define the position and color of the light in the shader.
   // fogColor, fogNear, and fogFar are used for fog calculations in the shader.
   // Memoize shader material to avoid recreating on every render (CRITICAL for preventing memory leaks)
-  // IMPORTANT: Don't include textures in dependencies - they may change reference but not content
+  // Note: React Compiler warning is a false positive - we need ALL these dependencies for WebGL
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const decalMaterial = useMemo(() => {
-    // Define the uniforms for the shader
+    // Define the uniforms for the shader - initialize with actual textures for iOS compatibility
     const decalShaderUniforms: { [uniform: string]: THREE.IUniform } = {
-      decalTexture: { value: null }, // Will be set via useEffect
-      backgroundTexture: { value: null }, // Will be set via useEffect
-      wipTexture: { value: null }, // Will be set via useEffect
+      decalTexture: { value: decalTexture },
+      backgroundTexture: { value: backgroundTexture },
+      wipTexture: { value: wipTexture },
       useWipTexture: { value: !!props.data?.wip },
       lightPosition: { value: LIGHT_ARGUMENTS.position },
       lightColor: { value: LIGHT_ARGUMENTS.color },
@@ -76,6 +144,9 @@ export default function BoxShader(props: {
       // The direction from the vertex to the light is calculated, normalized, and assigned to vLightDirection.
       // The position of the vertex is transformed by the projection matrix to handle camera projection, and then assigned to gl_Position, which determines the position of the vertex on the screen.
       vertexShader: `
+      precision highp float;
+      precision highp int;
+      
       varying vec2 vUv;
       varying vec3 vNormal; 
       varying vec3 vLightDirection;
@@ -118,6 +189,10 @@ export default function BoxShader(props: {
       // The final color is calculated as a mix of the color (modulated by the light effect) and the fog color, using the fog factor as the mix factor.
       // The final color is assigned to gl_FragColor, which is the output color of the fragment.
       fragmentShader: `
+        precision highp float;
+        precision highp int;
+        precision highp sampler2D;
+        
         uniform sampler2D decalTexture;
         uniform sampler2D backgroundTexture;
         uniform sampler2D wipTexture;
@@ -130,13 +205,16 @@ export default function BoxShader(props: {
         varying vec3 vNormal;
         varying vec3 vLightDirection;
         void main() {
-          vec4 texColor = texture2D(decalTexture, vUv);
-          vec4 bgColor = texture2D(backgroundTexture, vUv);
+          // Clamp UV coordinates to prevent texture bleeding on iOS
+          vec2 clampedUv = clamp(vUv, 0.0, 1.0);
+          
+          vec4 texColor = texture2D(decalTexture, clampedUv);
+          vec4 bgColor = texture2D(backgroundTexture, clampedUv);
           float lambertian = max(dot(normalize(vNormal), vLightDirection), 0.0);
           vec3 lightEffect = lightColor * lambertian;
           vec3 color = mix(bgColor.rgb, texColor.rgb, texColor.a);
           if (useWipTexture) {
-            vec4 wipColor = texture2D(wipTexture, vUv);
+            vec4 wipColor = texture2D(wipTexture, clampedUv);
             color = mix(color, wipColor.rgb, wipColor.a);
           }
           float depth = gl_FragCoord.z / gl_FragCoord.w;
@@ -156,24 +234,14 @@ export default function BoxShader(props: {
       opacity: 1,
     });
   }, [
-    // NOTE: Textures intentionally NOT in dependencies to avoid recreation
-    // They're updated via useEffect below
+    // Include textures in dependencies so material recreates with correct textures
+    // This ensures iOS gets the right textures from the start
+    decalTexture,
+    backgroundTexture,
+    wipTexture,
     props.data?.wip,
     fogOptions,
   ]);
-
-  // Update texture uniforms when textures change (without recreating material)
-  useEffect(() => {
-    if (decalMaterial.uniforms.decalTexture) {
-      decalMaterial.uniforms.decalTexture.value = decalTexture;
-    }
-    if (decalMaterial.uniforms.backgroundTexture) {
-      decalMaterial.uniforms.backgroundTexture.value = backgroundTexture;
-    }
-    if (decalMaterial.uniforms.wipTexture) {
-      decalMaterial.uniforms.wipTexture.value = wipTexture;
-    }
-  }, [decalTexture, backgroundTexture, wipTexture, decalMaterial]);
 
   // Dispose of material on unmount to prevent memory leaks
   useEffect(() => {
@@ -181,12 +249,6 @@ export default function BoxShader(props: {
       decalMaterial.dispose();
     };
   }, [decalMaterial]);
-
-  // Update useWipTexture uniform when it changes
-  useEffect(() => {
-    if (!decalMaterial.uniforms.useWipTexture) return;
-    decalMaterial.uniforms.useWipTexture.value = !!props.data?.wip;
-  }, [props.data?.wip, decalMaterial]);
 
   return <primitive attach="material" object={decalMaterial} />;
 }
