@@ -88,11 +88,88 @@
         }
       }
     </script>
-    <script type="module" crossorigin src="/portfolio/assets/index-Cl11m9Jy.js"></script>
+    <style>
+      /* Inline critical styles for loading screen - shows instantly before React loads */
+      body:has(#loading-screen) {
+        overflow: hidden;
+      }
+      #loading-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(to bottom right, #111827, #000);
+        transition: opacity 0.3s ease-out;
+      }
+      #loading-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .spinner-container {
+        text-align: center;
+      }
+      .spinner {
+        position: relative;
+        margin: 0 auto 1.5rem;
+        width: 5rem;
+        height: 5rem;
+      }
+      .spinner-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 9999px;
+        border: 4px solid rgba(6, 182, 212, 0.2);
+      }
+      .spinner-border {
+        position: absolute;
+        inset: 0;
+        border-radius: 9999px;
+        border: 4px solid transparent;
+        border-top-color: #06b6d4;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      .loading-text {
+        font-size: 1.25rem;
+        font-weight: 600;
+        background: linear-gradient(to right, #22d3ee, #2563eb);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: pulse 2s ease-in-out infinite;
+      }
+    </style>
+    <script type="module" crossorigin src="/portfolio/assets/index-DkRG5OHj.js"></script>
     <link rel="modulepreload" crossorigin href="/portfolio/assets/three-C3LJckq_.js">
-    <link rel="stylesheet" crossorigin href="/portfolio/assets/index-B0m7cqdG.css">
+    <link rel="stylesheet" crossorigin href="/portfolio/assets/index-D8PuXc5W.css">
   <link rel="manifest" href="/portfolio/manifest.webmanifest"></head>
   <body>
+    <!-- Loading screen - shown instantly before React loads -->
+    <div id="loading-screen">
+      <div class="spinner-container">
+        <div class="spinner">
+          <div class="spinner-ring"></div>
+          <div class="spinner-border"></div>
+        </div>
+        <p class="loading-text">Loading...</p>
+      </div>
+    </div>
+
     <div id="root" class="overflow-x-hidden"></div>
   </body>
 </html>
