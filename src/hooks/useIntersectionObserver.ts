@@ -17,22 +17,19 @@ export function useIntersectionObserver(
 ) {
   const { threshold = 0.1, root = null, rootMargin = "0px" } = options;
   const prefersReducedMotion = useReducedMotion();
-  const [isIntersecting, setIsIntersecting] = useState(prefersReducedMotion);
+  const [observerIntersecting, setObserverIntersecting] = useState(false);
   const targetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // If user prefers reduced motion, always show content immediately
-    if (prefersReducedMotion) {
-      setIsIntersecting(true);
-      return;
-    }
+    // Skip observer if user prefers reduced motion
+    if (prefersReducedMotion) return;
 
     const target = targetRef.current;
     if (!target) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
+        setObserverIntersecting(entry.isIntersecting);
       },
       { threshold, root, rootMargin },
     );
@@ -44,5 +41,9 @@ export function useIntersectionObserver(
     };
   }, [threshold, root, rootMargin, prefersReducedMotion]);
 
-  return { targetRef, isIntersecting };
+  // Derive final value: always true for reduced motion, otherwise use observer
+  return {
+    targetRef,
+    isIntersecting: prefersReducedMotion || observerIntersecting,
+  };
 }
