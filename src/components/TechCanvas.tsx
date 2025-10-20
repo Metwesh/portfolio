@@ -7,7 +7,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import * as THREE from "three";
-import { technologies } from "../constants";
+import { technologies } from "../constants/technologies";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "../shaders/FogArguments";
 import TechBox from "./TechBox";
 import { WIP } from "../assets";

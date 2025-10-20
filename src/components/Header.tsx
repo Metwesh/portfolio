@@ -11,20 +11,24 @@ export function Header({ scrollY }: { scrollY: number }) {
 
   const handleMenuOpen = () => {
     setMenuOpen((prev) => !prev);
-    if (!menuOpen) {
-      document.body.style.overflow = "hidden"; // Prevent background scroll
-    } else {
-      document.body.style.overflow = ""; // Restore background scroll
-    }
   };
 
   // Close menu on nav click (mobile) and restore focus
   const handleNavClick = () => {
     setMenuOpen(false);
-    document.body.style.overflow = "";
     // Restore focus to menu button for better keyboard navigation
     setTimeout(() => menuButtonRef.current?.focus(), 100);
   };
+
+  // Handle body scroll lock/unlock as a side effect
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [menuOpen]);
 
   // Close menu on Escape key
   useEffect(() => {

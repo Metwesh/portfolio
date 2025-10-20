@@ -1,10 +1,9 @@
-import { useMemo } from "react";
 import { ScrollHelper } from "../components";
 import { navLinks } from "../constants";
 
 export function HeroSection({ scrollY }: { scrollY: number }) {
-  // Capture viewport height once at mount for consistent fade calculations
-  const initialHeight = useMemo(() => window.innerHeight, []);
+  // React Compiler will optimize this - no need for useMemo
+  const initialHeight = window.innerHeight;
 
   return (
     <section

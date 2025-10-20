@@ -1,8 +1,9 @@
 import { defineConfig, type Plugin } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { visualizer } from "rollup-plugin-visualizer";
+import viteCompression from "vite-plugin-compression";
 import path from "path";
 
 const getBasePath = (mode: string) =>
@@ -22,13 +23,33 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           three: ["three", "@react-three/fiber", "@react-three/drei"],
           vendor: ["react", "react-dom"],
+          gsap: ["gsap", "@react-spring/three"],
         },
       },
     },
     sourcemap: mode === "development",
   },
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: [
+          [
+            "babel-plugin-react-compiler",
+            {
+              // Skip Three.js components that require direct mutations
+              sources: (filename: string) => {
+                return (
+                  filename.indexOf("MLogo") === -1 &&
+                  filename.indexOf("AnimatedStars") === -1 &&
+                  filename.indexOf("TechBox") === -1 &&
+                  filename.indexOf("TechCanvas") === -1
+                );
+              },
+            },
+          ],
+        ],
+      },
+    }),
     tailwindcss(),
     ...(mode === "analyze"
       ? [
@@ -91,12 +112,27 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,json}"],
-        sourcemap: true,
+        sourcemap: mode === "development",
       },
       devOptions: {
         enabled: true,
       },
       selfDestroying: true,
     }),
+    // Compression plugins for production
+    ...(mode !== "development"
+      ? [
+          viteCompression({
+            algorithm: "gzip",
+            ext: ".gz",
+            threshold: 1024,
+          }),
+          viteCompression({
+            algorithm: "brotliCompress",
+            ext: ".br",
+            threshold: 1024,
+          }),
+        ]
+      : []),
   ],
 }));

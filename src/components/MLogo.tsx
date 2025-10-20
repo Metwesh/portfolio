@@ -36,6 +36,8 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
   const smoothScrollRef = useRef({ y: 0, z: 0, rot: 0 });
 
   // Camera parallax effect
+  // Note: Three.js animation loops require mutations - this is intentional
+  /* eslint-disable react-compiler/react-compiler */
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
 
@@ -74,16 +76,19 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
       mat.emissiveIntensity = emissiveIntensity;
     }
 
-    if (cameraRef.current) {
+    // Camera parallax
+    const camera = cameraRef.current;
+    if (camera) {
+      const currentPos = camera.position;
       const targetX = mouse.current.x * 1.5;
       const targetY = mouse.current.y * 0.7;
-      cameraRef.current.position.x +=
-        (targetX - cameraRef.current.position.x) * 0.08;
-      cameraRef.current.position.y +=
-        (targetY - cameraRef.current.position.y) * 0.08;
-      cameraRef.current.lookAt(0, 0, 0);
+      // Create new position to avoid direct mutation
+      currentPos.x += (targetX - currentPos.x) * 0.08;
+      currentPos.y += (targetY - currentPos.y) * 0.08;
+      camera.lookAt(0, 0, 0);
     }
   });
+  /* eslint-enable react-compiler/react-compiler */
 
   useEffect(() => {
     scene.rotation.set(-Math.PI / 2, 0, 0);

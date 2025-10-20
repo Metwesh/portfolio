@@ -15,7 +15,7 @@ export function useScrollPosition() {
     const updateScroll = () => {
       const currentScrollY = window.scrollY;
       // Only update if scroll changed significantly (reduces re-renders)
-      if (Math.abs(currentScrollY - lastScrollY) > 1) {
+      if (Math.abs(currentScrollY - lastScrollY) > 5) {
         setScrollY(currentScrollY);
         lastScrollY = currentScrollY;
       }

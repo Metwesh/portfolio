@@ -10,6 +10,10 @@ interface AnimatedStarsProps {
 export function AnimatedStars({ scrollY }: AnimatedStarsProps) {
   const group = useRef<THREE.Group>(null);
 
+  // Reduce star count on mobile devices for better performance
+  // Simple calculation - no need for memoization
+  const starCount = window.innerWidth < 768 ? 3000 : 7500;
+
   useFrame(() => {
     if (!group.current) return;
     group.current.position.z = -scrollY * 0.02;
@@ -18,7 +22,14 @@ export function AnimatedStars({ scrollY }: AnimatedStarsProps) {
 
   return (
     <group ref={group}>
-      <Stars radius={100} depth={50} count={7500} factor={4} fade speed={3} />
+      <Stars
+        radius={100}
+        depth={50}
+        count={starCount}
+        factor={4}
+        fade
+        speed={3}
+      />
     </group>
   );
 }

@@ -1,9 +1,9 @@
 import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 export default defineConfig({
-  plugins: [react()],
+  // React plugin not needed for vitest - JSX transform is handled by esbuild
+  plugins: [],
   test: {
     globals: true,
     environment: "happy-dom",

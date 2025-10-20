@@ -123,7 +123,7 @@ describe("useScrollPosition", () => {
       rafCallbacks.forEach((cb) => cb(0));
     });
 
-    expect(result.current).toBe(105);
+    expect(result.current).toBe(100);
   });
 
   it("should throttle updates using requestAnimationFrame", () => {

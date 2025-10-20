@@ -1,4 +1,4 @@
-import { experiences } from "../constants";
+import { experiences } from "../constants/experiences";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 
 export function ExperienceSection() {
@@ -82,6 +82,7 @@ export function ExperienceSection() {
                   <img
                     src={experience.icon}
                     alt={`${experience.company}-logo`}
+                    loading="lazy"
                     className="h-full w-full rounded-full object-contain"
                   />
                 </div>

@@ -18,17 +18,24 @@ export function MainCanvas({
 
   useEffect(() => {
     const controller = new AbortController();
-    window.addEventListener(
-      "mousemove",
-      (e) => {
-        // Normalize to [-1, 1]
-        mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouse.current.y = (e.clientY / window.innerHeight) * 2 - 1;
-      },
-      {
-        signal: controller.signal,
-      },
-    );
+    let ticking = false;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          // Normalize to [-1, 1]
+          mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+          mouse.current.y = (e.clientY / window.innerHeight) * 2 - 1;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, {
+      passive: true,
+      signal: controller.signal,
+    });
     return () => {
       controller.abort();
     };

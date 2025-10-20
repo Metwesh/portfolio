@@ -1,0 +1,88 @@
+import {
+  algorithms,
+  bachelorsDegree,
+  cLanguage,
+  cisa,
+  completeWebDev,
+  jsCert,
+  ossa,
+  pythonDev,
+  seniorWebDev,
+} from "../assets";
+
+const getBasePath = () => (import.meta.env.DEV ? "" : "/portfolio");
+
+export const certificates = [
+  {
+    title: "Bachelor's degree",
+    icon: bachelorsDegree,
+    issuer: "AAST",
+    color: "#4267B2",
+    year: 2021,
+    link: `${getBasePath()}/documents/English certificate.pdf`,
+  },
+  {
+    title: "Complete Web Dev",
+    icon: completeWebDev,
+    issuer: "Zero to Mastery",
+    color: "#ff00cc",
+    year: 2022,
+    link: `${getBasePath()}/documents/Certificate-of-completion-for-complete-web-developer-in-2020-zero-to-mastery.pdf`,
+  },
+  {
+    title: "Junior To Senior Web Dev",
+    icon: seniorWebDev,
+    issuer: "Udemy",
+    color: "#ff9900",
+    year: 2022,
+    link: "https://www.udemy.com/certificate/UC-ebbe19f2-8c53-4d44-9098-b7662a4954b3/",
+  },
+  {
+    title: "C Language Course",
+    icon: cLanguage,
+    issuer: "Udemy",
+    color: "#006400",
+    year: 2022,
+    link: "https://www.udemy.com/certificate/UC-e3bbec7e-1d48-42f4-99ec-9cc0357d5575/",
+  },
+  {
+    title: "Algorithms & Data Structures",
+    icon: algorithms,
+    issuer: "Udemy",
+    color: "#00eaff",
+    year: 2022,
+    link: "https://www.udemy.com/certificate/UC-1ecabe2a-7108-4462-8ae5-09085e501c2d/",
+  },
+  {
+    title: "OSSA",
+    icon: ossa,
+    issuer: "Oracle",
+    color: "#7c3aed",
+    year: 2022,
+    link: `${getBasePath()}/documents/OSSA.pdf`,
+  },
+  {
+    title: "CISA",
+    icon: cisa,
+    issuer: "Oracle",
+    color: "#ef4444",
+    year: 2022,
+    link: `${getBasePath()}/documents/CISA.pdf`,
+  },
+  {
+    title: "JS Cert",
+    icon: jsCert,
+    issuer: "Codingame",
+    color: "#fde047",
+    year: 2022,
+    link: "https://www.codingame.com/certification/_qSkPD6K1GYUn4FIDBnGFg",
+  },
+  {
+    title: "Python Developer",
+    icon: pythonDev,
+    issuer: "Udemy",
+    color: "#14b8a6",
+    year: 2024,
+    link: "https://www.udemy.com/certificate/UC-2cb10543-7b97-40aa-bd2e-6341de1b1970/",
+  },
+];

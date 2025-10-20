@@ -1,4 +1,4 @@
-import { certificates } from "../constants";
+import { certificates } from "../constants/certificates";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 
 export function CertificatesSection() {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { projects } from "../constants";
+import { projects } from "../constants/projects";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 
 export function ProjectsSection() {
@@ -14,7 +14,6 @@ export function ProjectsSection() {
       const next = new Set(prev);
       if (next.has(title)) next.delete(title);
       else next.add(title);
-
       return next;
     });
   };
@@ -80,6 +79,7 @@ export function ProjectsSection() {
                       <img
                         src={proj.image}
                         alt={`${proj.name} preview`}
+                        loading="lazy"
                         className="h-full w-full scale-[0.85] object-contain opacity-10 blur-[1px] transition-[scale,opacity] duration-500 group-hover:scale-90 group-hover:opacity-30"
                       />
                     </div>
