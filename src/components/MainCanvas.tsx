@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, useRef, useEffect } from "react";
 import { AnimatedStars } from "./AnimatedStars";
 import { MLogo } from "./MLogo";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import * as THREE from "three";
 
 export function MainCanvas({
@@ -12,11 +13,15 @@ export function MainCanvas({
   scrollY: number;
   onReady?: () => void;
 }) {
+  const prefersReducedMotion = useReducedMotion();
   // Track mouse position for parallax
   const mouse = useRef({ x: 0, y: 0 });
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
 
   useEffect(() => {
+    // Skip mouse tracking if user prefers reduced motion
+    if (prefersReducedMotion) return;
+
     const controller = new AbortController();
     let ticking = false;
 
@@ -39,14 +44,14 @@ export function MainCanvas({
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [prefersReducedMotion]);
   return (
     <div className="animate-in fade-in pointer-events-none fixed inset-0 z-0 h-lvh duration-1000">
       <Canvas
         shadows
-        dpr={[1, 2]}
+        dpr={[window.devicePixelRatio, 2]}
         camera={{ fov: 60, position: [0, 0, 10] }}
-        frameloop="always"
+        frameloop={prefersReducedMotion ? "demand" : "always"}
         performance={{ min: 0.5 }}
         onCreated={() =>
           // Wait a bit for M logo to initialize, then signal ready
@@ -54,7 +59,10 @@ export function MainCanvas({
         }
       >
         <Suspense fallback={null}>
-          <AnimatedStars scrollY={scrollY} />
+          <AnimatedStars
+            scrollY={scrollY}
+            reducedMotion={prefersReducedMotion}
+          />
           <ambientLight intensity={0.7} />
           <directionalLight position={[5, 10, 5]} intensity={1.2} castShadow />
           <PerspectiveCamera
@@ -64,8 +72,17 @@ export function MainCanvas({
             ref={cameraRef}
           />
           {/* M-Logo centerpiece */}
-          <Float speed={2} rotationIntensity={0.8} floatIntensity={0.8}>
-            <MLogo scrollY={scrollY} cameraRef={cameraRef} mouse={mouse} />
+          <Float
+            speed={prefersReducedMotion ? 0 : 2}
+            rotationIntensity={prefersReducedMotion ? 0 : 0.8}
+            floatIntensity={prefersReducedMotion ? 0 : 0.8}
+          >
+            <MLogo
+              scrollY={scrollY}
+              cameraRef={cameraRef}
+              mouse={mouse}
+              reducedMotion={prefersReducedMotion}
+            />
           </Float>
           <Environment preset="sunset" background={false} />
         </Suspense>

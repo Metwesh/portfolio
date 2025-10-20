@@ -1,13 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
-import { navLinks } from "../constants";
+import { navLinks, ANIMATION_CONFIG } from "../constants";
 
 export function Header({ scrollY }: { scrollY: number }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   // Derive header background state from scrollY instead of using effect
-  const headerBg = scrollY > 8;
+  const headerBg = scrollY > ANIMATION_CONFIG.HEADER_VISIBLE_THRESHOLD;
 
   const handleMenuOpen = () => {
     setMenuOpen((prev) => !prev);
@@ -32,7 +32,7 @@ export function Header({ scrollY }: { scrollY: number }) {
 
   // Close menu on Escape key
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleEscape = (e: KeyboardEvent): void => {
       if (e.key === "Escape" && menuOpen) {
         handleNavClick();
       }
@@ -107,8 +107,6 @@ export function Header({ scrollY }: { scrollY: number }) {
       {createPortal(
         <div
           aria-modal="true"
-          // id="mobile-nav-overlay"
-          // tabIndex={0}
           role="dialog"
           className={`fixed inset-0 z-10 flex h-screen w-screen flex-col items-center justify-center gap-10 bg-black/80 text-2xl font-bold text-white backdrop-blur-xl transition-all duration-500 md:hidden ${
             menuOpen

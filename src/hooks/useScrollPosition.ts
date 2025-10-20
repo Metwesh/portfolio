@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ANIMATION_CONFIG } from "../constants";
 
 /**
  * Custom hook to track scroll position with performance optimizations
@@ -15,7 +16,10 @@ export function useScrollPosition() {
     const updateScroll = () => {
       const currentScrollY = window.scrollY;
       // Only update if scroll changed significantly (reduces re-renders)
-      if (Math.abs(currentScrollY - lastScrollY) > 5) {
+      if (
+        Math.abs(currentScrollY - lastScrollY) >
+        ANIMATION_CONFIG.SCROLL_THRESHOLD
+      ) {
         setScrollY(currentScrollY);
         lastScrollY = currentScrollY;
       }

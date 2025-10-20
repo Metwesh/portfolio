@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "./useReducedMotion";
 
 interface UseIntersectionObserverOptions {
   threshold?: number;
@@ -9,15 +10,23 @@ interface UseIntersectionObserverOptions {
 /**
  * Custom hook for intersection observer
  * Useful for lazy loading and animations on scroll
+ * Respects prefers-reduced-motion by immediately showing content
  */
 export function useIntersectionObserver(
   options: UseIntersectionObserverOptions = {},
 ) {
   const { threshold = 0.1, root = null, rootMargin = "0px" } = options;
-  const [isIntersecting, setIsIntersecting] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const [isIntersecting, setIsIntersecting] = useState(prefersReducedMotion);
   const targetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // If user prefers reduced motion, always show content immediately
+    if (prefersReducedMotion) {
+      setIsIntersecting(true);
+      return;
+    }
+
     const target = targetRef.current;
     if (!target) return;
 
@@ -33,7 +42,7 @@ export function useIntersectionObserver(
     return () => {
       observer.disconnect();
     };
-  }, [threshold, root, rootMargin]);
+  }, [threshold, root, rootMargin, prefersReducedMotion]);
 
   return { targetRef, isIntersecting };
 }

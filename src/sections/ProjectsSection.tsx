@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { projects } from "../constants/projects";
+import { ANIMATION_CONFIG, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 
 export function ProjectsSection() {
   const { targetRef, isIntersecting } = useIntersectionObserver({
-    threshold: 0.1,
-    rootMargin: "50px 0px 0px",
+    threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
+    rootMargin: INTERSECTION_OBSERVER_CONFIG.PROJECTS_ROOT_MARGIN,
   });
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
 
-  const toggleFlip = (title: string) => {
+  const toggleFlip = (title: string): void => {
     setFlippedCards((prev) => {
       const next = new Set(prev);
       if (next.has(title)) next.delete(title);
@@ -40,7 +41,9 @@ export function ProjectsSection() {
         {projects.map((proj, index) => {
           const isFlipped = flippedCards.has(proj.name);
           const isOdd = index % 2 === 1;
-          const translateX = isOdd ? 150 : -150;
+          const translateX = isOdd
+            ? ANIMATION_CONFIG.PROJECTS_SLIDE_DISTANCE
+            : -ANIMATION_CONFIG.PROJECTS_SLIDE_DISTANCE;
 
           return (
             <div
@@ -53,7 +56,7 @@ export function ProjectsSection() {
                 transform: isIntersecting
                   ? "translateX(0) scale(1)"
                   : `translateX(${translateX}px) scale(0.8)`,
-                transition: `all 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.15}s`,
+                transition: `all 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * ANIMATION_CONFIG.PROJECTS_STAGGER_DELAY}s`,
               }}
             >
               {/* Inner container for flip effect */}

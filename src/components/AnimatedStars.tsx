@@ -5,9 +5,13 @@ import * as THREE from "three";
 
 interface AnimatedStarsProps {
   scrollY: number;
+  reducedMotion?: boolean;
 }
 
-export function AnimatedStars({ scrollY }: AnimatedStarsProps) {
+export function AnimatedStars({
+  scrollY,
+  reducedMotion = false,
+}: AnimatedStarsProps) {
   const group = useRef<THREE.Group>(null);
 
   // Reduce star count on mobile devices for better performance
@@ -15,7 +19,7 @@ export function AnimatedStars({ scrollY }: AnimatedStarsProps) {
   const starCount = window.innerWidth < 768 ? 3000 : 7500;
 
   useFrame(() => {
-    if (!group.current) return;
+    if (!group.current || reducedMotion) return;
     group.current.position.z = -scrollY * 0.02;
     group.current.position.y = -scrollY * 0.005;
   });
@@ -28,7 +32,7 @@ export function AnimatedStars({ scrollY }: AnimatedStarsProps) {
         count={starCount}
         factor={4}
         fade
-        speed={3}
+        speed={reducedMotion ? 0 : 3}
       />
     </group>
   );

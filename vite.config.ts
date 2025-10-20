@@ -79,7 +79,7 @@ export default defineConfig(({ mode }) => ({
         theme_color: "#00eaff",
         background_color: "#080e19",
         display: "standalone",
-        scope: "/",
+        scope: getBasePath(mode) ?? "/",
         icons: [
           {
             src: `${getBasePath(mode) ?? "/"}favicons/pwa-64x64.png`,

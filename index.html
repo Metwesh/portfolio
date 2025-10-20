@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mohamed H. Aly | Frontend Engineer Portfolio</title>
 
+    <!-- Resource Hints -->
+    <link rel="dns-prefetch" href="https://www.linkedin.com" />
+    <link rel="dns-prefetch" href="https://github.com" />
+
     <!-- Primary Meta Tags -->
     <meta name="title" content="Mohamed H. Aly | Frontend Engineer Portfolio" />
     <meta
@@ -85,21 +89,59 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Mohamed H. Aly",
-        "jobTitle": "Frontend Engineer",
-        "url": "https://metwesh.github.io/portfolio/",
-        "sameAs": [
-          "https://www.linkedin.com/in/mohamed-h-aly/",
-          "https://github.com/metwesh"
-        ],
-        "description": "Frontend Engineer specializing in Next.js, React, and TypeScript",
-        "email": "mohamedh.aly@hotmail.com",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Cairo",
-          "addressCountry": "Egypt"
-        }
+        "@graph": [
+          {
+            "@type": "Person",
+            "@id": "https://metwesh.github.io/portfolio/#person",
+            "name": "Mohamed H. Aly",
+            "jobTitle": "Frontend Engineer",
+            "url": "https://metwesh.github.io/portfolio/",
+            "sameAs": [
+              "https://www.linkedin.com/in/mohamed-h-aly/",
+              "https://github.com/metwesh"
+            ],
+            "description": "Frontend Engineer specializing in Next.js, React, and TypeScript",
+            "email": "mohamedh.aly@hotmail.com",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Cairo",
+              "addressCountry": "Egypt"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://metwesh.github.io/portfolio/#website",
+            "url": "https://metwesh.github.io/portfolio/",
+            "name": "Mohamed H. Aly | Portfolio",
+            "description": "Frontend Engineer specializing in Next.js, React, and TypeScript. Building scalable web applications with modern technologies.",
+            "author": {
+              "@id": "https://metwesh.github.io/portfolio/#person"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://metwesh.github.io/portfolio/#{search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://metwesh.github.io/portfolio/#webpage",
+            "url": "https://metwesh.github.io/portfolio/",
+            "name": "Mohamed H. Aly | Frontend Engineer Portfolio",
+            "isPartOf": {
+              "@id": "https://metwesh.github.io/portfolio/#website"
+            },
+            "about": {
+              "@id": "https://metwesh.github.io/portfolio/#person"
+            },
+            "description": "Frontend Engineer specializing in Next.js, React, and TypeScript. Building scalable web applications with modern technologies.",
+            "inLanguage": "en-US"
+          }
+        ]
       }
     </script>
     <style>

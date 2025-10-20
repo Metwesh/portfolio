@@ -1,10 +1,11 @@
 import { certificates } from "../constants/certificates";
+import { ANIMATION_CONFIG, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 
 export function CertificatesSection() {
   const { targetRef, isIntersecting } = useIntersectionObserver({
-    threshold: 0.1,
-    rootMargin: "50px",
+    threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
+    rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
   });
 
   return (
@@ -38,8 +39,8 @@ export function CertificatesSection() {
                 opacity: isIntersecting ? 1 : 0,
                 transform: isIntersecting
                   ? "translateY(0) translateZ(0) rotateZ(0deg)"
-                  : `translateY(${150 - index * 20}px) translateZ(-${index * 50}px) rotateZ(${(certificates.length - index) * 3}deg)`,
-                transition: `all 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.12}s, box-shadow 0.75s cubic-bezier(.23,1.12,.32,1)`,
+                  : `translateY(${ANIMATION_CONFIG.CERTIFICATES_BASE_OFFSET - index * ANIMATION_CONFIG.CERTIFICATES_OFFSET_STEP}px) translateZ(-${index * ANIMATION_CONFIG.CERTIFICATES_DEPTH_OFFSET}px) rotateZ(${(certificates.length - index) * ANIMATION_CONFIG.CERTIFICATES_ROTATION_FACTOR}deg)`,
+                transition: `all 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY}s, box-shadow 0.75s cubic-bezier(.23,1.12,.32,1)`,
               }}
             >
               {/* Colored glow */}

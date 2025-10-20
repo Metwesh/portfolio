@@ -1,7 +1,9 @@
 import { ScrollHelper } from "../components";
-import { navLinks } from "../constants";
+import { navLinks, ANIMATION_CONFIG } from "../constants";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 
 export function HeroSection({ scrollY }: { scrollY: number }) {
+  const prefersReducedMotion = useReducedMotion();
   // React Compiler will optimize this - no need for useMemo
   const initialHeight = window.innerHeight;
 
@@ -13,9 +15,16 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
       <div
         className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500"
         style={{
-          transform: `translateY(-${Math.min(scrollY * 0.6, 400)}px)`,
-          opacity: 1 - Math.min(scrollY / (initialHeight * 0.6), 1),
           pointerEvents: "auto",
+          ...(!prefersReducedMotion && {
+            transform: `translateY(-${Math.min(scrollY * ANIMATION_CONFIG.HERO_PARALLAX_SPEED, ANIMATION_CONFIG.HERO_MAX_OFFSET)}px)`,
+            opacity:
+              1 -
+              Math.min(
+                scrollY / (initialHeight * ANIMATION_CONFIG.HERO_FADE_FACTOR),
+                1,
+              ),
+          }),
         }}
       >
         <div className="animate-fade-in-up text-center">

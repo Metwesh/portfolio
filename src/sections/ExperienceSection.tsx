@@ -1,10 +1,11 @@
 import { experiences } from "../constants/experiences";
+import { ANIMATION_CONFIG, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 
 export function ExperienceSection() {
   const { targetRef, isIntersecting } = useIntersectionObserver({
-    threshold: 0.1,
-    rootMargin: "50px",
+    threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
+    rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
   });
 
   return (
@@ -69,8 +70,8 @@ export function ExperienceSection() {
                   opacity: isIntersecting ? 1 : 0,
                   transform: isIntersecting
                     ? "translateY(0) scale(1) rotate(0deg)"
-                    : `translateY(100px) scale(0.85) rotate(${isEven ? -5 : 5}deg)`,
-                  transition: `all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.5 + index * 0.2}s`,
+                    : `translateY(100px) scale(0.85) rotate(${isEven ? -ANIMATION_CONFIG.EXPERIENCE_ROTATION_ANGLE : ANIMATION_CONFIG.EXPERIENCE_ROTATION_ANGLE}deg)`,
+                  transition: `all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) ${ANIMATION_CONFIG.EXPERIENCE_BASE_DELAY + index * ANIMATION_CONFIG.EXPERIENCE_STAGGER_DELAY}s`,
                 }}
               >
                 <div

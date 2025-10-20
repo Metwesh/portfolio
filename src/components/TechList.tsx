@@ -23,17 +23,15 @@ export default function TechList({ isInView }: TechListProps) {
   useEffect(() => {
     const controller = new AbortController();
 
-    window.addEventListener(
-      "resize",
-      () => setColumns(getColumnCount(window.innerWidth)),
-      {
-        signal: controller.signal,
-      },
-    );
+    const handleResize = () => setColumns(getColumnCount(window.innerWidth));
+
+    window.addEventListener("resize", handleResize, {
+      signal: controller.signal,
+    });
     return () => controller.abort();
   }, []);
 
-  const handleCardClick = (index: number) => {
+  const handleCardClick = (index: number): void => {
     setFlippedCards((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(index)) newSet.delete(index);

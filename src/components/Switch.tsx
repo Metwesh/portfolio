@@ -26,7 +26,10 @@ export default function Switch({
         href="#tech-stacks-container"
         role="switch"
         aria-checked={value}
-        onClick={() => onChange(!value)}
+        onClick={(e) => {
+          e.preventDefault();
+          onChange(!value);
+        }}
         className={`relative inline-flex h-8 w-14 items-center rounded-full border shadow-lg backdrop-blur-md transition-all duration-300 ease-in-out focus:ring-2 focus:ring-cyan-400/50 focus:ring-offset-2 focus:ring-offset-transparent focus:outline-none ${
           value
             ? "border-cyan-400/50 bg-gradient-to-r from-cyan-500/30 to-blue-600/30 shadow-cyan-400/20"

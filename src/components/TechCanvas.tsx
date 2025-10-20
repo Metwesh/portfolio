@@ -45,7 +45,7 @@ export default function TechCanvas({ isInView }: TechCanvasProps) {
 
   return (
     <Canvas
-      dpr={[1, 2]}
+      dpr={[window.devicePixelRatio, 2]}
       camera={{ position: [0, 0, 35], fov: 90 }}
       frameloop={isInView ? "always" : "demand"}
       performance={{ min: 0.5 }}

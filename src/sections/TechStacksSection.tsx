@@ -1,17 +1,27 @@
 import { useState } from "react";
 import { ScrollHelper } from "../components";
 import TechCanvas from "../components/TechCanvas";
-import { navLinks } from "../constants";
+import {
+  navLinks,
+  ANIMATION_CONFIG,
+  INTERSECTION_OBSERVER_CONFIG,
+} from "../constants";
 import Switch from "../components/Switch";
 import TechList from "../components/TechList";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 
 export function TechStacksSection() {
-  const [isList, setIsList] = useState(window.innerWidth < 768);
+  const prefersReducedMotion = useReducedMotion();
+  const [isList, setIsList] = useState(
+    () =>
+      window.innerWidth < ANIMATION_CONFIG.MOBILE_BREAKPOINT ||
+      prefersReducedMotion,
+  );
 
   const { targetRef, isIntersecting } = useIntersectionObserver({
-    threshold: 0.1,
-    rootMargin: "50px 0px 200px 0px",
+    threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
+    rootMargin: INTERSECTION_OBSERVER_CONFIG.TECH_STACKS_ROOT_MARGIN,
   });
 
   return (
@@ -45,12 +55,14 @@ export function TechStacksSection() {
         >
           <ScrollHelper />
         </a>
-        <Switch
-          value={isList}
-          onChange={setIsList}
-          className="max-md:mx-auto md:col-start-3 md:col-end-4 md:ml-auto"
-          labels={["Canvas", "List"]}
-        />
+        {!prefersReducedMotion && (
+          <Switch
+            value={isList}
+            onChange={setIsList}
+            className="max-md:mx-auto md:col-start-3 md:col-end-4 md:ml-auto"
+            labels={["Canvas", "List"]}
+          />
+        )}
       </div>
     </section>
   );

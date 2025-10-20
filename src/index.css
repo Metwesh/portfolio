@@ -97,8 +97,34 @@
   * {
     @apply border-border outline-ring/50;
   }
-  html {
-    scroll-behavior: smooth;
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  /* Disable all animations and transitions for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    /* Disable animations globally BUT exclude loading screen */
+    *:not(#loading-screen):not(#loading-screen *),
+    *:not(#loading-screen):not(#loading-screen *)::before,
+    *:not(#loading-screen):not(#loading-screen *)::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* Specifically disable custom animations (but not loading screen) */
+    .animate-bounce-dot,
+    .animate-header-gradient-move,
+    .animate-header-gradient-move-pulse,
+    .animate-float,
+    .animate-float-2,
+    .animate-fade-in-up,
+    .animate-in,
+    [class*="animate-"]:not(#loading-screen):not(#loading-screen *) {
+      animation: none !important;
+    }
   }
   body {
     @apply bg-background relative min-h-svh bg-gradient-to-br from-gray-900 to-black font-sans text-white;
