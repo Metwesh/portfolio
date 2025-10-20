@@ -14,7 +14,7 @@ interface TechBoxProps {
   onClick: () => void;
   scale: number | undefined;
   animateTo: THREE.Vector3;
-  hasAnimated: boolean;
+  isInView: boolean;
 }
 
 export default function TechBox({
@@ -23,7 +23,7 @@ export default function TechBox({
   onClick,
   scale,
   animateTo,
-  hasAnimated,
+  isInView,
 }: TechBoxProps) {
   const [meshRotation] = useState(
     () => new THREE.Euler(Math.random(), Math.random(), Math.random()),
@@ -56,10 +56,10 @@ export default function TechBox({
 
   // Reset initialization when hasAnimated becomes false (so animation can re-trigger)
   useEffect(() => {
-    if (!hasAnimated) {
+    if (!isInView) {
       hasInitialized.current = false;
     }
-  }, [hasAnimated]);
+  }, [isInView]);
 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
     // Record pointer down position and time for tap detection
@@ -105,14 +105,24 @@ export default function TechBox({
     if (!meshRef.current || !camera) return;
 
     // Initialize position off-screen if hasn't animated yet
-    if (!hasInitialized.current && !hasAnimated) {
-      meshRef.current.position.set(position.x, position.y, -500);
+    if (!hasInitialized.current && !isInView) {
+      // Calculate position in front of camera's current view
+      const cameraDirection = new THREE.Vector3();
+      camera.getWorldDirection(cameraDirection);
+
+      // Start position far away in front of camera
+      const startDistance = 500;
+      const startPos = camera.position
+        .clone()
+        .add(cameraDirection.multiplyScalar(startDistance));
+
+      meshRef.current.position.copy(startPos);
       meshRef.current.scale.set(0.1, 0.1, 0.1);
       hasInitialized.current = true;
     }
 
     // Only animate if has been triggered
-    if (!hasAnimated) return;
+    if (!isInView) return;
 
     // Randomly moves boxes around as you rotate
     const deltaPosition = camera.position

@@ -19,9 +19,6 @@ interface TechCanvasProps {
 }
 
 export default function TechCanvas({ isInView }: TechCanvasProps) {
-  // Animation triggers every time isInView becomes true
-  const hasAnimated = isInView;
-
   // Golden Spiral algorithm
   const points = useMemo(() => {
     const temp = [];
@@ -59,7 +56,7 @@ export default function TechCanvas({ isInView }: TechCanvasProps) {
         points={points}
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex}
-        hasAnimated={hasAnimated}
+        isInView={isInView}
       />
     </Canvas>
   );
@@ -70,12 +67,12 @@ function Controls({
   points,
   selectedIndex,
   setSelectedIndex,
-  hasAnimated,
+  isInView,
 }: {
   points: Array<THREE.Vector3>;
   selectedIndex: number | null;
   setSelectedIndex: (i: number | null) => void;
-  hasAnimated: boolean;
+  isInView: boolean;
 }) {
   // Memoize offscreen positions to avoid creating new Vector3 objects on every render
   const offscreenPositions = useMemo(
@@ -151,7 +148,7 @@ function Controls({
               data={technologies[index]}
               onClick={handleBoxClick(index)}
               scale={isSelected ? 10 : undefined}
-              hasAnimated={hasAnimated}
+              isInView={isInView}
               animateTo={animateTo}
             />
           );
@@ -201,7 +198,13 @@ function Controls({
           </Html>
         )}
       </group>
-      <TrackballControls noZoom noPan makeDefault />
+      <TrackballControls
+        noZoom
+        noPan
+        makeDefault
+        dynamicDampingFactor={0.05}
+        staticMoving={false}
+      />
     </group>
   );
 }
