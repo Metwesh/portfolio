@@ -1,7 +1,24 @@
 export function ScrollHelper() {
   return (
-    <div className="flex h-[64px] w-[35px] items-start justify-center rounded-3xl border-4 border-white bg-white/10 p-2 shadow-lg backdrop-blur-md transition-all hover:border-fuchsia-400 focus:border-fuchsia-400">
-      <div className="animate-bounce-dot mb-1 h-3 w-3 rounded-full bg-white shadow-md shadow-cyan-400/60" />
+    <div className="group flex h-[64px] w-[35px] items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-white/10 shadow-lg backdrop-blur-md transition-all hover:border-fuchsia-400 focus:border-fuchsia-400">
+      <div className="animate-scroll-chevrons relative h-full w-full">
+        {[...Array(3)].map((_, index) => (
+          <svg
+            key={index}
+            className={`absolute left-1/2 h-4 w-4 -translate-x-1/2 text-white shadow-cyan-400/60 drop-shadow-md ${
+              index === 0 ? "top-0" : index === 1 ? "top-1/2" : "top-full"
+            }`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        ))}
+      </div>
     </div>
   );
 }

@@ -49,8 +49,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  --animate-bounce-dot: bounce-dot 1.5s cubic-bezier(0.23, 1.12, 0.32, 1)
-    infinite;
+  --animate-scroll-chevrons: scroll-chevrons 1s linear infinite;
   --animate-header-gradient-move: header-gradient-move 5s ease-in-out infinite;
   --animate-header-gradient-move-pulse:
     header-gradient-move 5s ease-in-out infinite, pulse 2s infinite;
@@ -104,10 +103,14 @@
   }
   /* Disable all animations and transitions for users who prefer reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    /* Disable animations globally BUT exclude loading screen */
-    *:not(#loading-screen):not(#loading-screen *),
-    *:not(#loading-screen):not(#loading-screen *)::before,
-    *:not(#loading-screen):not(#loading-screen *)::after {
+    /* Disable animations globally BUT exclude loading screen and scroll chevrons */
+    *:not(#loading-screen):not(#loading-screen *):not(.animate-scroll-chevrons),
+    *:not(#loading-screen):not(#loading-screen *)::before:not(
+        .animate-scroll-chevrons
+      ),
+    *:not(#loading-screen):not(#loading-screen *)::after:not(
+        .animate-scroll-chevrons
+      ) {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
@@ -115,14 +118,15 @@
     }
 
     /* Specifically disable custom animations (but not loading screen) */
-    .animate-bounce-dot,
     .animate-header-gradient-move,
     .animate-header-gradient-move-pulse,
     .animate-float,
     .animate-float-2,
     .animate-fade-in-up,
     .animate-in,
-    [class*="animate-"]:not(#loading-screen):not(#loading-screen *) {
+    [class*="animate-"]:not(.animate-scroll-chevrons):not(#loading-screen):not(
+        #loading-screen *
+      ) {
       animation: none !important;
     }
   }
@@ -167,13 +171,12 @@
       transform: translateY(18px);
     }
   }
-  @keyframes bounce-dot {
-    0%,
-    100% {
-      transform: translateY(0);
+  @keyframes scroll-chevrons {
+    0% {
+      transform: translateY(-50%);
     }
-    50% {
-      transform: translateY(24px);
+    100% {
+      transform: translateY(0%);
     }
   }
   @keyframes header-gradient-move {
