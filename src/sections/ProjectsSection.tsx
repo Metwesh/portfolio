@@ -1,6 +1,7 @@
 import { projects } from "../constants/projects";
 import { ANIMATION_CONFIG, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 
 // 3D Card Tilt Configuration
 const CARD_TILT_CONFIG = {
@@ -15,7 +16,10 @@ export function ProjectsSection() {
     rootMargin: INTERSECTION_OBSERVER_CONFIG.PROJECTS_ROOT_MARGIN,
   });
 
+  const prefersReducedMotion = useReducedMotion();
+
   const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
     const card = e.currentTarget;
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -28,6 +32,7 @@ export function ProjectsSection() {
   };
 
   const handleCardMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
     e.currentTarget.style.transform =
       "rotateX(0deg) rotateY(0deg) translateZ(0px) scale(1)";
   };
@@ -36,6 +41,7 @@ export function ProjectsSection() {
     e: React.MouseEvent<HTMLAnchorElement>,
     color: string,
   ) => {
+    if (prefersReducedMotion) return;
     e.currentTarget.style.boxShadow = `0 8px 30px ${color}60`;
   };
 
@@ -43,6 +49,7 @@ export function ProjectsSection() {
     e: React.MouseEvent<HTMLAnchorElement>,
     color: string,
   ) => {
+    if (prefersReducedMotion) return;
     e.currentTarget.style.boxShadow = `0 4px 20px ${color}40`;
   };
 
@@ -50,6 +57,7 @@ export function ProjectsSection() {
     e: React.MouseEvent<HTMLAnchorElement>,
     color: string,
   ) => {
+    if (prefersReducedMotion) return;
     e.currentTarget.style.background = `${color}20`;
     e.currentTarget.style.boxShadow = `0 8px 30px ${color}30`;
   };
@@ -58,6 +66,7 @@ export function ProjectsSection() {
     e: React.MouseEvent<HTMLAnchorElement>,
     color: string,
   ) => {
+    if (prefersReducedMotion) return;
     e.currentTarget.style.background = `${color}10`;
     e.currentTarget.style.boxShadow = "none";
   };
@@ -83,9 +92,8 @@ export function ProjectsSection() {
       <div className="grid w-full max-w-5xl grid-cols-1 gap-12 md:grid-cols-2">
         {projects.map((proj, index) => {
           const isOdd = index % 2 === 1;
-          const translateX = isOdd
-            ? ANIMATION_CONFIG.PROJECTS_SLIDE_DISTANCE
-            : -ANIMATION_CONFIG.PROJECTS_SLIDE_DISTANCE;
+          const translateX =
+            ANIMATION_CONFIG.PROJECTS_SLIDE_DISTANCE * (isOdd ? 1 : -1);
 
           return (
             <div
@@ -142,7 +150,7 @@ export function ProjectsSection() {
                         <img
                           src={proj.image}
                           alt={`${proj.name} preview`}
-                          className="h-full w-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
+                          className="h-full w-full object-cover transition-all duration-700 group-hover:brightness-110"
                         />
                       </div>
                       {/* Gradient overlay */}
