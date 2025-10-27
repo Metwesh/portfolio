@@ -104,17 +104,28 @@
   /* Disable all animations and transitions for users who prefer reduced motion */
   @media (prefers-reduced-motion: reduce) {
     /* Disable animations globally BUT exclude loading screen and scroll chevrons */
-    *:not(#loading-screen):not(#loading-screen *):not(.animate-scroll-chevrons),
-    *:not(#loading-screen):not(#loading-screen *)::before:not(
-        .animate-scroll-chevrons
-      ),
-    *:not(#loading-screen):not(#loading-screen *)::after:not(
+    *:not(#loading-screen):not(#loading-screen *):not(
         .animate-scroll-chevrons
       ) {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+
+    *:not(#loading-screen):not(#loading-screen *)::before,
+    *:not(#loading-screen):not(#loading-screen *)::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    /* Allow scroll chevrons to animate */
+    .animate-scroll-chevrons,
+    .animate-scroll-chevrons::before,
+    .animate-scroll-chevrons::after {
+      animation-duration: revert !important;
+      animation-iteration-count: revert !important;
     }
 
     /* Specifically disable custom animations (but not loading screen) */
