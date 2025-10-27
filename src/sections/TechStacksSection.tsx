@@ -73,6 +73,7 @@ export function TechStacksSection() {
             value={isList}
             onChange={setIsList}
             className="max-md:mx-auto md:col-start-3 md:col-end-4 md:ml-auto"
+            target="tech-stacks-container"
             labels={["Canvas", "List"]}
           />
         )}
