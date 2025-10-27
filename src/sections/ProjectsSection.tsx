@@ -1,14 +1,7 @@
 import { projects } from "../constants/projects";
 import { ANIMATION_CONFIG, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
-import { useReducedMotion } from "../hooks/useReducedMotion";
-
-// 3D Card Tilt Configuration
-const CARD_TILT_CONFIG = {
-  TILT_INTENSITY: 50, // Higher = less tilt, Lower = more tilt
-  HOVER_SCALE: 1.02,
-  HOVER_TRANSLATE_Z: 10, // in pixels
-} as const;
+import { TagsPopover } from "../components/TagsPopover";
 
 export function ProjectsSection() {
   const { targetRef, isIntersecting } = useIntersectionObserver({
@@ -16,224 +9,181 @@ export function ProjectsSection() {
     rootMargin: INTERSECTION_OBSERVER_CONFIG.PROJECTS_ROOT_MARGIN,
   });
 
-  const prefersReducedMotion = useReducedMotion();
-
-  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion) return;
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = (y - centerY) / CARD_TILT_CONFIG.TILT_INTENSITY;
-    const rotateY = (centerX - x) / CARD_TILT_CONFIG.TILT_INTENSITY;
-    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${CARD_TILT_CONFIG.HOVER_TRANSLATE_Z}px) scale(${CARD_TILT_CONFIG.HOVER_SCALE})`;
-  };
-
-  const handleCardMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion) return;
-    e.currentTarget.style.transform =
-      "rotateX(0deg) rotateY(0deg) translateZ(0px) scale(1)";
-  };
-
-  const handleLiveButtonMouseEnter = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    color: string,
-  ) => {
-    if (prefersReducedMotion) return;
-    e.currentTarget.style.boxShadow = `0 8px 30px ${color}60`;
-  };
-
-  const handleLiveButtonMouseLeave = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    color: string,
-  ) => {
-    if (prefersReducedMotion) return;
-    e.currentTarget.style.boxShadow = `0 4px 20px ${color}40`;
-  };
-
-  const handleCodeButtonMouseEnter = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    color: string,
-  ) => {
-    if (prefersReducedMotion) return;
-    e.currentTarget.style.background = `${color}20`;
-    e.currentTarget.style.boxShadow = `0 8px 30px ${color}30`;
-  };
-
-  const handleCodeButtonMouseLeave = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    color: string,
-  ) => {
-    if (prefersReducedMotion) return;
-    e.currentTarget.style.background = `${color}10`;
-    e.currentTarget.style.boxShadow = "none";
-  };
-
   return (
     <section
       ref={targetRef}
       id="projects"
       aria-labelledby="projects-heading"
-      className="relative z-10 flex min-h-screen flex-col items-center justify-center py-32"
+      className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-32"
     >
-      <h2
-        id="projects-heading"
-        className="mb-12 bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent drop-shadow-lg"
-        style={{
-          opacity: isIntersecting ? 1 : 0,
-          transform: `translateY(${isIntersecting ? 0 : 30}px)`,
-          transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
-        }}
-      >
-        Projects
-      </h2>
-      <div className="grid w-full max-w-5xl grid-cols-1 gap-12 md:grid-cols-2">
+      {/* Animated section title */}
+      <div className="relative mb-20">
+        <h2
+          id="projects-heading"
+          className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-5xl font-black tracking-tight text-transparent md:text-6xl"
+          style={{
+            opacity: isIntersecting ? 1 : 0,
+            transform: `translateY(${isIntersecting ? 0 : 50}px) scale(${isIntersecting ? 1 : 0.9})`,
+            transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+          }}
+        >
+          Featured Projects
+          <div className="absolute -inset-1 -z-10 bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
+        </h2>
+      </div>
+
+      {/* Projects grid */}
+      <div className="grid w-full max-w-7xl grid-cols-1 gap-8 md:gap-12 lg:grid-cols-2">
         {projects.map((proj, index) => {
           const isOdd = index % 2 === 1;
           const translateX =
             ANIMATION_CONFIG.PROJECTS_SLIDE_DISTANCE * (isOdd ? 1 : -1);
 
           return (
-            <div
+            <article
               key={proj.name}
-              className="group perspective-1000 relative overflow-visible"
+              className="group relative"
               style={{
-                minHeight: "20rem",
                 opacity: isIntersecting ? 1 : 0,
                 transform: isIntersecting
                   ? "translateX(0) scale(1)"
-                  : `translateX(${translateX}px) scale(0.8)`,
-                transition: `all 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * ANIMATION_CONFIG.PROJECTS_STAGGER_DELAY}s`,
+                  : `translateX(${translateX}px) scale(0.95)`,
+                transition: `all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * ANIMATION_CONFIG.PROJECTS_STAGGER_DELAY}s`,
               }}
             >
-              {/* Main tilting 3D card container */}
+              {/* Glow effect behind card */}
               <div
-                className="preserve-3d relative h-full w-full overflow-hidden rounded-3xl bg-white/5 shadow-2xl backdrop-blur-lg transition-all duration-500 ease-out"
+                className="absolute -inset-4 rounded-3xl opacity-0 blur-3xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none"
                 style={{
-                  boxShadow: `0 8px 32px 0 ${proj.color}33, 0 0 0 1px ${proj.color}20`,
-                  transform: "rotateX(0deg) rotateY(0deg) translateZ(0px)",
+                  background: `radial-gradient(circle at center, ${proj.color}40, transparent 70%)`,
                 }}
-                onMouseMove={handleCardMouseMove}
-                onMouseLeave={handleCardMouseLeave}
-              >
-                {/* Animated colored blob backgrounds with pulsing */}
-                <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-10">
+              />
+
+              {/* Main card */}
+              <div className="relative h-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none">
+                {/* Animated gradient mesh */}
+                <div className="absolute inset-0 opacity-30">
                   <div
-                    className="absolute top-1/3 -right-1/4 h-[300px] w-[300px] animate-pulse rounded-full blur-3xl transition-all duration-1000"
+                    className="absolute top-0 right-0 h-96 w-96 translate-x-[20%] -translate-y-[20%] rounded-full blur-3xl transition-all duration-1000 group-hover:translate-x-[10%] group-hover:-translate-y-[10%] group-hover:scale-120 motion-reduce:transition-none"
                     style={{
-                      background: proj.color,
-                      animationDuration: "3s",
+                      background: `radial-gradient(circle, ${proj.color}60, transparent 70%)`,
                     }}
                   />
                   <div
-                    className="absolute bottom-1/4 -left-1/4 h-72 w-72 animate-pulse rounded-full blur-3xl transition-all duration-1000"
+                    className="absolute bottom-0 left-0 h-80 w-80 -translate-x-[20%] translate-y-[20%] rounded-full blur-3xl transition-all duration-1000 group-hover:-translate-x-[10%] group-hover:translate-y-[10%] group-hover:scale-120 motion-reduce:transition-none"
                     style={{
-                      background: proj.color,
-                      animationDuration: "4s",
-                      animationDelay: "1s",
+                      background: `radial-gradient(circle, ${proj.color}40, transparent 70%)`,
                     }}
                   />
                 </div>
 
-                {/* Image with parallax overlay effect */}
-                <div className="relative h-56 w-full overflow-hidden">
+                {/* Shimmer effect overlay */}
+                <div className="absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none">
+                  <div
+                    className="absolute inset-0 -translate-x-full bg-[length:200%_100%] motion-safe:animate-[shimmer_2s_infinite]"
+                    style={{
+                      backgroundImage: `linear-gradient(110deg, transparent 25%, ${proj.color}20 50%, transparent 75%)`,
+                    }}
+                  />
+                </div>
+
+                {/* Image section with parallax */}
+                <div className="relative h-64 overflow-hidden md:h-80">
                   {proj.image && (
                     <>
-                      <div
-                        className="absolute inset-0 transition-transform duration-700 ease-out"
-                        style={{
-                          transform: "translateZ(30px) scale(1.05)",
-                        }}
-                      >
+                      <div className="absolute inset-0 transition-transform duration-700 not-motion-reduce:group-hover:scale-110 motion-reduce:transition-none">
                         <img
                           src={proj.image}
                           alt={`${proj.name} preview`}
-                          className="h-full w-full object-cover transition-all duration-700 group-hover:brightness-110"
+                          className="h-full w-full object-cover"
                         />
                       </div>
-                      {/* Gradient overlay */}
+
+                      {/* Multi-layer gradients */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                       <div
-                        className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80"
+                        className="absolute inset-0 opacity-40 mix-blend-color-dodge transition-opacity duration-500 group-hover:opacity-60 motion-reduce:transition-none"
                         style={{
-                          transform: "translateZ(40px)",
+                          backgroundImage: `linear-gradient(135deg, ${proj.color}80 0%, transparent 60%)`,
                         }}
                       />
-                      {/* Color accent overlay */}
-                      <div
-                        className="absolute inset-0 opacity-20 mix-blend-overlay transition-opacity duration-500 group-hover:opacity-30"
-                        style={{
-                          background: `linear-gradient(135deg, ${proj.color} 0%, transparent 70%)`,
-                          transform: "translateZ(35px)",
-                        }}
-                      />
+
+                      {/* Spotlight effect */}
+                      <div className="spotlight-effect pointer-events-none absolute inset-0 opacity-0 mix-blend-overlay transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none" />
                     </>
+                  )}
+
+                  {/* Floating tech tag preview */}
+                  {proj.tags && proj.tags.length > 0 && (
+                    <div
+                      className="absolute top-4 left-4 max-w-[80%]"
+                      style={{
+                        opacity: isIntersecting ? 1 : 0,
+                        transform: `translateY(${isIntersecting ? 0 : -20}px)`,
+                        transition: `all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.1}s`,
+                      }}
+                    >
+                      <TagsPopover
+                        tags={proj.tags}
+                        visibleCount={3}
+                        projectColor={proj.color}
+                      />
+                    </div>
                   )}
                 </div>
 
-                {/* Content section with floating effect */}
-                <div
-                  className="relative z-20 flex flex-col justify-between p-8"
-                  style={{
-                    transform: "translateZ(50px)",
-                    minHeight: "20rem",
-                  }}
-                >
-                  {/* Title with glowing underline */}
-                  <div className="mb-6">
-                    <h3 className="mb-3 text-2xl font-bold text-white drop-shadow-lg transition-all duration-300 group-hover:translate-y-[-2px]">
-                      {proj.name}
-                    </h3>
+                {/* Content section */}
+                <div className="relative p-6 md:p-8">
+                  {/* Title with animated underline */}
+                  <h3 className="relative mb-4 inline-block text-2xl font-bold text-white md:text-3xl">
+                    {proj.name}
                     <div
-                      className="h-1 w-0 rounded-full transition-all duration-500 group-hover:w-20"
+                      className="absolute -bottom-1 left-0 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-16 motion-reduce:transition-none"
                       style={{
-                        background: proj.color,
-                        boxShadow: `0 0 10px ${proj.color}`,
+                        backgroundImage: `linear-gradient(90deg, ${proj.color}, transparent)`,
+                        boxShadow: `0 0 20px ${proj.color}80`,
                       }}
                     />
-                  </div>
+                  </h3>
 
                   {/* Description */}
-                  <p className="mb-6 flex-1 text-sm leading-relaxed text-white/85 transition-all duration-300 group-hover:text-white">
+                  <p className="mb-6 text-sm leading-relaxed text-white/70 transition-colors duration-300 group-hover:text-white/90 motion-reduce:transition-none md:text-base">
                     {proj.description}
                   </p>
 
-                  {/* Floating action buttons */}
-                  <div className="flex gap-3">
+                  {/* Action buttons with magnetic effect */}
+                  <div className="flex flex-wrap gap-3">
                     {proj.link && (
                       <a
                         href={proj.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group/btn relative flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-3 font-semibold shadow-lg transition-all duration-300 hover:-translate-y-1"
+                        className="group/btn relative min-w-[120px] flex-1 overflow-hidden rounded-xl px-5 py-3 text-center font-bold"
                         style={{
-                          background: proj.color,
-                          color: "#000",
+                          backgroundImage: `linear-gradient(135deg, ${proj.color}, ${proj.color}CC)`,
                           boxShadow: `0 4px 20px ${proj.color}40`,
                         }}
-                        onMouseEnter={(e) =>
-                          handleLiveButtonMouseEnter(e, proj.color)
-                        }
-                        onMouseLeave={(e) =>
-                          handleLiveButtonMouseLeave(e, proj.color)
-                        }
                       >
-                        <span className="relative z-10 text-sm">Live</span>
-                        <svg
-                          className="relative z-10 transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:scale-110 group-hover/btn:rotate-45"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M7 7h10v10" />
-                          <path d="M7 17 17 7" />
-                        </svg>
+                        <span className="relative z-10 flex items-center justify-center gap-2 text-white">
+                          View Live
+                          <svg
+                            className="h-4 w-4 transition-transform duration-300 group-hover/btn:rotate-45 motion-reduce:transition-none"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2.5}
+                              d="M7 7h10v10M7 17L17 7"
+                            />
+                          </svg>
+                        </span>
+                        {/* Button glow */}
+                        <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/btn:opacity-100 motion-reduce:transition-none">
+                          <div className="absolute inset-0 bg-white/20" />
+                        </div>
                       </a>
                     )}
                     {proj.source_code_link && (
@@ -241,54 +191,56 @@ export function ProjectsSection() {
                         href={proj.source_code_link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group/btn relative flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl border-2 px-4 py-3 font-semibold shadow-lg transition-all duration-300 hover:-translate-y-1"
+                        className="group/btn relative min-w-[120px] flex-1 overflow-hidden rounded-xl border-2 px-5 py-3 text-center font-bold"
                         style={{
                           borderColor: proj.color,
                           color: proj.color,
-                          background: `${proj.color}10`,
+                          backgroundColor: `${proj.color}15`,
                         }}
-                        onMouseEnter={(e) =>
-                          handleCodeButtonMouseEnter(e, proj.color)
-                        }
-                        onMouseLeave={(e) =>
-                          handleCodeButtonMouseLeave(e, proj.color)
-                        }
                       >
-                        <span className="relative z-10 text-sm">Code</span>
-                        <svg
-                          className="relative z-10 transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:scale-110 group-hover/btn:rotate-45"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M7 7h10v10" />
-                          <path d="M7 17 17 7" />
-                        </svg>
+                        <span className="relative z-10 flex items-center justify-center gap-2">
+                          Source Code
+                          <svg
+                            className="h-4 w-4 transition-transform duration-300 group-hover/btn:rotate-45 motion-reduce:transition-none"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2.5}
+                              d="M7 7h10v10M7 17L17 7"
+                            />
+                          </svg>
+                        </span>
+                        {/* Button glow - colored version */}
+                        <div
+                          className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/btn:opacity-100 motion-reduce:transition-none"
+                          style={{
+                            background: `${proj.color}20`,
+                          }}
+                        />
                       </a>
                     )}
                   </div>
                 </div>
 
-                {/* Animated corner accents */}
+                {/* Corner accents */}
                 <div
-                  className="pointer-events-none absolute top-0 left-0 h-20 w-20 opacity-0 transition-all duration-500 group-hover:opacity-100"
+                  className="absolute top-0 right-0 h-32 w-32 opacity-0 transition-all duration-700 group-hover:opacity-60 motion-reduce:transition-none"
                   style={{
-                    background: `radial-gradient(circle at top left, ${proj.color}40, transparent 70%)`,
+                    backgroundImage: `radial-gradient(circle at top right, ${proj.color}40, transparent 70%)`,
                   }}
                 />
                 <div
-                  className="pointer-events-none absolute right-0 bottom-0 h-20 w-20 opacity-0 transition-all duration-500 group-hover:opacity-100"
+                  className="absolute bottom-0 left-0 h-32 w-32 opacity-0 transition-all duration-700 group-hover:opacity-60 motion-reduce:transition-none"
                   style={{
-                    background: `radial-gradient(circle at bottom right, ${proj.color}40, transparent 70%)`,
+                    backgroundImage: `radial-gradient(circle at bottom left, ${proj.color}40, transparent 70%)`,
                   }}
                 />
               </div>
-            </div>
+            </article>
           );
         })}
       </div>

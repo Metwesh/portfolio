@@ -5,12 +5,7 @@ interface SwitchProps {
   labels?: [string, string];
 }
 
-export default function Switch({
-  value,
-  onChange,
-  className,
-  labels,
-}: SwitchProps) {
+export function Switch({ value, onChange, className, labels }: SwitchProps) {
   return (
     <div
       className={`items-center gap-3 ${className ?? ""} ${

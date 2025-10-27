@@ -16,6 +16,43 @@ import {
   taskHandlerApp,
 } from "../assets";
 
+// Valid tag color names
+export type TagColor =
+  | "orange"
+  | "blue"
+  | "yellow"
+  | "purple"
+  | "green"
+  | "pink"
+  | "red"
+  | "cyan"
+  | "light-blue"
+  | "light-green"
+  | "light-purple"
+  | "light-pink"
+  | "light-orange"
+  | "dark-purple"
+  | "dark-green"
+  | "dull-blue"
+  | "gray-white";
+
+export interface ProjectTag {
+  name: string;
+  color: TagColor;
+}
+
+type HexColor = `#${string}`;
+
+export interface Project {
+  name: string;
+  description: string;
+  image: string;
+  color: HexColor; // Hex color for the project card
+  tags?: ProjectTag[];
+  source_code_link?: string;
+  link?: string;
+}
+
 export const projects = [
   {
     name: "Book Rental Dashboard",
@@ -409,6 +446,32 @@ export const projects = [
       "A Next.js-based CRM for The MARQ communities, featuring advanced caching, analytics, and real-time updates.",
     image: marqCrm,
     color: "#7c3aed",
+    tags: [
+      {
+        name: "Typescript",
+        color: "blue",
+      },
+      {
+        name: "NextJS",
+        color: "gray-white",
+      },
+      {
+        name: "Shadcn-UI",
+        color: "purple",
+      },
+      {
+        name: "TailwindCSS",
+        color: "light-blue",
+      },
+      {
+        name: "Next-Auth",
+        color: "pink",
+      },
+      {
+        name: "Recharts",
+        color: "orange",
+      },
+    ],
   },
   {
     name: "Address Online",
@@ -416,6 +479,40 @@ export const projects = [
       "A Next.js-powered e-commerce platform built for The Address Holding, enabling users to explore and purchase residential and commercial properties.",
     image: addOn,
     color: "#ec4899",
+    tags: [
+      {
+        name: "Typescript",
+        color: "blue",
+      },
+      {
+        name: "NextJS",
+        color: "gray-white",
+      },
+      {
+        name: "Shadcn-UI",
+        color: "purple",
+      },
+      {
+        name: "TailwindCSS",
+        color: "light-blue",
+      },
+      {
+        name: "Next-Auth",
+        color: "pink",
+      },
+      {
+        name: "Recharts",
+        color: "orange",
+      },
+      {
+        name: "React-Query",
+        color: "light-purple",
+      },
+      {
+        name: "next-intl",
+        color: "dull-blue",
+      },
+    ],
   },
   {
     name: "Address Online CMS",
@@ -423,6 +520,40 @@ export const projects = [
       "An internal dashboard built with Next.js for managing listings, content, and user activity on the Address Online property platform.",
     image: addOnCms,
     color: "#ff9900",
+    tags: [
+      {
+        name: "Typescript",
+        color: "blue",
+      },
+      {
+        name: "NextJS",
+        color: "gray-white",
+      },
+      {
+        name: "Shadcn-UI",
+        color: "purple",
+      },
+      {
+        name: "TailwindCSS",
+        color: "light-blue",
+      },
+      {
+        name: "Next-Auth",
+        color: "pink",
+      },
+      {
+        name: "Recharts",
+        color: "orange",
+      },
+      {
+        name: "React-Query",
+        color: "light-purple",
+      },
+      {
+        name: "React-Table",
+        color: "dull-blue",
+      },
+    ],
   },
   {
     name: "Arady Misr Platform",
@@ -430,6 +561,40 @@ export const projects = [
       "A Next.js-based real estate marketplace specialized in land plots, offering users a seamless experience to browse and invest in land opportunities.",
     image: aradyMisr,
     color: "#22c55e",
+    tags: [
+      {
+        name: "Typescript",
+        color: "blue",
+      },
+      {
+        name: "NextJS",
+        color: "gray-white",
+      },
+      {
+        name: "Shadcn-UI",
+        color: "purple",
+      },
+      {
+        name: "TailwindCSS",
+        color: "light-blue",
+      },
+      {
+        name: "Next-Auth",
+        color: "pink",
+      },
+      {
+        name: "Recharts",
+        color: "orange",
+      },
+      {
+        name: "React-Query",
+        color: "light-purple",
+      },
+      {
+        name: "next-intl",
+        color: "dull-blue",
+      },
+    ],
   },
   {
     name: "Arady Misr CMS",
@@ -437,5 +602,39 @@ export const projects = [
       "A content and listing management system for the Arady Misr platform, built with Next.js to support admin workflows and data control.",
     image: aradyMisrCms,
     color: "#00eaff",
+    tags: [
+      {
+        name: "Typescript",
+        color: "blue",
+      },
+      {
+        name: "NextJS",
+        color: "gray-white",
+      },
+      {
+        name: "Shadcn-UI",
+        color: "purple",
+      },
+      {
+        name: "TailwindCSS",
+        color: "light-blue",
+      },
+      {
+        name: "Next-Auth",
+        color: "pink",
+      },
+      {
+        name: "Recharts",
+        color: "orange",
+      },
+      {
+        name: "React-Query",
+        color: "light-purple",
+      },
+      {
+        name: "React-Table",
+        color: "dull-blue",
+      },
+    ],
   },
-];
+] satisfies readonly Project[];

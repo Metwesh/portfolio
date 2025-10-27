@@ -9,7 +9,7 @@ import {
 import * as THREE from "three";
 import { technologies } from "../constants/technologies";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "../shaders/FogArguments";
-import TechBox from "./TechBox";
+import { TechBox } from "./TechBox";
 import { WIP } from "../assets";
 
 const SPHERE_RADIUS = 20;
@@ -18,7 +18,7 @@ interface TechCanvasProps {
   isInView: boolean;
 }
 
-export default function TechCanvas({ isInView }: TechCanvasProps) {
+export function TechCanvas({ isInView }: TechCanvasProps) {
   // Golden Spiral algorithm
   const points = useMemo(() => {
     const temp = [];

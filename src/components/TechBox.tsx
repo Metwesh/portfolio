@@ -17,7 +17,7 @@ interface TechBoxProps {
   isInView: boolean;
 }
 
-export default function TechBox({
+export function TechBox({
   data,
   position,
   onClick,

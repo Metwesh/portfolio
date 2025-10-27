@@ -13,6 +13,7 @@
     "test:coverage": "vitest --coverage",
     "lint": "eslint .",
     "prettier": "prettier --write .",
+    "prettier:check": "prettier --check .",
     "compile": "tsc --noEmit",
     "system:fix": "yarn lint && yarn compile && yarn prettier",
     "predeploy": "npm run build",

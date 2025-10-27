@@ -16,7 +16,7 @@ const getColumnCount = (width: number): number => {
   else return 2; // default
 };
 
-export default function TechList({ isInView }: TechListProps) {
+export function TechList({ isInView }: TechListProps) {
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
   const [columns, setColumns] = useState(getColumnCount(window.innerWidth));
 
@@ -65,15 +65,15 @@ export default function TechList({ isInView }: TechListProps) {
             >
               {/* Card container with flip transform */}
               <div
-                className={`preserve-3d relative h-full w-full transform-gpu rounded-xl transition-transform duration-700 ${
+                className={`preserve-3d relative h-full w-full transform-gpu rounded-xl transition-transform duration-700 motion-reduce:transition-none ${
                   isFlipped ? "rotate-y-180" : ""
                 }`}
               >
                 {/* Front side */}
-                <div className="absolute inset-0 rounded-xl border border-white/30 bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-lg backdrop-blur-md transition-all duration-500 ease-out backface-hidden hover:scale-105 hover:border-cyan-400 hover:from-cyan-500/30 hover:to-blue-600/30 hover:shadow-xl hover:shadow-cyan-400/20">
+                <div className="absolute inset-0 rounded-xl border border-white/30 bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-lg backdrop-blur-md transition-all duration-500 ease-out backface-hidden hover:scale-105 hover:border-cyan-400 hover:from-cyan-500/30 hover:to-blue-600/30 hover:shadow-xl hover:shadow-cyan-400/20 motion-reduce:transition-none">
                   {tech.wip && (
                     <div
-                      className="absolute inset-0 rounded-lg opacity-60 transition-opacity duration-300 group-hover:opacity-40"
+                      className="absolute inset-0 rounded-lg opacity-60 transition-opacity duration-300 group-hover:opacity-40 motion-reduce:transition-none"
                       style={{
                         backgroundImage: `url(${WIP})`,
                         backgroundSize: "cover",
@@ -83,20 +83,20 @@ export default function TechList({ isInView }: TechListProps) {
                     />
                   )}
                   {/* Animated background gradient */}
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-cyan-400/0 to-blue-600/0 opacity-0 transition-opacity duration-500 group-hover:from-cyan-400/10 group-hover:to-blue-600/5 group-hover:opacity-100" />
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-cyan-400/0 to-blue-600/0 opacity-0 transition-opacity duration-500 group-hover:from-cyan-400/10 group-hover:to-blue-600/5 group-hover:opacity-100 motion-reduce:transition-none" />
 
                   {/* Glow effect */}
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-cyan-400/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-30" />
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-cyan-400/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-30 motion-reduce:transition-none" />
 
                   <div className="relative z-10 flex h-full items-center justify-center">
                     <div className="relative flex h-16 w-16 items-center justify-center">
                       {/* Icon glow */}
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-600/20 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-100" />
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-600/20 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none" />
 
                       <img
                         src={tech.icon}
                         alt={tech.name}
-                        className="relative z-10 h-full w-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-110"
+                        className="relative z-10 h-full w-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none"
                       />
                     </div>
                   </div>
