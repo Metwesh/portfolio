@@ -140,7 +140,7 @@ export function CertificatesSection() {
 
                       {/* Arrow icon */}
                       <div
-                        className="flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:rotate-45 motion-reduce:transition-none"
+                        className="flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 group-hover:rotate-45 motion-reduce:transition-none"
                         style={{
                           background: `${cert.color}30`,
                           color: cert.color,
