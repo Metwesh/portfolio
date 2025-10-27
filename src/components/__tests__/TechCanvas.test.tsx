@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
-import TechCanvas from "../TechCanvas";
+import { TechCanvas } from "../TechCanvas";
 
 // Mock @react-three/fiber
 vi.mock("@react-three/fiber", () => ({

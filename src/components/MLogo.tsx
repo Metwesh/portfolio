@@ -137,7 +137,9 @@ export function MLogo({
 
   // Set initial position for normal mode
   useLayoutEffect(() => {
-    if (!reducedMotion && group.current) group.current.position.set(0, 0, 0);
+    if (!reducedMotion && group.current?.position) {
+      group.current.position.set(0, 0, 0);
+    }
   }, [reducedMotion]);
 
   return (

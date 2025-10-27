@@ -26,6 +26,9 @@ jobs:
       - name: Lint & compile 🧹
         run: yarn lint && yarn compile
 
+      - name: Run tests 🧪
+        run: yarn test:run
+
       - name: Build project 🏗️
         run: yarn build
         env:
