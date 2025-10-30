@@ -72,6 +72,7 @@ import addOn from "./projects/ADD-ON.webp";
 import aradyMisr from "./projects/ARADY-MISR.webp";
 import aradyMisrCms from "./projects/ARADY-MISR-CMS.webp";
 import marqCrm from "./projects/MARQ-CRM.webp";
+import BRGRSpinTheWheel from "./projects/BRGR-spin-the-wheel.webp";
 
 // Certificates
 import bachelorsDegree from "./certificates/English-certificate.webp";
@@ -167,4 +168,5 @@ export {
   aradyMisr,
   aradyMisrCms,
   marqCrm,
+  BRGRSpinTheWheel,
 };
