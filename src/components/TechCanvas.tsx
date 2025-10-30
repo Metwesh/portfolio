@@ -113,35 +113,15 @@ function Controls({
 
   // Calculate zoomed positions based on current state
   const getBoxPosition = (originalPos: THREE.Vector3, index: number) => {
-    const isSelected = selectedIndex === index;
+    let scale = 1; // default
 
     if (selectedIndex !== null) {
-      if (isSelected) {
-        // Selected box moves closer to camera
-        return new THREE.Vector3(
-          originalPos.x * 0.3,
-          originalPos.y * 0.3,
-          originalPos.z * 0.3,
-        );
-      } else {
-        // Non-selected boxes move away from camera
-        return new THREE.Vector3(
-          originalPos.x * 2,
-          originalPos.y * 2,
-          originalPos.z * 2,
-        );
-      }
-    } else if (isInView) {
-      // When in view, boxes are closer to camera (bigger sphere)
-      return new THREE.Vector3(originalPos.x, originalPos.y, originalPos.z);
+      scale = selectedIndex === index ? 0.3 : 2; // selected vs non-selected
     } else {
-      // When not in view, boxes are further from camera
-      return new THREE.Vector3(
-        originalPos.x * 1.25,
-        originalPos.y * 1.25,
-        originalPos.z * 1.25,
-      );
+      scale = isInView ? 1 : 1.25; // in view vs not
     }
+
+    return originalPos.clone().multiplyScalar(scale);
   };
 
   // Track touch/pointer events for close button to distinguish tap from drag
