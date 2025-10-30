@@ -11,6 +11,13 @@ export function ExperienceSection() {
 
   const prefersReducedMotion = useReducedMotion();
 
+  // Calculate when all cards finish animating
+  const lastCardDelay =
+    ANIMATION_CONFIG.EXPERIENCE_BASE_DELAY +
+    (experiences.length - 1) * ANIMATION_CONFIG.EXPERIENCE_STAGGER_DELAY;
+  const cardAnimationDuration = 0.9; // From the card transition duration
+  const timelineDelay = lastCardDelay + cardAnimationDuration;
+
   return (
     <section
       ref={targetRef}
@@ -43,11 +50,11 @@ export function ExperienceSection() {
             backgroundImage: `linear-gradient(to bottom, ${experiences
               .map((exp) => exp.color)
               .join(", ")})`,
-            opacity: isIntersecting ? 1 : 0,
             transform: `scaleY(${isIntersecting ? 1 : 0})`,
             transformOrigin: "top",
-            transition:
-              "opacity 0.8s ease-out, transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s",
+            transition: isIntersecting
+              ? `transform 3s cubic-bezier(0.34, 1.56, 0.64, 1) ${timelineDelay}s`
+              : "transform 0.3s ease-out",
           }}
         />
         <div
@@ -56,11 +63,11 @@ export function ExperienceSection() {
             backgroundImage: `linear-gradient(to bottom, ${experiences
               .map((exp) => exp.color)
               .join(", ")})`,
-            opacity: isIntersecting ? 1 : 0,
             transform: `scaleY(${isIntersecting ? 1 : 0})`,
             transformOrigin: "top",
-            transition:
-              "opacity 0.8s ease-out, transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s",
+            transition: isIntersecting
+              ? `transform 3s cubic-bezier(0.34, 1.56, 0.64, 1) ${timelineDelay}s`
+              : "transform 0.3s ease-out",
           }}
         />
 
@@ -91,7 +98,7 @@ export function ExperienceSection() {
                   />
 
                   <div
-                    className="relative h-14 w-14 overflow-hidden rounded-2xl border-2 border-white/10 bg-white/5 backdrop-blur-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-[5deg] motion-reduce:transition-none sm:h-16 sm:w-16"
+                    className="relative h-14 w-14 overflow-hidden rounded-2xl border-2 border-white/10 bg-white/5 backdrop-blur-md transition-all duration-500 group-hover:scale-110 motion-reduce:transition-none sm:h-16 sm:w-16"
                     style={{
                       boxShadow: `0 0 24px 4px ${experience.color}88`,
                     }}
@@ -108,7 +115,7 @@ export function ExperienceSection() {
                 {/* Card */}
                 <div className="flex flex-1 flex-col items-center gap-6 rounded-2xl">
                   <div
-                    className="relative w-full overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl transition-all duration-500 group-hover:-translate-y-1 motion-reduce:transition-none"
+                    className="relative w-full overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl transition-all duration-500 not-motion-reduce:group-hover:-translate-y-1 motion-reduce:transition-none"
                     style={{
                       background:
                         "linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))",
@@ -155,7 +162,7 @@ export function ExperienceSection() {
                         {experience.points.map((point, pointIndex) => (
                           <li
                             key={`experience-point-${point.title}`}
-                            className="flex gap-2 transition-all duration-300 group-hover:translate-x-1 motion-reduce:transition-none"
+                            className="flex gap-2 transition-all duration-300 not-motion-reduce:group-hover:translate-x-1 motion-reduce:transition-none"
                             style={{
                               transitionDelay: `${pointIndex * 30}ms`,
                             }}
@@ -168,7 +175,7 @@ export function ExperienceSection() {
                             />
                             <div>
                               <strong>{point.title}</strong>
-                              <span>: {point.subtitle}</span>
+                              <span>{`: ${point.subtitle}`}</span>
                             </div>
                           </li>
                         ))}

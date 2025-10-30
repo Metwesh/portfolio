@@ -12,3 +12,4 @@ export { TechBox } from "./TechBox";
 export { TechCanvas } from "./TechCanvas";
 export { TechList } from "./TechList";
 export { TagsPopover } from "./TagsPopover";
+export { TechTooltip } from "./TechTooltip";

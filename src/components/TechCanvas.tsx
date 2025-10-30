@@ -1,5 +1,6 @@
 import { TrackballControls, Html } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import { TrackballControls as TrackballControlsImpl } from "three-stdlib";
 import {
   useMemo,
   useState,
@@ -10,7 +11,7 @@ import * as THREE from "three";
 import { technologies } from "../constants/technologies";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "../shaders/FogArguments";
 import { TechBox } from "./TechBox";
-import { WIP } from "../assets";
+import { TechTooltip } from "./TechTooltip";
 
 const SPHERE_RADIUS = 20;
 
@@ -58,7 +59,41 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
         setSelectedIndex={setSelectedIndex}
         isInView={isInView}
       />
+      <ControlsReset isInView={isInView} />
     </Canvas>
+  );
+}
+
+// Component to handle orbital controls reset
+function ControlsReset({ isInView }: { isInView: boolean }) {
+  const { camera } = useThree();
+  const controlsRef = useRef<TrackballControlsImpl | null>(null);
+  const hasReset = useRef(false);
+
+  useFrame(() => {
+    if (!isInView && !hasReset.current) {
+      // Reset camera to default position
+      camera.position.set(0, 0, 35);
+      camera.lookAt(0, 0, 0);
+
+      // Reset controls if available
+      if (controlsRef.current) controlsRef.current.reset();
+
+      hasReset.current = true;
+    } else if (isInView) {
+      hasReset.current = false;
+    }
+  });
+
+  return (
+    <TrackballControls
+      ref={controlsRef}
+      noZoom
+      noPan
+      makeDefault
+      dynamicDampingFactor={0.05}
+      staticMoving={false}
+    />
   );
 }
 
@@ -74,11 +109,40 @@ function Controls({
   setSelectedIndex: (i: number | null) => void;
   isInView: boolean;
 }) {
-  // Memoize offscreen positions to avoid creating new Vector3 objects on every render
-  const offscreenPositions = useMemo(
-    () => points.map((pos) => new THREE.Vector3(pos.x, pos.y, -500)),
-    [points],
-  );
+  // Note: offscreenPositions removed as we now use dynamic positioning
+
+  // Calculate zoomed positions based on current state
+  const getBoxPosition = (originalPos: THREE.Vector3, index: number) => {
+    const isSelected = selectedIndex === index;
+
+    if (selectedIndex !== null) {
+      if (isSelected) {
+        // Selected box moves closer to camera
+        return new THREE.Vector3(
+          originalPos.x * 0.3,
+          originalPos.y * 0.3,
+          originalPos.z * 0.3,
+        );
+      } else {
+        // Non-selected boxes move away from camera
+        return new THREE.Vector3(
+          originalPos.x * 2,
+          originalPos.y * 2,
+          originalPos.z * 2,
+        );
+      }
+    } else if (isInView) {
+      // When in view, boxes are closer to camera (bigger sphere)
+      return new THREE.Vector3(originalPos.x, originalPos.y, originalPos.z);
+    } else {
+      // When not in view, boxes are further from camera
+      return new THREE.Vector3(
+        originalPos.x * 1.25,
+        originalPos.y * 1.25,
+        originalPos.z * 1.25,
+      );
+    }
+  };
 
   // Track touch/pointer events for close button to distinguish tap from drag
   const buttonPointerDown = useRef<{
@@ -111,7 +175,7 @@ function Controls({
     const deltaTime = Date.now() - buttonPointerDown.current.time;
 
     // Consider it a tap if movement is minimal and time is short
-    const isTap = deltaX < 10 && deltaY < 10 && deltaTime < 300;
+    const isTap = deltaX < 10 && deltaY < 10 && deltaTime < 200;
 
     if (isTap) handleClose();
 
@@ -133,23 +197,19 @@ function Controls({
       />
       <group rotation={[0, 0, 35]}>
         {points.map((pos, index) => {
-          // Animate unselected boxes off and back on screen
+          // Calculate the target position based on zoom state
+          const targetPosition = getBoxPosition(pos, index);
           const isSelected = selectedIndex === index;
-          // If selected, lerp to offscreen; if not, lerp to original
-          // We'll pass both positions and let TechBox animate between them
-          const animateTo =
-            selectedIndex !== null && !isSelected
-              ? offscreenPositions[index]
-              : pos;
+
           return (
             <TechBox
               key={`technology-${index}`}
-              position={pos}
+              position={targetPosition}
               data={technologies[index]}
               onClick={handleBoxClick(index)}
-              scale={isSelected ? 10 : undefined}
+              scale={isSelected ? 20 : undefined}
               isInView={isInView}
-              animateTo={animateTo}
+              animateTo={targetPosition}
             />
           );
         })}
@@ -159,52 +219,16 @@ function Controls({
             position={[0, -14, 0]}
             style={{ pointerEvents: "auto", userSelect: "none" }}
           >
-            <button
-              style={{
-                background: "rgba(20,24,32,0.92)",
-                color: "#fff",
-                padding: "1.2rem 2.2rem",
-                borderRadius: "1.2rem",
-                fontSize: "2rem",
-                fontWeight: 700,
-                boxShadow: "0 4px 32px #000a",
-                marginTop: "2.5rem",
-                letterSpacing: "0.02em",
-                textAlign: "center",
-                cursor: "pointer",
-                whiteSpace: "pre",
-                backgroundImage: technologies[selectedIndex].wip
-                  ? `url(${WIP})`
-                  : undefined,
-                backgroundSize: "cover",
-                backgroundRepeat: "no-repeat",
-              }}
+            <TechTooltip
+              technologyName={technologies[selectedIndex].name}
+              isWip={technologies[selectedIndex].wip || false}
+              onClose={handleClose}
               onPointerDown={handleButtonPointerDown}
               onPointerUp={handleButtonPointerUp}
-              onClick={handleClose}
-            >
-              {technologies[selectedIndex].name}
-              <div
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: 400,
-                  marginTop: 8,
-                  opacity: 0.7,
-                }}
-              >
-                (Click to close)
-              </div>
-            </button>
+            />
           </Html>
         )}
       </group>
-      <TrackballControls
-        noZoom
-        noPan
-        makeDefault
-        dynamicDampingFactor={0.05}
-        staticMoving={false}
-      />
     </group>
   );
 }

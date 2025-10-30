@@ -102,7 +102,7 @@ export function CertificatesSection() {
                         <img
                           src={cert.icon}
                           alt={`${cert.title} icon`}
-                          className="relative h-full w-full rounded-2xl object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 motion-reduce:transition-none"
+                          className="relative h-full w-full rounded-2xl object-contain transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
                         />
                       </div>
                     )}
@@ -228,7 +228,7 @@ export function CertificatesSection() {
                   viewBox="0 0 478 478"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  className="transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 motion-reduce:transition-none"
+                  className="transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
                 >
                   <rect width="478" height="478" rx="32" fill="transparent" />
                   <path

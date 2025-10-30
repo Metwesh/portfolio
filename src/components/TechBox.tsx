@@ -106,16 +106,8 @@ export function TechBox({
 
     // Initialize position off-screen if hasn't animated yet
     if (!hasInitialized.current && !isInView) {
-      // Calculate position in front of camera's current view
-      const cameraDirection = new THREE.Vector3();
-      camera.getWorldDirection(cameraDirection);
-
-      // Start position far away in front of camera
-      const startDistance = 500;
-      const startPos = camera.position
-        .clone()
-        .add(cameraDirection.multiplyScalar(startDistance));
-
+      // Start position far away from center (off-screen)
+      const startPos = new THREE.Vector3(0, 0, -500);
       meshRef.current.position.copy(startPos);
       meshRef.current.scale.set(0.1, 0.1, 0.1);
       hasInitialized.current = true;
@@ -124,7 +116,7 @@ export function TechBox({
     // Only animate if has been triggered
     if (!isInView) return;
 
-    // Randomly moves boxes around as you rotate
+    // Randomly moves boxes around as you rotate (the cool floating effect!)
     const deltaPosition = camera.position
       .clone()
       .sub(prevCameraPosition.current);
@@ -135,21 +127,14 @@ export function TechBox({
 
     prevCameraPosition.current = camera.position.clone();
 
-    // Animate position
+    // Animate position to target
     const targetPos = animateTo || position;
-    meshRef.current.position.lerp(
-      targetPos,
-      animateTo.z === -500 ? 0.01 : 0.15, // Adjust lerp speed based on z position
-    );
+    meshRef.current.position.lerp(targetPos, 0.15);
 
     // Scales boxes up to custom scale if provided, else default 3
-    // Reuse Vector3 object to avoid memory allocation every frame
     const scaleValue = scale || 3;
     targetScaleRef.current.set(scaleValue, scaleValue, scaleValue);
-    meshRef.current.scale.lerp(
-      targetScaleRef.current,
-      animateTo.z === -500 ? 0.01 : 0.025, // Adjust lerp speed based on z position
-    );
+    meshRef.current.scale.lerp(targetScaleRef.current, 0.08);
 
     // Rotates boxes around themselves
     meshRef.current.rotation.x = meshRef.current.rotation.x + 0.005;
