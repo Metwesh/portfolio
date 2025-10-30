@@ -27,4 +27,6 @@ const accentColors = [
 
 const mainLogoPath = "./m-logo/main-logo.gltf";
 
-export { navLinks, accentColors, mainLogoPath };
+const storageKey = "portfolio_user_id";
+
+export { navLinks, accentColors, mainLogoPath, storageKey };
