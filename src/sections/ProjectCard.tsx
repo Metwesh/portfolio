@@ -1,5 +1,6 @@
 import { TagsPopover } from "../components/TagsPopover";
 import type { Project } from "../constants/projects";
+import { cn } from "../lib/utils";
 
 interface ProjectCardProps {
   project: Project;
@@ -26,9 +27,10 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
           />
 
           <a
-            className={`relative block rounded-[22px] border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl ${
-              isClickable ? "cursor-pointer" : ""
-            }`}
+            className={cn(
+              "relative block rounded-[22px] border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl",
+              isClickable && "cursor-pointer",
+            )}
             href={project.link}
             target="_blank"
             rel="noopener noreferrer"
@@ -57,35 +59,36 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
               }}
             />
 
-            {/* Clickable indicator - more visible */}
-            {isClickable && (
-              <div className="absolute top-4 right-4 z-20 flex items-center gap-2 rounded-full border border-white/20 bg-white/20 px-3 py-2 backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:border-white/40 group-hover:bg-white/30">
-                <span className="text-xs font-semibold text-white/90">
-                  Visit
-                </span>
-                <svg
-                  className="h-4 w-4 text-white transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-              </div>
-            )}
-
             <div className="relative grid grid-cols-1 items-center gap-6 p-4 md:grid-cols-12 md:gap-8 md:p-6">
               {/* Image */}
               <div
-                className={
-                  isEven ? "md:col-span-7" : "md:order-2 md:col-span-7"
-                }
+                className={cn(
+                  "relative",
+                  isEven ? "md:col-span-7" : "md:order-2 md:col-span-7",
+                )}
               >
+                {/* Clickable indicator - positioned on image */}
+                {isClickable && (
+                  <div className="absolute top-4 right-4 z-20 flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-3 py-2 backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:border-white/40 group-hover:bg-black/60">
+                    <span className="text-xs font-semibold text-white">
+                      Visit
+                    </span>
+                    <svg
+                      className="h-4 w-4 text-white transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                  </div>
+                )}
+
                 <div className="relative overflow-hidden rounded-xl border border-white/10 transition-all duration-500 group-hover:border-white/20">
                   {project.image && (
                     <>
@@ -122,11 +125,12 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
                       style={{ background: project.color }}
                     />
                     <div
-                      className={`relative flex h-20 w-20 items-center justify-center rounded-xl border p-1 transition-all duration-500 group-hover:scale-105 ${
+                      className={cn(
+                        "relative flex h-20 w-20 items-center justify-center rounded-xl border p-1 transition-all duration-500 group-hover:scale-105",
                         project.darkLogo
                           ? "border-white/30 bg-white/95 group-hover:border-white/40 group-hover:bg-white"
-                          : "border-white/10 bg-white/5 backdrop-blur-sm group-hover:border-white/20 group-hover:bg-white/10"
-                      }`}
+                          : "border-white/10 bg-white/5 backdrop-blur-sm group-hover:border-white/20 group-hover:bg-white/10",
+                      )}
                     >
                       {project.logo ? (
                         <div className="relative h-full w-full">
@@ -191,26 +195,6 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
                       visibleCount={4}
                       projectColor={project.color}
                     />
-                  </div>
-                )}
-
-                {/* Source code button - prevent click propagation */}
-                {project.source_code_link && (
-                  <div className="mt-6" onClick={(e) => e.stopPropagation()}>
-                    <a
-                      href={project.source_code_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block rounded-xl border px-5 py-3 font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                      style={{
-                        borderColor: project.color,
-                        color: project.color,
-                        backgroundColor:
-                          `${project.color}15` as unknown as string,
-                      }}
-                    >
-                      Source Code
-                    </a>
                   </div>
                 )}
               </div>

@@ -10,6 +10,7 @@ import {
 } from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { cn } from "../lib/utils";
 
 export function TechStacksSection() {
   const prefersReducedMotion = useReducedMotion();
@@ -46,11 +47,12 @@ export function TechStacksSection() {
       </div>
       <div
         ref={targetRef}
-        className={`scroll-mt-18 ${
+        className={cn(
+          "scroll-mt-18",
           !isList
             ? "-mx-4 h-[520px] w-screen md:h-[650px] lg:h-[750px]"
-            : "w-full max-w-6xl"
-        }`}
+            : "w-full max-w-6xl",
+        )}
         id="tech-stacks-container"
       >
         {isList ? (
@@ -60,13 +62,11 @@ export function TechStacksSection() {
         )}
       </div>
       <div className="mx-8 mt-2 grid w-full items-center gap-8 md:grid-cols-3 md:gap-4">
-        <a
+        <ScrollHelper
           href={navLinks[3].href}
-          aria-label="Scroll to projects"
+          ariaLabel="Scroll to projects"
           className="mx-auto flex w-fit justify-center md:col-start-2 md:col-end-3"
-        >
-          <ScrollHelper />
-        </a>
+        />
         {!prefersReducedMotion && (
           <Switch
             value={isList}

@@ -7,7 +7,7 @@ import {
   useRef,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import * as THREE from "three";
+import { Vector3 as ThreeVector3 } from "three";
 import { technologies } from "../constants/technologies";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "../shaders/FogArguments";
 import { TechBox } from "./TechBox";
@@ -32,7 +32,7 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
       const x = Math.cos(phi) * r;
       const z = Math.sin(phi) * r;
       temp.push(
-        new THREE.Vector3(
+        new ThreeVector3(
           x * SPHERE_RADIUS,
           y * SPHERE_RADIUS,
           z * SPHERE_RADIUS,
@@ -131,7 +131,7 @@ function Controls({
   isInView,
   onInteraction,
 }: {
-  points: Array<THREE.Vector3>;
+  points: Array<ThreeVector3>;
   selectedIndex: number | null;
   setSelectedIndex: (i: number | null) => void;
   isInView: boolean;
@@ -140,7 +140,7 @@ function Controls({
   // Note: offscreenPositions removed as we now use dynamic positioning
 
   // Calculate zoomed positions based on current state
-  const getBoxPosition = (originalPos: THREE.Vector3, index: number) => {
+  const getBoxPosition = (originalPos: ThreeVector3, index: number) => {
     let scale = 1; // default
 
     if (selectedIndex !== null) {

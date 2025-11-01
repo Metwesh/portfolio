@@ -1,7 +1,11 @@
 import { Float } from "@react-three/drei";
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useRef, useState, useEffect } from "react";
-import * as THREE from "three";
+import {
+  Vector3 as ThreeVector3,
+  Euler as ThreeEuler,
+  Mesh as ThreeMesh,
+} from "three";
 import BoxShader from "../shaders/BoxShader";
 
 interface TechBoxProps {
@@ -10,10 +14,10 @@ interface TechBoxProps {
     name: string;
     wip?: boolean;
   };
-  position: THREE.Vector3;
+  position: ThreeVector3;
   onClick: () => void;
   scale: number | undefined;
-  animateTo: THREE.Vector3;
+  animateTo: ThreeVector3;
   isInView: boolean;
 }
 
@@ -26,17 +30,17 @@ export function TechBox({
   isInView,
 }: TechBoxProps) {
   const [meshRotation] = useState(
-    () => new THREE.Euler(Math.random(), Math.random(), Math.random()),
+    () => new ThreeEuler(Math.random(), Math.random(), Math.random()),
   );
 
-  const meshRef = useRef<THREE.Mesh>(null);
+  const meshRef = useRef<ThreeMesh>(null);
 
   const { camera } = useThree();
 
-  const prevCameraPosition = useRef(new THREE.Vector3());
+  const prevCameraPosition = useRef(new ThreeVector3());
   const rotationSpeed = useRef(0);
   // Reuse Vector3 object instead of creating new one every frame
-  const targetScaleRef = useRef(new THREE.Vector3());
+  const targetScaleRef = useRef(new ThreeVector3());
   const hasInitialized = useRef(false);
 
   // Track touch/pointer events to distinguish between tap and drag
@@ -107,7 +111,7 @@ export function TechBox({
     // Initialize position off-screen if hasn't animated yet
     if (!hasInitialized.current && !isInView) {
       // Start position far away from center (off-screen)
-      const startPos = new THREE.Vector3(0, 0, -500);
+      const startPos = new ThreeVector3(0, 0, -500);
       meshRef.current.position.copy(startPos);
       meshRef.current.scale.set(0.1, 0.1, 0.1);
       hasInitialized.current = true;

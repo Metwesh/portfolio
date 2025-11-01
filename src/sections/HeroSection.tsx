@@ -46,13 +46,11 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
               Crafting mind-bending digital experiences.
             </span>
           </p>
-          <a
+          <ScrollHelper
             href={navLinks[0].href}
-            aria-label="Scroll to projects"
+            ariaLabel="Scroll to projects"
             className="mx-auto mt-2 flex w-fit justify-center"
-          >
-            <ScrollHelper />
-          </a>
+          />
         </div>
       </div>
     </section>

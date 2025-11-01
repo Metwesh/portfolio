@@ -4,7 +4,7 @@ import { Suspense, useRef, useEffect } from "react";
 import { AnimatedStars } from "./AnimatedStars";
 import { MLogo } from "./MLogo";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import * as THREE from "three";
+import { PerspectiveCamera as ThreePerspectiveCamera } from "three";
 
 export function MainCanvas({
   scrollY,
@@ -16,7 +16,7 @@ export function MainCanvas({
   const prefersReducedMotion = useReducedMotion();
   // Track mouse position for parallax
   const mouse = useRef({ x: 0, y: 0 });
-  const cameraRef = useRef<THREE.PerspectiveCamera>(null);
+  const cameraRef = useRef<ThreePerspectiveCamera>(null);
 
   useEffect(() => {
     // Skip mouse tracking if user prefers reduced motion
@@ -59,10 +59,7 @@ export function MainCanvas({
         }
       >
         <Suspense fallback={null}>
-          <AnimatedStars
-            scrollY={scrollY}
-            reducedMotion={prefersReducedMotion}
-          />
+          <AnimatedStars scrollY={scrollY} />
           <ambientLight intensity={0.7} />
           <directionalLight position={[5, 10, 5]} intensity={1.2} castShadow />
           <PerspectiveCamera
@@ -77,12 +74,7 @@ export function MainCanvas({
             rotationIntensity={prefersReducedMotion ? 0 : 0.8}
             floatIntensity={prefersReducedMotion ? 0 : 0.8}
           >
-            <MLogo
-              scrollY={scrollY}
-              cameraRef={cameraRef}
-              mouse={mouse}
-              reducedMotion={prefersReducedMotion}
-            />
+            <MLogo scrollY={scrollY} cameraRef={cameraRef} mouse={mouse} />
           </Float>
           <Environment preset="sunset" background={false} />
         </Suspense>

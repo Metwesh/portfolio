@@ -1,11 +1,21 @@
 import { useLoader } from "@react-three/fiber";
 import { WIP, boxBg } from "../assets";
-import * as THREE from "three";
+import {
+  Texture as ThreeTexture,
+  ClampToEdgeWrapping as ThreeClampToEdgeWrapping,
+  LinearFilter as ThreeLinearFilter,
+  CanvasTexture as ThreeCanvasTexture,
+  Color as ThreeColor,
+  ShaderMaterial as ThreeShaderMaterial,
+  type IUniform as ThreeIUniform,
+  type ShaderMaterialParameters as ThreeShaderMaterialParameters,
+  TextureLoader as ThreeTextureLoader,
+} from "three";
 import { useEffect, useMemo } from "react";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "./FogArguments";
 
 // Cache processed textures globally to avoid reprocessing the same texture multiple times
-const textureCache = new Map<string, THREE.Texture>();
+const textureCache = new Map<string, ThreeTexture>();
 
 // Detect if we're on iOS (where the texture issues occur)
 const isIOS =
@@ -13,9 +23,9 @@ const isIOS =
   (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
 
 const processTexture = (
-  texture: THREE.Texture,
+  texture: ThreeTexture,
   cacheKey: string,
-): THREE.Texture => {
+): ThreeTexture => {
   // Return cached texture if available
   if (textureCache.has(cacheKey)) {
     return textureCache.get(cacheKey)!;
@@ -23,10 +33,10 @@ const processTexture = (
 
   // On non-iOS, just configure the texture normally (much faster)
   if (!isIOS) {
-    texture.wrapS = THREE.ClampToEdgeWrapping;
-    texture.wrapT = THREE.ClampToEdgeWrapping;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
+    texture.wrapS = ThreeClampToEdgeWrapping;
+    texture.wrapT = ThreeClampToEdgeWrapping;
+    texture.minFilter = ThreeLinearFilter;
+    texture.magFilter = ThreeLinearFilter;
     texture.generateMipmaps = false;
     texture.needsUpdate = true;
     textureCache.set(cacheKey, texture);
@@ -44,11 +54,11 @@ const processTexture = (
   canvas.height = texture.image.height || 250;
   ctx.drawImage(texture.image, 0, 0, canvas.width, canvas.height);
 
-  const newTexture = new THREE.CanvasTexture(canvas);
-  newTexture.wrapS = THREE.ClampToEdgeWrapping;
-  newTexture.wrapT = THREE.ClampToEdgeWrapping;
-  newTexture.minFilter = THREE.LinearFilter;
-  newTexture.magFilter = THREE.LinearFilter;
+  const newTexture = new ThreeCanvasTexture(canvas);
+  newTexture.wrapS = ThreeClampToEdgeWrapping;
+  newTexture.wrapT = ThreeClampToEdgeWrapping;
+  newTexture.minFilter = ThreeLinearFilter;
+  newTexture.magFilter = ThreeLinearFilter;
   newTexture.generateMipmaps = false;
   newTexture.anisotropy = 0;
   newTexture.needsUpdate = true;
@@ -65,9 +75,9 @@ export default function BoxShader(props: {
   };
 }) {
   // Load the decals & backgrounds
-  const rawDecalTexture = useLoader(THREE.TextureLoader, props.data.icon);
-  const rawBackgroundTexture = useLoader(THREE.TextureLoader, boxBg);
-  const rawWipTexture = useLoader(THREE.TextureLoader, WIP);
+  const rawDecalTexture = useLoader(ThreeTextureLoader, props.data.icon);
+  const rawBackgroundTexture = useLoader(ThreeTextureLoader, boxBg);
+  const rawWipTexture = useLoader(ThreeTextureLoader, WIP);
 
   // Process textures with global caching and iOS detection
   const decalTexture = useMemo(
@@ -91,8 +101,8 @@ export default function BoxShader(props: {
     () => ({
       color:
         typeof FOG_ARGUMENTS.color === "string"
-          ? new THREE.Color(FOG_ARGUMENTS.color).toArray()
-          : new THREE.Color("#080e19").toArray(),
+          ? new ThreeColor(FOG_ARGUMENTS.color).toArray()
+          : new ThreeColor("#080e19").toArray(),
       near: FOG_ARGUMENTS.near,
       far: FOG_ARGUMENTS.far,
     }),
@@ -109,7 +119,7 @@ export default function BoxShader(props: {
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const decalMaterial = useMemo(() => {
     // Define the uniforms for the shader - initialize with actual textures for iOS compatibility
-    const decalShaderUniforms: { [uniform: string]: THREE.IUniform } = {
+    const decalShaderUniforms: { [uniform: string]: ThreeIUniform } = {
       decalTexture: { value: decalTexture },
       backgroundTexture: { value: backgroundTexture },
       wipTexture: { value: wipTexture },
@@ -122,7 +132,7 @@ export default function BoxShader(props: {
     };
 
     // Define the decal shader
-    const decalShader: THREE.ShaderMaterialParameters = {
+    const decalShader: ThreeShaderMaterialParameters = {
       uniforms: decalShaderUniforms,
       lights: true,
       fog: true,
@@ -226,7 +236,7 @@ export default function BoxShader(props: {
     };
 
     // Create and return the shader material
-    return new THREE.ShaderMaterial({
+    return new ThreeShaderMaterial({
       uniforms: decalShader.uniforms,
       vertexShader: decalShader.vertexShader,
       fragmentShader: decalShader.fragmentShader,

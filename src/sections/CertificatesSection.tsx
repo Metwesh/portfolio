@@ -1,6 +1,7 @@
 import { certificates } from "../constants/certificates";
 import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
+import { cn } from "../lib/utils";
 
 export function CertificatesSection() {
   const { targetRef, isIntersecting } = useIntersectionObserver({
@@ -44,7 +45,7 @@ export function CertificatesSection() {
             return (
               <article
                 key={cert.title}
-                className={`group relative ${gridSpan}`}
+                className={cn("group relative", gridSpan)}
                 style={{
                   opacity: isIntersecting ? 1 : 0,
                   transform: isIntersecting

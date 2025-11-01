@@ -3,6 +3,7 @@ import { projects } from "../constants/projects";
 import { breakpoints, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { ProjectCard } from "./ProjectCard";
+import { ProjectScrollbar } from "../components/ProjectScrollbar";
 
 export function ProjectsSection({ scrollY }: { scrollY: number }) {
   const { targetRef: sectionRef, isIntersecting } = useIntersectionObserver({
@@ -30,6 +31,30 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
     0,
     Math.min(projects.length, Math.round(-horizontalTranslate / 100)),
   );
+
+  // Function to scroll to a specific project
+  const scrollToProject = (targetIndex: number, smooth = true) => {
+    const element = sectionRef.current;
+    if (!element || windowWidth < breakpoints.mobile) return;
+
+    const rect = element.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const sectionHeight = rect.height;
+    const totalScrollDistance = sectionHeight - viewportHeight;
+
+    // Calculate target scroll progress (0 to 1)
+    const targetScrollProgress = targetIndex / projects.length;
+    const targetScrollAmount = targetScrollProgress * totalScrollDistance;
+
+    // Get current scroll position relative to section top
+    const sectionTop = element.offsetTop;
+    const targetScroll = sectionTop + targetScrollAmount;
+
+    window.scrollTo({
+      top: targetScroll,
+      behavior: smooth ? "smooth" : "auto",
+    });
+  };
 
   // Calculate horizontal translation based on scroll - must use effect since we read DOM
   useEffect(() => {
@@ -130,35 +155,6 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
 
       {/* Mobile: vertical stack, Desktop: horizontal scroll */}
       <div className="md:-ms-gutter flex flex-col gap-8 md:sticky md:top-0 md:h-screen md:w-screen md:flex-row md:items-center md:gap-0 md:overflow-hidden">
-        {/* Progress indicator - only on desktop */}
-        {windowWidth >= breakpoints.mobile && (
-          <div className="pointer-events-none absolute bottom-8 left-1/2 z-50 flex -translate-x-1/2 gap-2">
-            {[...Array(projects.length + 1)].map((_, index) => (
-              <div
-                key={index}
-                className="transition-all duration-600"
-                style={{
-                  width: currentProjectIndex === index ? "32px" : "8px",
-                  height: "8px",
-                  borderRadius: "4px",
-                  backgroundColor:
-                    currentProjectIndex === index
-                      ? "rgba(255, 255, 255, 0.9)"
-                      : "rgba(255, 255, 255, 0.3)",
-                }}
-                aria-label={
-                  index === 0
-                    ? "Title"
-                    : `Project ${index}: ${projects[index - 1]?.name}`
-                }
-                role="progressbar"
-                aria-valuenow={currentProjectIndex}
-                aria-valuemin={0}
-                aria-valuemax={projects.length}
-              />
-            ))}
-          </div>
-        )}
         <div
           className="flex flex-col gap-8 md:h-full md:flex-row md:items-center md:gap-0"
           style={{
@@ -192,6 +188,15 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
             <ProjectCard key={proj.name} project={proj} index={index} />
           ))}
         </div>
+
+        {/* Progress indicator / Scrollbar - only on desktop */}
+        {windowWidth >= breakpoints.mobile && (
+          <ProjectScrollbar
+            projectCount={projects.length}
+            currentIndex={currentProjectIndex}
+            onNavigate={scrollToProject}
+          />
+        )}
       </div>
     </section>
   );

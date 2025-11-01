@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { breakpoints, technologies } from "../constants";
 import { WIP } from "../assets";
+import { cn } from "../lib/utils";
 
 interface TechListProps {
   isInView: boolean;
@@ -64,9 +65,10 @@ export function TechList({ isInView }: TechListProps) {
             >
               {/* Card container with flip transform */}
               <div
-                className={`preserve-3d relative h-full w-full transform-gpu rounded-xl transition-transform duration-700 motion-reduce:transition-none ${
-                  isFlipped ? "rotate-y-180" : ""
-                }`}
+                className={cn(
+                  "preserve-3d relative h-full w-full transform-gpu rounded-xl transition-transform duration-700 motion-reduce:transition-none",
+                  isFlipped && "rotate-y-180",
+                )}
               >
                 {/* Front side */}
                 <div className="absolute inset-0 rounded-xl border border-white/30 bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-lg backdrop-blur-md transition-all duration-500 ease-out backface-hidden hover:scale-105 hover:border-cyan-400 hover:from-cyan-500/30 hover:to-blue-600/30 hover:shadow-xl hover:shadow-cyan-400/20 motion-reduce:transition-none">

@@ -61,7 +61,6 @@ export interface Project {
   darkLogo?: boolean;
   color: HexColor; // Hex color for the project card
   tags?: ProjectTag[];
-  source_code_link?: string;
   link?: string;
 }
 

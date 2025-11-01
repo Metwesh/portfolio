@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           three: ["three", "@react-three/fiber", "@react-three/drei"],
           vendor: ["react", "react-dom"],
-          gsap: ["gsap", "@react-spring/three"],
+          animation: ["@react-spring/three"],
         },
       },
     },

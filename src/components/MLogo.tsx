@@ -2,25 +2,28 @@ import { a, useSpring } from "@react-spring/three";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useLayoutEffect, useRef } from "react";
-import * as THREE from "three";
+import {
+  PerspectiveCamera as ThreePerspectiveCamera,
+  Group as ThreeGroup,
+  MeshPhysicalMaterial as ThreeMeshPhysicalMaterial,
+  Mesh as ThreeMesh,
+  Color as ThreeColor,
+} from "three";
 import { mainLogoPath } from "../constants";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 
 interface SassyMLogoProps {
   scrollY: number;
-  cameraRef: React.RefObject<THREE.PerspectiveCamera | null>;
+  cameraRef: React.RefObject<ThreePerspectiveCamera | null>;
   mouse: React.RefObject<{ x: number; y: number }>;
-  reducedMotion?: boolean;
 }
 
-export function MLogo({
-  scrollY,
-  cameraRef,
-  mouse,
-  reducedMotion = false,
-}: SassyMLogoProps) {
+export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
+  const reducedMotion = useReducedMotion();
+
   const { scene } = useGLTF(mainLogoPath);
 
-  const group = useRef<THREE.Group>(null);
+  const group = useRef<ThreeGroup>(null);
 
   // Scale and opacity - animated entrance for normal mode, instant for reduced motion
   const springConfig = useSpring({
@@ -42,12 +45,12 @@ export function MLogo({
   const { scale, opacity, position } = springConfig;
 
   // Store mesh materials for animation
-  const meshMaterialsRef = useRef<THREE.MeshPhysicalMaterial[]>([]);
+  const meshMaterialsRef = useRef<ThreeMeshPhysicalMaterial[]>([]);
 
   // Reuse color objects to avoid creating new ones every frame
-  const colorARef = useRef(new THREE.Color("#00eaff"));
-  const colorBRef = useRef(new THREE.Color("#e12afb"));
-  const targetColorRef = useRef(new THREE.Color());
+  const colorARef = useRef(new ThreeColor("#00eaff"));
+  const colorBRef = useRef(new ThreeColor("#e12afb"));
+  const targetColorRef = useRef(new ThreeColor());
 
   // Smooth scroll values for weighted/inertial feel
   // Initialize z to 0 so logo is visible on load (camera is at z=10, looking at origin)
@@ -114,20 +117,20 @@ export function MLogo({
     scene.rotation.set(-Math.PI / 2, 0, 0);
 
     // Setup materials (only needs to run once per scene)
-    const materials: THREE.MeshPhysicalMaterial[] = [];
+    const materials: ThreeMeshPhysicalMaterial[] = [];
     scene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh && (child as THREE.Mesh).material) {
-        const mesh = child as THREE.Mesh;
-        const mat = mesh.material as THREE.MeshPhysicalMaterial;
+      if ((child as ThreeMesh).isMesh && (child as ThreeMesh).material) {
+        const mesh = child as ThreeMesh;
+        const mat = mesh.material as ThreeMeshPhysicalMaterial;
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mat.metalness = 0.95;
         mat.roughness = 0.15;
         mat.clearcoat = 1;
         mat.clearcoatRoughness = 0.05;
-        mat.emissive = new THREE.Color("#00eaff");
+        mat.emissive = new ThreeColor("#00eaff");
         mat.emissiveIntensity = 0.25;
-        mat.color = new THREE.Color("#00eaff");
+        mat.color = new ThreeColor("#00eaff");
         mat.envMapIntensity = 1.5;
         materials.push(mat);
       }
@@ -141,6 +144,10 @@ export function MLogo({
       group.current.position.set(0, 0, 0);
     }
   }, [reducedMotion]);
+
+  // Cleanup: GLTFs loaded with useGLTF are cached globally, no disposal needed
+  // However, if materials are cloned, they should be disposed
+  // In this case, we're using the original materials so no cleanup needed
 
   return (
     <a.group

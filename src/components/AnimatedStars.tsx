@@ -1,19 +1,18 @@
 import { Stars } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import * as THREE from "three";
+import { Group as ThreeGroup } from "three";
 import { breakpoints } from "../constants";
+import { ShootingStars } from "./ShootingStars";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 
 interface AnimatedStarsProps {
   scrollY: number;
-  reducedMotion?: boolean;
 }
 
-export function AnimatedStars({
-  scrollY,
-  reducedMotion = false,
-}: AnimatedStarsProps) {
-  const group = useRef<THREE.Group>(null);
+export function AnimatedStars({ scrollY }: AnimatedStarsProps) {
+  const reducedMotion = useReducedMotion();
+  const group = useRef<ThreeGroup>(null);
 
   // Reduce star count on mobile devices for better performance
   // Simple calculation - no need for memoization
@@ -35,6 +34,7 @@ export function AnimatedStars({
         fade
         speed={reducedMotion ? 0 : 3}
       />
+      <ShootingStars count={20} />
     </group>
   );
 }
