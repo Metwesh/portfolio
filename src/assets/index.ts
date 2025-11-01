@@ -57,8 +57,8 @@ import WIP from "./technologies/Under-Construction.svg";
 
 // Companies
 import actLogo from "./companies/ACT.svg";
-import sideupLogo from "./companies/sideup.svg";
-import sideupWhiteLogo from "./companies/sideup-white.svg";
+import sideupLogo from "./companies/SIDEUP.svg";
+import sideupWhiteLogo from "./companies/SIDEUP-white.svg";
 import tahLogo from "./companies/TAH.svg";
 import marqLogo from "./companies/MARQ.svg";
 import dartSpaceLogo from "./companies/DArt-Space.webp";
