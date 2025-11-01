@@ -36,6 +36,8 @@ jobs:
           VITE_TEMPLATE_ID: ${{ secrets.VITE_TEMPLATE_ID }}
           VITE_PUBLIC_KEY: ${{ secrets.VITE_PUBLIC_KEY }}
           VITE_PERSONAL_EMAIL: ${{ secrets.VITE_PERSONAL_EMAIL }}
+          VITE_MIXPANEL_TOKEN: ${{ secrets.VITE_MIXPANEL_TOKEN }}
+          VITE_MIXPANEL_HOST: ${{ secrets.VITE_MIXPANEL_HOST }}
 
       - name: Upload production-ready build files 📤
         uses: actions/upload-artifact@v4
