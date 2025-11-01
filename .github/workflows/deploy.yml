@@ -9,6 +9,7 @@ jobs:
   build:
     name: Build 🛠️
     runs-on: ubuntu-latest
+    environment: github-pages
 
     steps:
       - name: Checkout repo 🛎️
@@ -32,10 +33,6 @@ jobs:
       - name: Build project 🏗️
         run: yarn build
         env:
-          VITE_SERVICE_ID: ${{ secrets.VITE_SERVICE_ID }}
-          VITE_TEMPLATE_ID: ${{ secrets.VITE_TEMPLATE_ID }}
-          VITE_PUBLIC_KEY: ${{ secrets.VITE_PUBLIC_KEY }}
-          VITE_PERSONAL_EMAIL: ${{ secrets.VITE_PERSONAL_EMAIL }}
           VITE_MIXPANEL_TOKEN: ${{ secrets.VITE_MIXPANEL_TOKEN }}
           VITE_MIXPANEL_HOST: ${{ secrets.VITE_MIXPANEL_HOST }}
 
