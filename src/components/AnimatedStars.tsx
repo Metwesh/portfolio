@@ -2,6 +2,7 @@ import { Stars } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
+import { breakpoints } from "../constants";
 
 interface AnimatedStarsProps {
   scrollY: number;
@@ -16,7 +17,7 @@ export function AnimatedStars({
 
   // Reduce star count on mobile devices for better performance
   // Simple calculation - no need for memoization
-  const starCount = window.innerWidth < 768 ? 3000 : 7500;
+  const starCount = window.innerWidth < breakpoints.mobile ? 3000 : 7500;
 
   useFrame(() => {
     if (!group.current || reducedMotion) return;

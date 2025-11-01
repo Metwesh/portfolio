@@ -1,22 +1,20 @@
 import { useState } from "react";
 import { ScrollHelper } from "../components";
-import { TechCanvas } from "../components/TechCanvas";
-import {
-  navLinks,
-  ANIMATION_CONFIG,
-  INTERSECTION_OBSERVER_CONFIG,
-} from "../constants";
 import { Switch } from "../components/Switch";
+import { TechCanvas } from "../components/TechCanvas";
 import { TechList } from "../components/TechList";
+import {
+  INTERSECTION_OBSERVER_CONFIG,
+  breakpoints,
+  navLinks,
+} from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
 export function TechStacksSection() {
   const prefersReducedMotion = useReducedMotion();
   const [isList, setIsList] = useState(
-    () =>
-      window.innerWidth < ANIMATION_CONFIG.MOBILE_BREAKPOINT ||
-      prefersReducedMotion,
+    () => window.innerWidth < breakpoints.mobile || prefersReducedMotion,
   );
 
   const { targetRef, isIntersecting } = useIntersectionObserver({
@@ -39,6 +37,7 @@ export function TechStacksSection() {
             opacity: isIntersecting ? 1 : 0,
             transform: `translateY(${isIntersecting ? 0 : 50}px) scale(${isIntersecting ? 1 : 0.9})`,
             transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            willChange: isIntersecting ? "auto" : "opacity, transform",
           }}
         >
           Tech Stacks

@@ -22,8 +22,10 @@ export function CertificatesSection() {
           className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-5xl font-black tracking-tight text-transparent md:text-6xl"
           style={{
             opacity: isIntersecting ? 1 : 0,
-            transform: `translateY(${isIntersecting ? 0 : 50}px) scale(${isIntersecting ? 1 : 0.9})`,
-            transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            transform: `translate3d(0, ${isIntersecting ? 0 : 50}px, 0) scale(${isIntersecting ? 1 : 0.9})`,
+            transition:
+              "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+            willChange: isIntersecting ? "auto" : "opacity, transform",
           }}
         >
           Certifications
@@ -46,9 +48,10 @@ export function CertificatesSection() {
                 style={{
                   opacity: isIntersecting ? 1 : 0,
                   transform: isIntersecting
-                    ? "translateY(0) rotateX(0deg)"
-                    : `translateY(${50 + index * 10}px) rotateX(15deg)`,
-                  transition: `all 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.1}s`,
+                    ? "translate3d(0, 0, 0)"
+                    : `translate3d(0, ${Math.min(30 + index * 5, 80)}px, 0)`,
+                  transition: `opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(index * 0.05, 0.4)}s, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(index * 0.05, 0.4)}s`,
+                  willChange: isIntersecting ? "auto" : "opacity, transform",
                 }}
               >
                 {/* Glow effect */}
@@ -195,9 +198,10 @@ export function CertificatesSection() {
             style={{
               opacity: isIntersecting ? 1 : 0,
               transform: isIntersecting
-                ? "translateY(0) rotateX(0deg)"
-                : `translateY(${50 + certificates.length * 10}px) rotateX(15deg)`,
-              transition: `all 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${certificates.length * 0.1}s`,
+                ? "translate3d(0, 0, 0)"
+                : `translate3d(0, ${Math.min(30 + certificates.length * 5, 80)}px, 0)`,
+              transition: `opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(certificates.length * 0.05, 0.4)}s, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(certificates.length * 0.05, 0.4)}s`,
+              willChange: isIntersecting ? "auto" : "opacity, transform",
             }}
           >
             {/* Glow effect */}

@@ -9,7 +9,7 @@ interface TagsPopoverProps {
 
 export function TagsPopover({
   tags,
-  visibleCount = 3,
+  visibleCount = 4,
   projectColor,
 }: TagsPopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,14 +46,24 @@ export function TagsPopover({
                 : "rgba(255,255,255,0.1)",
               backgroundColor: isOpen ? `${projectColor}20` : "rgba(0,0,0,0.4)",
             }}
+            onClick={() => setIsOpen((prev) => !prev)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
+                e.preventDefault();
+                setIsOpen((prev) => !prev);
+              }
+            }}
+            aria-expanded={isOpen}
+            aria-label={`Show ${hiddenTags.length} more ${hiddenTags.length === 1 ? "tag" : "tags"}`}
           >
-            +{hiddenTags.length}
+            +{hiddenTags.length} {hiddenTags.length === 1 ? "tag" : "tags"}
           </button>
 
           {/* Popover */}
           <div
-            className="absolute top-full left-1/2 z-50 mt-2 -translate-x-1/2 transition-all duration-300"
+            className="absolute top-full z-50 mt-2 transition-all duration-300"
             style={{
+              left: "50%",
               opacity: isOpen ? 1 : 0,
               pointerEvents: isOpen ? "auto" : "none",
               transform: `translateX(-50%) translateY(${isOpen ? "0" : "-10px"})`,
@@ -64,7 +74,8 @@ export function TagsPopover({
               className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-t border-l backdrop-blur-xl"
               style={{
                 background: `linear-gradient(135deg, ${projectColor}20, rgba(0,0,0,0.6))`,
-                borderColor: `${projectColor}30`,
+                borderTopColor: `${projectColor}30`,
+                borderLeftColor: `${projectColor}30`,
               }}
             />
 

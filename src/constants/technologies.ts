@@ -37,6 +37,11 @@ import {
   Serverless,
   Threejs,
   TypeScript,
+  Prisma,
+  TailwindCSS,
+  Vue,
+  NestJS,
+  ClickUp,
 } from "../assets";
 
 export const technologies = [
@@ -62,7 +67,11 @@ export const technologies = [
   },
   {
     icon: BootStrap,
-    name: "BootStrap",
+    name: "Bootstrap",
+  },
+  {
+    icon: TailwindCSS,
+    name: "Tailwind CSS",
   },
   {
     icon: React,
@@ -74,11 +83,19 @@ export const technologies = [
   },
   {
     icon: NextJS,
-    name: "NEXTJS",
+    name: "Next.js",
+  },
+  {
+    icon: Vue,
+    name: "Vue",
   },
   {
     icon: Jira,
     name: "Jira",
+  },
+  {
+    icon: ClickUp,
+    name: "ClickUp",
   },
   {
     icon: Ionic,
@@ -90,15 +107,19 @@ export const technologies = [
   },
   {
     icon: Threejs,
-    name: "Threejs",
+    name: "Three.js",
   },
   {
     icon: NodeJS,
-    name: "NodeJS",
+    name: "Node.js",
   },
   {
     icon: Express,
     name: "Express",
+  },
+  {
+    icon: NestJS,
+    name: "NestJS",
   },
   {
     icon: PHP,
@@ -111,7 +132,6 @@ export const technologies = [
   {
     icon: Python,
     name: "Python",
-    wip: true,
   },
   {
     icon: Serverless,
@@ -119,7 +139,7 @@ export const technologies = [
   },
   {
     icon: RESTfulAPIs,
-    name: "RESTfulAPIs",
+    name: "RESTful APIs",
   },
   {
     icon: MachineLearning,
@@ -154,6 +174,10 @@ export const technologies = [
   {
     icon: Redis,
     name: "Redis",
+  },
+  {
+    icon: Prisma,
+    name: "Prisma",
   },
   {
     icon: Docker,

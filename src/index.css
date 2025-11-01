@@ -49,12 +49,18 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
+  --spacing-gutter: 1rem;
+
   --animate-scroll-chevrons: scroll-chevrons 1s linear infinite;
   --animate-header-gradient-move: header-gradient-move 5s ease-in-out infinite;
   --animate-header-gradient-move-pulse:
     header-gradient-move 5s ease-in-out infinite, pulse 2s infinite;
   --animate-float: float 6s ease-in-out infinite;
   --animate-float-2: float-2 6s ease-in-out infinite;
+  --animate-card-float: cardFloat 8s ease-in-out infinite;
+  --animate-card-glow: cardGlow 4s ease-in-out infinite;
+  --animate-button-shine: buttonShine 2s ease-in-out infinite;
+  --animate-status-pulse: statusPulse 2s ease-in-out infinite;
 }
 
 :root {
@@ -96,6 +102,18 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  /* Global focus styles */
+  *:focus-visible {
+    @apply rounded-md ring-2 ring-white outline-none;
+    box-shadow:
+      0 0 0 3px rgba(255, 255, 255, 0.8),
+      0 0 20px rgba(255, 255, 255, 0.6);
+    transition:
+      box-shadow 0.2s ease-in-out,
+      outline 0.2s ease-in-out;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;
@@ -265,6 +283,47 @@
     50% {
       opacity: 1;
       transform: scale(1.1);
+    }
+  }
+
+  @keyframes cardFloat {
+    0%,
+    100% {
+      transform: translateY(0px) rotateX(0deg);
+    }
+    50% {
+      transform: translateY(-8px) rotateX(2deg);
+    }
+  }
+
+  @keyframes cardGlow {
+    0%,
+    100% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  @keyframes buttonShine {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes statusPulse {
+    0%,
+    100% {
+      opacity: 0.8;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
     }
   }
 }

@@ -6,7 +6,7 @@ import icosahedronService from "./service-icons/icosahedron-service.webp";
 import origamiFlowerService from "./service-icons/origami-flower-service.webp";
 import ringService from "./service-icons/ring-service.webp";
 
-// Tech
+// Technologies
 import HTML5 from "./technologies/HTML5.svg";
 import CSS3 from "./technologies/CSS3.svg";
 import JavaScript from "./technologies/JavaScript.svg";
@@ -45,16 +45,27 @@ import NextJS from "./technologies/Next-js.svg";
 import Ionic from "./technologies/Ionic.svg";
 import Jira from "./technologies/Jira.svg";
 import Firebase from "./technologies/Firebase.svg";
+import Prisma from "./technologies/Prisma.svg";
+import TailwindCSS from "./technologies/Tailwind.svg";
+import Vue from "./technologies/Vue.svg";
+import NestJS from "./technologies/NestJS.svg";
+import ClickUp from "./technologies/ClickUp.svg";
 
 // Extras
 import boxBg from "./technologies/Box-Bg.svg";
 import WIP from "./technologies/Under-Construction.svg";
 
 // Companies
-import act from "./companies/ACT.svg";
-import sideup from "./companies/sideup.svg";
-import sideupWhite from "./companies/sideup-white.svg";
-import tah from "./companies/tah.svg";
+import actLogo from "./companies/ACT.svg";
+import sideupLogo from "./companies/SIDEUP.svg";
+import sideupWhiteLogo from "./companies/SIDEUP-white.svg";
+import tahLogo from "./companies/TAH.svg";
+import marqLogo from "./companies/MARQ.svg";
+import dartSpaceLogo from "./companies/DArt-Space.webp";
+import aradyMisrLogo from "./companies/Arady-Misr.svg";
+import beltoneLogo from "./companies/Beltone.svg";
+import brgrLogo from "./companies/BRGR.webp";
+import amanLogo from "./companies/Aman.webp";
 
 // Projects
 import bookRentalProject from "./projects/Graduation Website.webp";
@@ -97,10 +108,10 @@ export {
   icosahedronService,
   origamiFlowerService,
   ringService,
-  sideup,
-  sideupWhite,
-  act,
-  tah,
+  sideupLogo,
+  sideupWhiteLogo,
+  actLogo,
+  tahLogo,
   bookRentalProject,
   clinicWebsite,
   budgetApp,
@@ -169,4 +180,15 @@ export {
   aradyMisrCms,
   marqCrm,
   BRGRSpinTheWheel,
+  Prisma,
+  TailwindCSS,
+  Vue,
+  NestJS,
+  ClickUp,
+  marqLogo,
+  aradyMisrLogo,
+  dartSpaceLogo,
+  beltoneLogo,
+  brgrLogo,
+  amanLogo,
 };

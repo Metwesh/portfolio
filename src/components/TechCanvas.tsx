@@ -43,24 +43,50 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
   }, []);
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [showHint, setShowHint] = useState(true);
 
   return (
-    <Canvas
-      dpr={[window.devicePixelRatio, 2]}
-      camera={{ position: [0, 0, 35], fov: 90 }}
-      frameloop={isInView ? "always" : "demand"}
-      performance={{ min: 0.5 }}
-      className="cursor-grab active:cursor-grabbing"
-      style={{ touchAction: "none" }}
-    >
-      <Controls
-        points={points}
-        selectedIndex={selectedIndex}
-        setSelectedIndex={setSelectedIndex}
-        isInView={isInView}
-      />
-      <ControlsReset isInView={isInView} />
-    </Canvas>
+    <div className="relative h-full w-full">
+      <Canvas
+        dpr={[window.devicePixelRatio, 2]}
+        camera={{ position: [0, 0, 35], fov: 90 }}
+        frameloop={isInView ? "always" : "demand"}
+        performance={{ min: 0.5 }}
+        className="cursor-grab active:cursor-grabbing"
+        style={{ touchAction: "none" }}
+      >
+        <Controls
+          points={points}
+          selectedIndex={selectedIndex}
+          setSelectedIndex={setSelectedIndex}
+          isInView={isInView}
+          onInteraction={() => setShowHint(false)}
+        />
+        <ControlsReset isInView={isInView} />
+      </Canvas>
+
+      {/* Hint overlay */}
+      {showHint && selectedIndex === null && (
+        <div className="animate-fade-in-up pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2">
+          <div className="relative flex items-center gap-2 rounded-full border border-white/10 bg-gradient-to-r from-white/5 to-white/10 px-5 py-2.5 backdrop-blur-sm">
+            <svg
+              className="h-4 w-4 animate-pulse text-cyan-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <p className="text-xs font-medium text-white/80 md:text-sm">
+              Click to explore
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -103,11 +129,13 @@ function Controls({
   selectedIndex,
   setSelectedIndex,
   isInView,
+  onInteraction,
 }: {
   points: Array<THREE.Vector3>;
   selectedIndex: number | null;
   setSelectedIndex: (i: number | null) => void;
   isInView: boolean;
+  onInteraction: () => void;
 }) {
   // Note: offscreenPositions removed as we now use dynamic positioning
 
@@ -136,6 +164,7 @@ function Controls({
   };
 
   const handleBoxClick = (index: number) => () => {
+    onInteraction();
     setSelectedIndex(index);
   };
 

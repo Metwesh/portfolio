@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { technologies } from "../constants";
+import { breakpoints, technologies } from "../constants";
 import { WIP } from "../assets";
 
 interface TechListProps {
@@ -7,11 +7,11 @@ interface TechListProps {
 }
 
 const getColumnCount = (width: number): number => {
-  if (width >= 1024)
+  if (width >= breakpoints.tablet)
     return 5; // lg
-  else if (width >= 768)
+  else if (width >= breakpoints.mobile)
     return 4; // md
-  else if (width >= 640)
+  else if (width >= breakpoints.smallMobile)
     return 3; // sm
   else return 2; // default
 };
@@ -41,7 +41,7 @@ export function TechList({ isInView }: TechListProps) {
     });
   };
   return (
-    <div className="relative mx-auto w-full max-w-4xl p-6">
+    <div className="relative mx-auto w-full max-w-4xl md:p-6">
       <div className="relative z-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {technologies.map((tech, index) => {
           const isFlipped = flippedCards.has(index);
@@ -59,7 +59,6 @@ export function TechList({ isInView }: TechListProps) {
                 transform: isInView
                   ? "translate3d(0, 0, 0) scale(1)"
                   : "translate3d(0, 50px, 0) scale(0.8)",
-                willChange: isInView ? "auto" : "transform, opacity",
                 transition: `opacity 0.6s ease-out ${staggerDelay}s, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${staggerDelay}s`,
               }}
             >

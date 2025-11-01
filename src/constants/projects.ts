@@ -14,8 +14,17 @@ import {
   sideupDashboardV2,
   sideupDashboardV3,
   BRGRSpinTheWheel,
+  sideupLogo,
+  tahLogo,
+  marqLogo,
+  aradyMisrLogo,
+  dartSpaceLogo,
+  beltoneLogo,
+  brgrLogo,
+  amanLogo,
   // taskHandlerApp,
 } from "../assets";
+import { accentColors } from "./misc";
 
 // Valid tag color names
 export type TagColor =
@@ -48,6 +57,8 @@ export interface Project {
   name: string;
   description: string;
   image: string;
+  logo?: string; // Optional logo for the project
+  darkLogo?: boolean;
   color: HexColor; // Hex color for the project card
   tags?: ProjectTag[];
   source_code_link?: string;
@@ -272,8 +283,10 @@ export const projects: readonly Project[] = [
         color: "green",
       },
     ],
+    logo: sideupLogo,
+    darkLogo: true,
     image: sideupDashboardV2,
-    color: "#8b5cf6",
+    color: accentColors.blue,
   },
   {
     name: "Aman Accept Dashboard",
@@ -313,8 +326,9 @@ export const projects: readonly Project[] = [
         color: "blue",
       },
     ],
+    logo: amanLogo,
     image: amanDashboard,
-    color: "#22c55e",
+    color: accentColors.darkBlue,
     link: "https://www.amanaccept.com/",
   },
   {
@@ -375,8 +389,10 @@ export const projects: readonly Project[] = [
         color: "green",
       },
     ],
+    logo: sideupLogo,
+    darkLogo: true,
     image: sideupDashboardV3,
-    color: "#f59e0b",
+    color: accentColors.amber,
   },
   {
     name: "BELTONE Holding Company Site",
@@ -408,8 +424,10 @@ export const projects: readonly Project[] = [
         color: "blue",
       },
     ],
+    logo: beltoneLogo,
+    darkLogo: true,
     image: beltoneHolding,
-    color: "#0ea5e9",
+    color: accentColors.yellow,
     link: "https://www.beltoneholding.com/",
   },
   {
@@ -438,15 +456,14 @@ export const projects: readonly Project[] = [
         color: "green",
       },
     ],
+    logo: dartSpaceLogo,
     image: dartSpace,
-    color: "#e11d48",
+    color: accentColors.rose,
   },
   {
     name: "MARQ CRM",
     description:
       "A Next.js-based CRM for The MARQ communities, featuring advanced caching, analytics, and real-time updates.",
-    image: marqCrm,
-    color: "#7c3aed",
     tags: [
       {
         name: "TypeScript",
@@ -473,13 +490,15 @@ export const projects: readonly Project[] = [
         color: "orange",
       },
     ],
+    logo: marqLogo,
+    darkLogo: true,
+    image: marqCrm,
+    color: accentColors.violet,
   },
   {
     name: "Address Online",
     description:
       "A Next.js-powered e-commerce platform built for The Address Holding, featuring interactive maps, property listings, and multi-language support with advanced UI components.",
-    image: addOn,
-    color: "#ec4899",
     tags: [
       {
         name: "Next.js",
@@ -522,13 +541,14 @@ export const projects: readonly Project[] = [
         color: "yellow",
       },
     ],
+    logo: tahLogo,
+    image: addOn,
+    color: accentColors.deepRose,
   },
   {
     name: "Address Online CMS",
     description:
       "A comprehensive admin dashboard built with Next.js featuring rich text editing, data visualization, file management, and advanced table functionality for property management.",
-    image: addOnCms,
-    color: "#ff9900",
     tags: [
       {
         name: "Next.js",
@@ -575,13 +595,18 @@ export const projects: readonly Project[] = [
         color: "red",
       },
     ],
+    logo: tahLogo,
+    image: addOnCms,
+    color: accentColors.red,
   },
   {
     name: "BRGR Spin The Wheel",
     description:
       "A spin the wheel game built with Next.js, NextAuth, Prisma, and TailwindCSS, featuring authentication, database integration, and responsive design.",
+    logo: brgrLogo,
+    darkLogo: true,
     image: BRGRSpinTheWheel,
-    color: "#22c55e",
+    color: accentColors.lightAmber,
     tags: [
       {
         name: "Next.js",
@@ -625,8 +650,6 @@ export const projects: readonly Project[] = [
     name: "Arady Misr Platform",
     description:
       "A Next.js-powered e-commerce platform for selling land and properties, featuring Google Maps integration, internationalization, and modern UI components for property listings.",
-    image: aradyMisr,
-    color: "#3b82f6",
     tags: [
       {
         name: "Next.js",
@@ -669,13 +692,15 @@ export const projects: readonly Project[] = [
         color: "yellow",
       },
     ],
+    logo: aradyMisrLogo,
+    darkLogo: true,
+    image: aradyMisr,
+    color: accentColors.green,
   },
   {
     name: "Arady Misr CMS",
     description:
       "A comprehensive content management system for the Arady Misr platform, featuring rich text editing, data tables, file management, and Google Maps integration with advanced admin capabilities.",
-    image: aradyMisrCms,
-    color: "#00eaff",
     tags: [
       {
         name: "Next.js",
@@ -722,5 +747,9 @@ export const projects: readonly Project[] = [
         color: "red",
       },
     ],
+    logo: aradyMisrLogo,
+    darkLogo: true,
+    image: aradyMisrCms,
+    color: accentColors.cyan,
   },
 ];

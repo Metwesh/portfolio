@@ -24,6 +24,10 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
                 scrollY / (initialHeight * ANIMATION_CONFIG.HERO_FADE_FACTOR),
                 1,
               ),
+            willChange:
+              scrollY > 0 && scrollY < initialHeight
+                ? "transform, opacity"
+                : "auto",
           }),
         }}
       >

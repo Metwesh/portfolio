@@ -4,7 +4,7 @@ import mixpanel from "mixpanel-browser";
 import App from "./App.tsx";
 import { ErrorBoundary } from "./components";
 import "./index.css";
-import { storageKey } from "./constants/misc.ts";
+import { storageKey } from "./constants/misc";
 
 // Initialize Mixpanel
 mixpanel.init(import.meta.env.VITE_MIXPANEL_TOKEN, {

@@ -3,6 +3,7 @@ export { ErrorBoundary } from "./ErrorBoundary";
 export { Footer } from "./Footer";
 export { Header } from "./Header";
 export { MainCanvas } from "./MainCanvas";
+export { MobileMenu } from "./MobileMenu";
 export { MLogo } from "./MLogo";
 export { NotFound } from "./NotFound";
 export { ScrollHelper } from "./ScrollHelper";

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { createPortal } from "react-dom";
 import { navLinks, ANIMATION_CONFIG } from "../constants";
+import { MobileMenu } from "./MobileMenu";
 
 export function Header({ scrollY }: { scrollY: number }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -60,7 +60,7 @@ export function Header({ scrollY }: { scrollY: number }) {
           />
         </svg>
         <span
-          className={`bg-gradient-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent drop-shadow-lg transition-opacity delay-1000 duration-1000 md:text-3xl ${
+          className={`bg-gradient-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent drop-shadow-lg transition-opacity delay-1000 duration-1000 group-focus-visible:opacity-100 group-focus-visible:delay-0 group-focus-visible:duration-300 md:text-3xl ${
             headerBg ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -104,39 +104,7 @@ export function Header({ scrollY }: { scrollY: number }) {
         ))}
       </nav>
       {/* Mobile nav overlay as portal, always mounted for animation */}
-      {createPortal(
-        <div
-          aria-modal="true"
-          role="dialog"
-          className={`fixed inset-0 z-10 flex h-screen w-screen flex-col items-center justify-center gap-10 bg-black/80 text-2xl font-bold text-white backdrop-blur-xl transition-all duration-500 md:hidden ${
-            menuOpen
-              ? "pointer-events-auto opacity-100"
-              : "pointer-events-none opacity-0"
-          } `}
-          style={{ transitionProperty: "opacity, transform" }}
-        >
-          {navLinks.map((link, index) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={handleNavClick}
-              className={`focus:ring-none focus rounded transition-all duration-500 hover:text-cyan-400 focus:text-cyan-400 focus:outline-none ${
-                menuOpen
-                  ? "translate-y-0 opacity-100"
-                  : "pointer-events-none translate-y-8 opacity-0"
-              }`}
-              style={{
-                transitionDelay: menuOpen ? `${index * 80 + 120}ms` : "0ms",
-              }}
-              tabIndex={menuOpen ? 0 : -1}
-              id={index === 0 ? "mobile-nav-first-link" : undefined}
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>,
-        document.body,
-      )}
+      <MobileMenu isOpen={menuOpen} onNavClick={handleNavClick} />
     </header>
   );
 }

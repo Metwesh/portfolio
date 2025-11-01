@@ -1,13 +1,14 @@
-import { act, sideupWhite, tah } from "../assets";
+import { actLogo, sideupWhiteLogo, tahLogo } from "../assets";
+import { accentColors } from "./misc";
 
 export const experiences = [
   {
     title: "Frontend Engineer",
     company: "The Address Holding",
     link: "https://theaddressholding.com/",
-    icon: tah,
+    icon: tahLogo,
     date: "Nov 2024 - Present",
-    color: "#fde047",
+    color: accentColors.yellow,
     points: [
       {
         title: "Internal system development",
@@ -35,9 +36,9 @@ export const experiences = [
     title: "Senior Frontend Engineer",
     company: "SIDEUP",
     link: "https://eg.sideup.co/",
-    icon: sideupWhite,
+    icon: sideupWhiteLogo,
     date: "Dec 2023 - Nov 2024",
-    color: "#ff00cc",
+    color: accentColors.magenta,
     points: [
       {
         title: "Led and mentored junior engineers",
@@ -65,9 +66,9 @@ export const experiences = [
     title: "Frontend Engineer",
     company: "SIDEUP",
     link: "https://eg.sideup.co/",
-    icon: sideupWhite,
+    icon: sideupWhiteLogo,
     date: "Feb 2023 - Dec 2023",
-    color: "#ec4899",
+    color: accentColors.pink,
     points: [
       {
         title: "Led frontend development",
@@ -95,9 +96,9 @@ export const experiences = [
     title: "Interface Specialist",
     company: "Advanced Computer Technologies (ACT)",
     link: "https://www.act.eg/",
-    icon: act,
+    icon: actLogo,
     date: "Feb 2022 - Feb 2023",
-    color: "#ff9900",
+    color: accentColors.orange,
     points: [
       {
         title: "System Integration Expertise",

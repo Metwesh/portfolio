@@ -47,7 +47,7 @@ export default function App() {
 
   return (
     <>
-      <div className="px-4">
+      <div className="px-gutter">
         {/* Skip to content for accessibility */}
         <SkipToContent />
 
@@ -63,7 +63,7 @@ export default function App() {
           </Suspense>
 
           <Suspense fallback={null}>
-            <ProjectsSection />
+            <ProjectsSection scrollY={scrollY} />
           </Suspense>
 
           <Suspense fallback={null}>

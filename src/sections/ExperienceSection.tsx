@@ -34,6 +34,7 @@ export function ExperienceSection() {
             opacity: isIntersecting ? 1 : 0,
             transform: `translateY(${isIntersecting ? 0 : 50}px) scale(${isIntersecting ? 1 : 0.9})`,
             transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            willChange: isIntersecting ? "auto" : "opacity, transform",
           }}
         >
           Experience
@@ -55,6 +56,7 @@ export function ExperienceSection() {
             transition: isIntersecting
               ? `transform 3s cubic-bezier(0.34, 1.56, 0.64, 1) ${timelineDelay}s`
               : "transform 0.3s ease-out",
+            willChange: isIntersecting ? "auto" : "transform",
           }}
         />
         <div
@@ -68,6 +70,7 @@ export function ExperienceSection() {
             transition: isIntersecting
               ? `transform 3s cubic-bezier(0.34, 1.56, 0.64, 1) ${timelineDelay}s`
               : "transform 0.3s ease-out",
+            willChange: isIntersecting ? "auto" : "transform",
           }}
         />
 
@@ -85,6 +88,7 @@ export function ExperienceSection() {
                     ? "translateY(0) scale(1) rotate(0deg)"
                     : `translateY(100px) scale(0.85) rotate(${isEven ? -ANIMATION_CONFIG.EXPERIENCE_ROTATION_ANGLE : ANIMATION_CONFIG.EXPERIENCE_ROTATION_ANGLE}deg)`,
                   transition: `all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) ${ANIMATION_CONFIG.EXPERIENCE_BASE_DELAY + index * ANIMATION_CONFIG.EXPERIENCE_STAGGER_DELAY}s`,
+                  willChange: isIntersecting ? "auto" : "opacity, transform",
                 }}
               >
                 {/* Logo with enhanced hover */}
