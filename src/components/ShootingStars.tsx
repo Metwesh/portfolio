@@ -111,14 +111,18 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
 
   // Spawn shooting stars at random intervals
   useEffect(() => {
-    if (reducedMotion || !groupRef.current) return;
+    if (reducedMotion) return;
 
     const spawnStar = () => {
+      // Defensive check: ensure groupRef is a valid THREE.Group
+      if (!groupRef.current || typeof groupRef.current.add !== "function")
+        return;
+
       const activeStars = starsRef.current.filter(
         (star) => star.lifetime < star.maxLifetime,
       );
 
-      if (activeStars.length < count && groupRef.current) {
+      if (activeStars.length < count) {
         const newStar = createShootingStar();
         const starGroup = createStarGroup(newStar);
         newStar.groupRef = starGroup;
@@ -127,21 +131,32 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
       }
     };
 
-    // Spawn initial stars
-    for (let i = 0; i < Math.min(count, 2); i++) {
-      spawnStar();
-    }
+    // Delay initial spawn to ensure Three.js group is ready
+    const initialSpawn = setTimeout(() => {
+      for (let i = 0; i < Math.min(count, 2); i++) {
+        spawnStar();
+      }
+    }, 100);
 
     // Spawn new stars at intervals
     const spawnInterval = setInterval(spawnStar, 3000); // Spawn every 3 seconds
 
-    return () => clearInterval(spawnInterval);
+    return () => {
+      clearTimeout(initialSpawn);
+      clearInterval(spawnInterval);
+    };
   }, [count, reducedMotion]);
 
   // Animate stars using direct mutation - no React re-renders
   // This is the proper way to handle animations in React Three Fiber
   useFrame((_, delta) => {
-    if (reducedMotion || !groupRef.current) return;
+    if (
+      reducedMotion ||
+      !groupRef.current ||
+      typeof groupRef.current.remove !== "function"
+    ) {
+      return;
+    }
 
     const stars = starsRef.current;
     const newStars: ShootingStar[] = [];
