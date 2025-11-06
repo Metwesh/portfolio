@@ -1,17 +1,17 @@
 import { useLoader } from "@react-three/fiber";
-import { WIP, boxBg } from "../assets";
+import { useEffect, useMemo } from "react";
 import {
-  Texture as ThreeTexture,
-  ClampToEdgeWrapping as ThreeClampToEdgeWrapping,
-  LinearFilter as ThreeLinearFilter,
   CanvasTexture as ThreeCanvasTexture,
+  ClampToEdgeWrapping as ThreeClampToEdgeWrapping,
   Color as ThreeColor,
-  ShaderMaterial as ThreeShaderMaterial,
   type IUniform as ThreeIUniform,
+  LinearFilter as ThreeLinearFilter,
+  ShaderMaterial as ThreeShaderMaterial,
   type ShaderMaterialParameters as ThreeShaderMaterialParameters,
+  type Texture as ThreeTexture,
   TextureLoader as ThreeTextureLoader,
 } from "three";
-import { useEffect, useMemo } from "react";
+import { WIP, boxBg } from "../assets";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "./FogArguments";
 
 // Cache processed textures globally to avoid reprocessing the same texture multiple times
@@ -24,11 +24,11 @@ const isIOS =
 
 const processTexture = (
   texture: ThreeTexture,
-  cacheKey: string,
+  cacheKey: string
 ): ThreeTexture => {
   // Return cached texture if available
   if (textureCache.has(cacheKey)) {
-    return textureCache.get(cacheKey)!;
+    return textureCache.get(cacheKey) ?? texture;
   }
 
   // On non-iOS, just configure the texture normally (much faster)
@@ -82,15 +82,15 @@ export default function BoxShader(props: {
   // Process textures with global caching and iOS detection
   const decalTexture = useMemo(
     () => processTexture(rawDecalTexture, props.data.icon),
-    [rawDecalTexture, props.data.icon],
+    [rawDecalTexture, props.data.icon]
   );
   const backgroundTexture = useMemo(
     () => processTexture(rawBackgroundTexture, "background"),
-    [rawBackgroundTexture],
+    [rawBackgroundTexture]
   );
   const wipTexture = useMemo(
     () => processTexture(rawWipTexture, "wip"),
-    [rawWipTexture],
+    [rawWipTexture]
   );
 
   // Define the options for the fog effect in the shader.
@@ -106,7 +106,7 @@ export default function BoxShader(props: {
       near: FOG_ARGUMENTS.near,
       far: FOG_ARGUMENTS.far,
     }),
-    [],
+    []
   );
 
   // Define the uniforms for the shader. These are the variables that can be accessed from both the vertex and fragment shaders.

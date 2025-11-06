@@ -7,7 +7,7 @@
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
-  wait: number,
+  wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -27,7 +27,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
  */
 export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
-  limit: number,
+  limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean;
 
@@ -35,7 +35,9 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
+      setTimeout(() => {
+        inThrottle = false;
+      }, limit);
     }
   };
 }
@@ -45,7 +47,7 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
  */
 export const requestIdleCallback =
   window.requestIdleCallback ||
-  function (cb: IdleRequestCallback) {
+  ((cb: IdleRequestCallback) => {
     const start = Date.now();
     return setTimeout(() => {
       cb({
@@ -53,13 +55,13 @@ export const requestIdleCallback =
         timeRemaining: () => Math.max(0, 50 - (Date.now() - start)),
       });
     }, 1);
-  };
+  });
 
 /**
  * Cancel idle callback with fallback
  */
 export const cancelIdleCallback =
   window.cancelIdleCallback ||
-  function (id: number) {
+  ((id: number) => {
     clearTimeout(id);
-  };
+  });

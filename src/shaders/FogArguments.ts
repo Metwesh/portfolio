@@ -1,7 +1,7 @@
 import {
   Color as ThreeColor,
-  Vector3 as ThreeVector3,
   type ColorRepresentation as ThreeColorRepresentation,
+  Vector3 as ThreeVector3,
 } from "three";
 
 export const FOG_ARGUMENTS: {

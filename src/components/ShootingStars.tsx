@@ -1,13 +1,13 @@
 import { useFrame } from "@react-three/fiber";
-import { useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
-  Vector3 as ThreeVector3,
-  Group as ThreeGroup,
-  SphereGeometry as ThreeSphereGeometry,
   CylinderGeometry as ThreeCylinderGeometry,
+  Group as ThreeGroup,
   MeshBasicMaterial as ThreeMeshBasicMaterial,
   Mesh as ThreeMeshType,
   Quaternion as ThreeQuaternion,
+  SphereGeometry as ThreeSphereGeometry,
+  Vector3 as ThreeVector3,
 } from "three";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
@@ -32,7 +32,7 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
   const groupRef = useRef<ThreeGroup>(null);
 
   // Create a new shooting star
-  const createShootingStar = (): ShootingStar => {
+  const createShootingStar = useCallback((): ShootingStar => {
     // Random position in view
     const x = (Math.random() - 0.5) * 100;
     const y = (Math.random() - 0.5) * 50 + 20; // Bias towards upper area
@@ -52,10 +52,10 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
       maxLifetime: Math.random() * 2 + 2, // 2-4 seconds
       groupRef: null,
     };
-  };
+  }, []);
 
   // Helper to create Three.js group for a star
-  const createStarGroup = (star: ShootingStar): ThreeGroup => {
+  const createStarGroup = useCallback((star: ShootingStar): ThreeGroup => {
     const group = new ThreeGroup();
     group.position.copy(star.position);
 
@@ -90,7 +90,7 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
     const axis = new ThreeVector3(0, 1, 0);
     const quaternion = new ThreeQuaternion().setFromUnitVectors(
       axis,
-      direction,
+      direction
     );
     trailMesh.quaternion.copy(quaternion);
     group.add(trailMesh);
@@ -107,7 +107,7 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
     group.add(glowMesh);
 
     return group;
-  };
+  }, []);
 
   // Spawn shooting stars at random intervals
   useEffect(() => {
@@ -119,7 +119,7 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
         return;
 
       const activeStars = starsRef.current.filter(
-        (star) => star.lifetime < star.maxLifetime,
+        (star) => star.lifetime < star.maxLifetime
       );
 
       if (activeStars.length < count) {
@@ -145,7 +145,7 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
       clearTimeout(initialSpawn);
       clearInterval(spawnInterval);
     };
-  }, [count, reducedMotion]);
+  }, [count, reducedMotion, createShootingStar, createStarGroup]);
 
   // Animate stars using direct mutation - no React re-renders
   // This is the proper way to handle animations in React Three Fiber
@@ -213,7 +213,9 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
               const mesh = child as ThreeMeshType;
               mesh.geometry?.dispose();
               if (Array.isArray(mesh.material)) {
-                mesh.material.forEach((mat) => mat.dispose());
+                for (const mat of mesh.material) {
+                  mat.dispose();
+                }
               } else {
                 mesh.material?.dispose();
               }

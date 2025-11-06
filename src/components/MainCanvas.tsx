@@ -1,10 +1,10 @@
 import { Environment, Float, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useRef, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
+import type { PerspectiveCamera as ThreePerspectiveCamera } from "three";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { AnimatedStars } from "./AnimatedStars";
 import { MLogo } from "./MLogo";
-import { useReducedMotion } from "../hooks/useReducedMotion";
-import { PerspectiveCamera as ThreePerspectiveCamera } from "three";
 
 export function MainCanvas({
   scrollY,
@@ -46,7 +46,7 @@ export function MainCanvas({
     };
   }, [prefersReducedMotion]);
   return (
-    <div className="animate-in fade-in pointer-events-none fixed inset-0 z-0 h-lvh duration-1000">
+    <div className="fade-in pointer-events-none fixed inset-0 z-0 h-lvh animate-in duration-1000">
       <Canvas
         shadows
         dpr={[window.devicePixelRatio, 2]}

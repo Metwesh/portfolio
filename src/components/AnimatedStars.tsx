@@ -1,10 +1,10 @@
 import { Stars } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import { Group as ThreeGroup } from "three";
+import type { Group as ThreeGroup } from "three";
 import { breakpoints } from "../constants";
-import { ShootingStars } from "./ShootingStars";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { ShootingStars } from "./ShootingStars";
 
 interface AnimatedStarsProps {
   scrollY: number;

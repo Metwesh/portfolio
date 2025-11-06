@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
-import { navLinks, ANIMATION_CONFIG } from "../constants";
-import { MobileMenu } from "./MobileMenu";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ANIMATION_CONFIG, navLinks } from "../constants";
 import { cn } from "../lib/utils";
+import { MobileMenu } from "./MobileMenu";
 
 export function Header({ scrollY }: { scrollY: number }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -15,11 +15,11 @@ export function Header({ scrollY }: { scrollY: number }) {
   };
 
   // Close menu on nav click (mobile) and restore focus
-  const handleNavClick = () => {
+  const handleNavClick = useCallback(() => {
     setMenuOpen(false);
     // Restore focus to menu button for better keyboard navigation
     setTimeout(() => menuButtonRef.current?.focus(), 100);
-  };
+  }, []);
 
   // Handle body scroll lock/unlock as a side effect
   useEffect(() => {
@@ -42,14 +42,14 @@ export function Header({ scrollY }: { scrollY: number }) {
       document.addEventListener("keydown", handleEscape);
       return () => document.removeEventListener("keydown", handleEscape);
     }
-  }, [menuOpen]);
+  }, [menuOpen, handleNavClick]);
 
   return (
     <header className="pointer-events-auto fixed top-0 left-0 z-40 flex w-full items-center justify-between px-4 py-4 md:px-8">
       <div
         className={cn(
-          "to-black-0 absolute inset-0 bg-gradient-to-b from-black/80 shadow-lg backdrop-blur-md transition-opacity duration-500",
-          headerBg ? "opacity-100" : "opacity-0",
+          "absolute inset-0 bg-gradient-to-b from-black/80 to-black-0 shadow-lg backdrop-blur-md transition-opacity duration-500",
+          headerBg ? "opacity-100" : "opacity-0"
         )}
       />
       <a className="group flex items-center gap-4" href="#" aria-label="Home">
@@ -65,8 +65,8 @@ export function Header({ scrollY }: { scrollY: number }) {
         </svg>
         <span
           className={cn(
-            "bg-gradient-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent drop-shadow-lg transition-opacity delay-1000 duration-1000 group-focus-visible:opacity-100 group-focus-visible:delay-0 group-focus-visible:duration-300 md:text-3xl",
-            headerBg ? "opacity-100" : "opacity-0",
+            "bg-gradient-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text font-extrabold text-2xl text-transparent tracking-tight drop-shadow-lg transition-opacity delay-1000 duration-1000 group-focus-visible:opacity-100 group-focus-visible:delay-0 group-focus-visible:duration-300 md:text-3xl",
+            headerBg ? "opacity-100" : "opacity-0"
           )}
         >
           Mohamed H. Aly
@@ -74,6 +74,7 @@ export function Header({ scrollY }: { scrollY: number }) {
       </a>
       {/* Hamburger for mobile */}
       <button
+        type="button"
         ref={menuButtonRef}
         className="fixed top-4 right-4 flex h-10 w-10 flex-col items-center justify-center shadow-lg md:hidden"
         aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -83,24 +84,24 @@ export function Header({ scrollY }: { scrollY: number }) {
         <span
           className={cn(
             "block h-0.5 w-7 rounded bg-white transition-all duration-300",
-            menuOpen ? "translate-y-1.5 rotate-45" : "",
+            menuOpen ? "translate-y-1.5 rotate-45" : ""
           )}
         />
         <span
           className={cn(
             "my-1 block h-0.5 w-7 rounded bg-white transition-all duration-300",
-            menuOpen ? "opacity-0" : "",
+            menuOpen ? "opacity-0" : ""
           )}
         />
         <span
           className={cn(
             "block h-0.5 w-7 rounded bg-white transition-all duration-300",
-            menuOpen ? "-translate-y-1.5 -rotate-45" : "",
+            menuOpen ? "-translate-y-1.5 -rotate-45" : ""
           )}
         />
       </button>
       {/* Desktop nav */}
-      <nav className="relative z-40 hidden gap-6 text-lg font-semibold md:flex">
+      <nav className="relative z-40 hidden gap-6 font-semibold text-lg md:flex">
         {navLinks.map((link) => (
           <a
             key={link.href}

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { breakpoints, technologies } from "../constants";
+import { useEffect, useState } from "react";
 import { WIP } from "../assets";
+import { breakpoints, technologies } from "../constants";
 import { cn } from "../lib/utils";
 
 interface TechListProps {
@@ -8,13 +8,10 @@ interface TechListProps {
 }
 
 const getColumnCount = (width: number): number => {
-  if (width >= breakpoints.tablet)
-    return 5; // lg
-  else if (width >= breakpoints.mobile)
-    return 4; // md
-  else if (width >= breakpoints.smallMobile)
-    return 3; // sm
-  else return 2; // default
+  if (width >= breakpoints.tablet) return 5;
+  if (width >= breakpoints.mobile) return 4;
+  if (width >= breakpoints.smallMobile) return 3;
+  return 2; // default
 };
 
 export function TechList({ isInView }: TechListProps) {
@@ -51,8 +48,9 @@ export function TechList({ isInView }: TechListProps) {
           const staggerDelay = (row + col) * 0.08; // Diagonal stagger
 
           return (
-            <div
-              key={`tech-${index}`}
+            <button
+              type="button"
+              key={`${tech.name}-${index}`}
               className="group perspective-1000 relative h-32 cursor-pointer"
               onClick={() => handleCardClick(index)}
               style={{
@@ -67,11 +65,11 @@ export function TechList({ isInView }: TechListProps) {
               <div
                 className={cn(
                   "preserve-3d relative h-full w-full transform-gpu rounded-xl transition-transform duration-700 motion-reduce:transition-none",
-                  isFlipped && "rotate-y-180",
+                  isFlipped && "rotate-y-180"
                 )}
               >
                 {/* Front side */}
-                <div className="absolute inset-0 rounded-xl border border-white/30 bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-lg backdrop-blur-md transition-all duration-500 ease-out backface-hidden hover:scale-105 hover:border-cyan-400 hover:from-cyan-500/30 hover:to-blue-600/30 hover:shadow-xl hover:shadow-cyan-400/20 motion-reduce:transition-none">
+                <div className="backface-hidden absolute inset-0 rounded-xl border border-white/30 bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-lg backdrop-blur-md transition-all duration-500 ease-out hover:scale-105 hover:border-cyan-400 hover:from-cyan-500/30 hover:to-blue-600/30 hover:shadow-cyan-400/20 hover:shadow-xl motion-reduce:transition-none">
                   {tech.wip && (
                     <div
                       className="absolute inset-0 rounded-lg opacity-60 transition-opacity duration-300 group-hover:opacity-40 motion-reduce:transition-none"
@@ -104,23 +102,23 @@ export function TechList({ isInView }: TechListProps) {
                 </div>
 
                 {/* Back side */}
-                <div className="absolute inset-0 rotate-y-180 rounded-xl border border-cyan-400/50 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 p-4 shadow-lg backdrop-blur-md backface-hidden">
+                <div className="backface-hidden absolute inset-0 rotate-y-180 rounded-xl border border-cyan-400/50 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 p-4 shadow-lg backdrop-blur-md">
                   <div className="relative z-10 flex h-full flex-col items-center justify-center space-y-2 text-center">
-                    <div className="text-lg font-bold text-cyan-100">
+                    <div className="font-bold text-cyan-100 text-lg">
                       {tech.name}
                     </div>
-                    <div className="text-xs text-cyan-200/80">
+                    <div className="text-cyan-200/80 text-xs">
                       Click to flip back
                     </div>
                     {tech.wip && (
-                      <div className="rounded-full bg-orange-500/20 px-2 py-1 text-xs text-orange-200">
+                      <div className="rounded-full bg-orange-500/20 px-2 py-1 text-orange-200 text-xs">
                         Work in Progress
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

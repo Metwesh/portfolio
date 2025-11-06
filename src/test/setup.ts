@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
-import { afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
+import { afterEach, vi } from "vitest";
 
 // Cleanup after each test
 afterEach(() => {
@@ -23,12 +23,11 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 // Mock IntersectionObserver
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: Testing purposes
 (globalThis as any).IntersectionObserver = class IntersectionObserver {
   root = null;
   rootMargin = "";
   thresholds = [];
-  constructor() {}
   disconnect() {}
   observe() {}
   takeRecords() {
@@ -38,9 +37,8 @@ Object.defineProperty(window, "matchMedia", {
 };
 
 // Mock ResizeObserver
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: Testing purposes
 (globalThis as any).ResizeObserver = class ResizeObserver {
-  constructor() {}
   disconnect() {}
   observe() {}
   unobserve() {}

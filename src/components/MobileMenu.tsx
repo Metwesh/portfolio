@@ -9,14 +9,13 @@ interface MobileMenuProps {
 
 export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
   return createPortal(
-    <div
+    <dialog
       aria-modal="true"
-      role="dialog"
       className={cn(
-        "fixed inset-0 z-10 flex h-screen w-screen flex-col items-center justify-center gap-8 bg-black/80 text-2xl font-bold text-white backdrop-blur-xl transition-[opacity,transform] duration-500 md:hidden",
+        "fixed inset-0 z-10 flex h-screen w-screen flex-col items-center justify-center gap-8 bg-black/80 font-bold text-2xl text-white backdrop-blur-xl transition-[opacity,transform] duration-500 md:hidden",
         isOpen
           ? "pointer-events-auto opacity-100"
-          : "pointer-events-none opacity-0",
+          : "pointer-events-none opacity-0"
       )}
     >
       {/* Navigation Links */}
@@ -26,10 +25,10 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
           href={link.href}
           onClick={onNavClick}
           className={cn(
-            "focus:ring-none focus rounded transition-all duration-500 hover:text-cyan-400 focus:text-cyan-400 focus:outline-none",
+            "focus rounded transition-all duration-500 hover:text-cyan-400 focus:text-cyan-400 focus:outline-none focus:ring-none",
             isOpen
               ? "translate-y-0 opacity-100"
-              : "pointer-events-none translate-y-8 opacity-0",
+              : "pointer-events-none translate-y-8 opacity-0"
           )}
           style={{
             transitionDelay: isOpen ? `${index * 80 + 120}ms` : "0ms",
@@ -47,7 +46,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
           "h-px w-32 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-all duration-500",
           isOpen
             ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-8 opacity-0",
+            : "pointer-events-none translate-y-8 opacity-0"
         )}
         style={{
           transitionDelay: isOpen ? `${navLinks.length * 80 + 120}ms` : "0ms",
@@ -57,10 +56,10 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
       {/* Social Links */}
       <div
         className={cn(
-          "flex gap-6 text-lg font-semibold transition-all duration-500",
+          "flex gap-6 font-semibold text-lg transition-all duration-500",
           isOpen
             ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-8 opacity-0",
+            : "pointer-events-none translate-y-8 opacity-0"
         )}
         style={{
           transitionDelay: isOpen
@@ -82,7 +81,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
           </a>
         ))}
       </div>
-    </div>,
-    document.body,
+    </dialog>,
+    document.body
   );
 }

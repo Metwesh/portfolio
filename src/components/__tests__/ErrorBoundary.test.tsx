@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import { ErrorBoundary } from "../ErrorBoundary";
 
 const ThrowError = () => {
@@ -11,7 +11,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <div>Test content</div>
-      </ErrorBoundary>,
+      </ErrorBoundary>
     );
 
     expect(screen.getByText("Test content")).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <ThrowError />
-      </ErrorBoundary>,
+      </ErrorBoundary>
     );
 
     expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
@@ -41,7 +41,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary fallback={<div>Custom error message</div>}>
         <ThrowError />
-      </ErrorBoundary>,
+      </ErrorBoundary>
     );
 
     expect(screen.getByText("Custom error message")).toBeInTheDocument();

@@ -53,8 +53,8 @@
 
   --animate-scroll-chevrons: scroll-chevrons 1s linear infinite;
   --animate-header-gradient-move: header-gradient-move 5s ease-in-out infinite;
-  --animate-header-gradient-move-pulse:
-    header-gradient-move 5s ease-in-out infinite, pulse 2s infinite;
+  --animate-header-gradient-move-pulse: header-gradient-move 5s ease-in-out
+    infinite, pulse 2s infinite;
   --animate-float: float 6s ease-in-out infinite;
   --animate-float-2: float-2 6s ease-in-out infinite;
   --animate-card-float: cardFloat 8s ease-in-out infinite;
@@ -106,12 +106,9 @@
   /* Global focus styles */
   *:focus-visible {
     @apply rounded-md ring-2 ring-white outline-none;
-    box-shadow:
-      0 0 0 3px rgba(255, 255, 255, 0.8),
-      0 0 20px rgba(255, 255, 255, 0.6);
-    transition:
-      box-shadow 0.2s ease-in-out,
-      outline 0.2s ease-in-out;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8), 0 0 20px
+      rgba(255, 255, 255, 0.6);
+    transition: box-shadow 0.2s ease-in-out, outline 0.2s ease-in-out;
   }
 
   @media (prefers-reduced-motion: no-preference) {

@@ -1,10 +1,10 @@
-import { defineConfig, type Plugin } from "vite";
-import react from "@vitejs/plugin-react";
+import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
-import { VitePWA } from "vite-plugin-pwa";
+import react from "@vitejs/plugin-react";
 import { visualizer } from "rollup-plugin-visualizer";
+import { type Plugin, defineConfig } from "vite";
 import viteCompression from "vite-plugin-compression";
-import path from "path";
+import { VitePWA } from "vite-plugin-pwa";
 
 const getBasePath = (mode: string) =>
   mode === "development" ? undefined : "/portfolio/";

@@ -3,11 +3,11 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useLayoutEffect, useRef } from "react";
 import {
-  PerspectiveCamera as ThreePerspectiveCamera,
-  Group as ThreeGroup,
-  MeshPhysicalMaterial as ThreeMeshPhysicalMaterial,
-  Mesh as ThreeMesh,
   Color as ThreeColor,
+  type Group as ThreeGroup,
+  type Mesh as ThreeMesh,
+  type MeshPhysicalMaterial as ThreeMeshPhysicalMaterial,
+  type PerspectiveCamera as ThreePerspectiveCamera,
 } from "three";
 import { mainLogoPath } from "../constants";
 import { useReducedMotion } from "../hooks/useReducedMotion";
@@ -37,7 +37,7 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
           position: [10, -5, -8], // More bottom right
         }
       : { scale: [2.2, 2.2, 2.2], opacity: 1, position: [0, 0, 0] },
-    config: { duration: 2200, easing: (t: number) => 1 - Math.pow(1 - t, 3) },
+    config: { duration: 2200, easing: (t: number) => 1 - (1 - t) ** 3 },
     delay: 500,
     immediate: reducedMotion, // Only skip animation if reduced motion
   });
@@ -85,7 +85,7 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
     targetColorRef.current.lerpColors(
       colorARef.current,
       colorBRef.current,
-      shimmer * 0.5,
+      shimmer * 0.5
     );
 
     const emissiveIntensity = 0.18 + shimmer * 0.22;

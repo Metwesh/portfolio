@@ -1,6 +1,6 @@
+import mixpanel from "mixpanel-browser";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import mixpanel from "mixpanel-browser";
 import App from "./App.tsx";
 import { ErrorBoundary } from "./components";
 import "./index.css";
@@ -22,7 +22,9 @@ if (mixpanelToken && mixpanelHost) {
 
         if (!userId) {
           // Generate a unique ID based on timestamp and random string
-          userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+          userId = `user_${Date.now()}_${Math.random()
+            .toString(36)
+            .substring(2, 15)}`;
           localStorage.setItem(storageKey, userId);
         }
 
@@ -60,10 +62,10 @@ if (mixpanelToken && mixpanelHost) {
   console.warn("Mixpanel not initialized: Missing environment variables");
 }
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById("root") ?? document.body).render(
   <StrictMode>
     <ErrorBoundary>
       <App />
     </ErrorBoundary>
-  </StrictMode>,
+  </StrictMode>
 );

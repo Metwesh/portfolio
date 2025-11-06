@@ -1,33 +1,33 @@
 import { useGLTF } from "@react-three/drei";
 import { Suspense, lazy } from "react";
 import { Footer, Header, MainCanvas, SkipToContent } from "./components";
-import { useScrollPosition } from "./hooks/useScrollPosition";
 import { mainLogoPath } from "./constants";
+import { useScrollPosition } from "./hooks/useScrollPosition";
 
 // Preload the model
 useGLTF.preload(mainLogoPath);
 
 // Lazy load sections for better performance
 const HeroSection = lazy(() =>
-  import("./sections").then((module) => ({ default: module.HeroSection })),
+  import("./sections").then((module) => ({ default: module.HeroSection }))
 );
 const ProjectsSection = lazy(() =>
-  import("./sections").then((module) => ({ default: module.ProjectsSection })),
+  import("./sections").then((module) => ({ default: module.ProjectsSection }))
 );
 const ExperienceSection = lazy(() =>
   import("./sections").then((module) => ({
     default: module.ExperienceSection,
-  })),
+  }))
 );
 const TechStacksSection = lazy(() =>
   import("./sections").then((module) => ({
     default: module.TechStacksSection,
-  })),
+  }))
 );
 const CertificatesSection = lazy(() =>
   import("./sections").then((module) => ({
     default: module.CertificatesSection,
-  })),
+  }))
 );
 
 // Track scroll position for 3D parallax

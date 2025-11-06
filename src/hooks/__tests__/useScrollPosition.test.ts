@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useScrollPosition } from "../useScrollPosition";
 
 describe("useScrollPosition", () => {
@@ -15,7 +15,7 @@ describe("useScrollPosition", () => {
       (callback: FrameRequestCallback) => {
         rafCallbacks.push(callback);
         return ++rafId;
-      },
+      }
     );
 
     // Mock cancelAnimationFrame
@@ -53,7 +53,9 @@ describe("useScrollPosition", () => {
 
     // Execute RAF callback
     act(() => {
-      rafCallbacks.forEach((cb) => cb(0));
+      for (const cb of rafCallbacks) {
+        cb(0);
+      }
     });
 
     expect(result.current).toBe(100);
@@ -64,7 +66,9 @@ describe("useScrollPosition", () => {
 
     // Initialize to current position (0)
     act(() => {
-      rafCallbacks.forEach((cb) => cb(0));
+      for (const cb of rafCallbacks) {
+        cb(0);
+      }
     });
     rafCallbacks = [];
 
@@ -81,7 +85,9 @@ describe("useScrollPosition", () => {
     });
 
     act(() => {
-      rafCallbacks.forEach((cb) => cb(0));
+      for (const cb of rafCallbacks) {
+        cb(0);
+      }
     });
 
     expect(result.current).toBe(100);
@@ -100,7 +106,9 @@ describe("useScrollPosition", () => {
     });
 
     act(() => {
-      rafCallbacks.forEach((cb) => cb(0));
+      for (const cb of rafCallbacks) {
+        cb(0);
+      }
     });
 
     // Should still be 100 because change was <= 1px
@@ -120,7 +128,9 @@ describe("useScrollPosition", () => {
     });
 
     act(() => {
-      rafCallbacks.forEach((cb) => cb(0));
+      for (const cb of rafCallbacks) {
+        cb(0);
+      }
     });
 
     expect(result.current).toBe(100);
@@ -152,7 +162,7 @@ describe("useScrollPosition", () => {
       expect.objectContaining({
         passive: true,
         signal: expect.any(AbortSignal),
-      }),
+      })
     );
 
     unmount();
@@ -174,7 +184,9 @@ describe("useScrollPosition", () => {
     });
 
     act(() => {
-      rafCallbacks.forEach((cb) => cb(0));
+      for (const cb of rafCallbacks) {
+        cb(0);
+      }
     });
 
     expect(result.current).toBe(5000);
@@ -193,7 +205,9 @@ describe("useScrollPosition", () => {
     });
 
     act(() => {
-      rafCallbacks.forEach((cb) => cb(0));
+      for (const cb of rafCallbacks) {
+        cb(0);
+      }
     });
 
     expect(result.current).toBe(-10);
@@ -224,7 +238,9 @@ describe("useScrollPosition", () => {
     });
 
     act(() => {
-      rafCallbacks.forEach((cb) => cb(0));
+      for (const cb of rafCallbacks) {
+        cb(0);
+      }
     });
 
     expect(result.current).toBe(260);
@@ -245,7 +261,9 @@ describe("useScrollPosition", () => {
       });
 
       act(() => {
-        rafCallbacks.forEach((cb) => cb(0));
+        for (const cb of rafCallbacks) {
+          cb(0);
+        }
         rafCallbacks = [];
       });
     }

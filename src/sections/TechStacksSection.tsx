@@ -15,7 +15,7 @@ import { cn } from "../lib/utils";
 export function TechStacksSection() {
   const prefersReducedMotion = useReducedMotion();
   const [isList, setIsList] = useState(
-    () => window.innerWidth < breakpoints.mobile || prefersReducedMotion,
+    () => window.innerWidth < breakpoints.mobile || prefersReducedMotion
   );
 
   const { targetRef, isIntersecting } = useIntersectionObserver({
@@ -33,7 +33,7 @@ export function TechStacksSection() {
       <div className="relative mb-20">
         <h2
           id="tech-stacks-heading"
-          className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-5xl font-black tracking-tight text-transparent md:text-6xl"
+          className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text font-black text-5xl text-transparent tracking-tight md:text-6xl"
           style={{
             opacity: isIntersecting ? 1 : 0,
             transform: `translateY(${isIntersecting ? 0 : 50}px) scale(${isIntersecting ? 1 : 0.9})`,
@@ -42,7 +42,7 @@ export function TechStacksSection() {
           }}
         >
           Tech Stacks
-          <div className="absolute -inset-1 -z-10 bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
+          <div className="-inset-1 -z-10 absolute bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
         </h2>
       </div>
       <div
@@ -51,7 +51,7 @@ export function TechStacksSection() {
           "scroll-mt-18",
           !isList
             ? "-mx-4 h-[520px] w-screen md:h-[650px] lg:h-[750px]"
-            : "w-full max-w-6xl",
+            : "w-full max-w-6xl"
         )}
         id="tech-stacks-container"
       >

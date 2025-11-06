@@ -1,4 +1,4 @@
-import { type PointerEvent as ReactPointerEvent } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { WIP } from "../assets";
 
 interface TechTooltipProps {
@@ -17,9 +17,10 @@ export function TechTooltip({
   onPointerUp,
 }: TechTooltipProps) {
   return (
-    <div className="animate-fade-in-up flex flex-col items-center gap-4">
+    <div className="flex animate-fade-in-up flex-col items-center gap-4">
       <button
-        className="relative cursor-pointer overflow-hidden rounded-3xl border border-white/20 px-10 py-6 text-center text-4xl font-bold tracking-wide whitespace-pre text-white backdrop-blur-md transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02]"
+        type="button"
+        className="hover:-translate-y-0.5 relative cursor-pointer overflow-hidden whitespace-pre rounded-3xl border border-white/20 px-10 py-6 text-center font-bold text-4xl text-white tracking-wide backdrop-blur-md transition-all duration-300 ease-in-out hover:scale-[1.02]"
         style={{
           background:
             "linear-gradient(135deg, rgba(20,24,32,0.95) 0%, rgba(30,35,45,0.95) 100%)",
@@ -43,12 +44,12 @@ export function TechTooltip({
         }}
       >
         {technologyName}
-        <div className="mt-2 flex items-center justify-center gap-2 text-base font-normal opacity-80">
+        <div className="mt-2 flex items-center justify-center gap-2 font-normal text-base opacity-80">
           <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-white/60" />
           Click to close
         </div>
         {isWip && (
-          <div className="absolute top-2 right-2 rounded-lg bg-yellow-400/90 px-2 py-1 text-xs font-semibold tracking-wider text-black uppercase">
+          <div className="absolute top-2 right-2 rounded-lg bg-yellow-400/90 px-2 py-1 font-semibold text-black text-xs uppercase tracking-wider">
             Work in Progress
           </div>
         )}

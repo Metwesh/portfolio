@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
+import { ProjectScrollbar } from "../components/ProjectScrollbar";
+import { INTERSECTION_OBSERVER_CONFIG, breakpoints } from "../constants";
 import { projects } from "../constants/projects";
-import { breakpoints, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { ProjectCard } from "./ProjectCard";
-import { ProjectScrollbar } from "../components/ProjectScrollbar";
 
 export function ProjectsSection({ scrollY }: { scrollY: number }) {
   const { targetRef: sectionRef, isIntersecting } = useIntersectionObserver({
@@ -29,7 +29,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
   // Calculate current project index for accessibility announcements
   const currentProjectIndex = Math.max(
     0,
-    Math.min(projects.length, Math.round(-horizontalTranslate / 100)),
+    Math.min(projects.length, Math.round(-horizontalTranslate / 100))
   );
 
   // Function to scroll to a specific project
@@ -57,6 +57,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
   };
 
   // Calculate horizontal translation based on scroll - must use effect since we read DOM
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scrollY is intentionally used to trigger re-runs on scroll, calculation reads from DOM
   useEffect(() => {
     const element = sectionRef.current;
     if (!element) return;
@@ -71,7 +72,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
     const totalScrollDistance = sectionHeight - viewportHeight;
     const scrollProgress = Math.max(
       0,
-      Math.min(1, enterProgress / totalScrollDistance),
+      Math.min(1, enterProgress / totalScrollDistance)
     );
 
     // Calculate horizontal translation (projects.length + title card)
@@ -149,7 +150,9 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
       {/* Screen reader announcement */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {windowWidth >= breakpoints.mobile && currentProjectIndex > 0
-          ? `Viewing project ${currentProjectIndex} of ${projects.length}: ${projects[currentProjectIndex - 1]?.name}`
+          ? `Viewing project ${currentProjectIndex} of ${projects.length}: ${
+              projects[currentProjectIndex - 1]?.name
+            }`
           : ""}
       </div>
 
@@ -177,10 +180,10 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
           <div className="mb-12 flex h-full w-full items-center justify-center md:mb-0 md:w-screen md:flex-shrink-0">
             <h2
               id="projects-heading"
-              className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-4xl font-black tracking-tight text-transparent md:text-6xl"
+              className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text font-black text-4xl text-transparent tracking-tight md:text-6xl"
             >
               Featured Projects
-              <div className="absolute -inset-1 -z-10 bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
+              <div className="-inset-1 -z-10 absolute bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
             </h2>
           </div>
 

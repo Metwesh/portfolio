@@ -1,10 +1,10 @@
 import { Float } from "@react-three/drei";
-import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
-import { useRef, useState, useEffect } from "react";
+import { type ThreeEvent, useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useRef, useState } from "react";
 import {
-  Vector3 as ThreeVector3,
   Euler as ThreeEuler,
-  Mesh as ThreeMesh,
+  type Mesh as ThreeMesh,
+  Vector3 as ThreeVector3,
 } from "three";
 import BoxShader from "../shaders/BoxShader";
 
@@ -30,7 +30,7 @@ export function TechBox({
   isInView,
 }: TechBoxProps) {
   const [meshRotation] = useState(
-    () => new ThreeEuler(Math.random(), Math.random(), Math.random()),
+    () => new ThreeEuler(Math.random(), Math.random(), Math.random())
   );
 
   const meshRef = useRef<ThreeMesh>(null);
@@ -45,7 +45,7 @@ export function TechBox({
 
   // Track touch/pointer events to distinguish between tap and drag
   const pointerDown = useRef<{ x: number; y: number; time: number } | null>(
-    null,
+    null
   );
 
   // Ensure geometry UVs are properly set for iOS
@@ -153,6 +153,7 @@ export function TechBox({
       position={[0, 0, 0.05]}
       floatingRange={[0.25, 0.25]}
     >
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: We need to use onClick for the mesh */}
       <mesh
         ref={meshRef}
         name={data.name}

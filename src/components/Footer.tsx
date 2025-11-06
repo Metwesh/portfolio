@@ -2,7 +2,7 @@ import { socialLinks } from "../constants";
 
 export function Footer() {
   return (
-    <footer className="relative z-10 w-full space-y-1 py-8 text-center text-sm text-gray-400">
+    <footer className="relative z-10 w-full space-y-1 py-8 text-center text-gray-400 text-sm">
       <div>
         {socialLinks.map((link, index) => (
           <span key={link.href}>

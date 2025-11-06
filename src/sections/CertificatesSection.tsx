@@ -1,5 +1,5 @@
-import { certificates } from "../constants/certificates";
 import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
+import { certificates } from "../constants/certificates";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { cn } from "../lib/utils";
 
@@ -20,7 +20,7 @@ export function CertificatesSection() {
       <div className="relative mb-20">
         <h2
           id="certificates-heading"
-          className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-5xl font-black tracking-tight text-transparent md:text-6xl"
+          className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text font-black text-5xl text-transparent tracking-tight md:text-6xl"
           style={{
             opacity: isIntersecting ? 1 : 0,
             transform: `translate3d(0, ${isIntersecting ? 0 : 50}px, 0) scale(${isIntersecting ? 1 : 0.9})`,
@@ -30,7 +30,7 @@ export function CertificatesSection() {
           }}
         >
           Certifications
-          <div className="absolute -inset-1 -z-10 bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
+          <div className="-inset-1 -z-10 absolute bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
         </h2>
       </div>
 
@@ -57,7 +57,7 @@ export function CertificatesSection() {
               >
                 {/* Glow effect */}
                 <div
-                  className="absolute -inset-2 rounded-3xl opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none"
+                  className="-inset-2 absolute rounded-3xl opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none"
                   style={{
                     background: `radial-gradient(circle at center, ${cert.color}50, transparent 70%)`,
                   }}
@@ -73,13 +73,13 @@ export function CertificatesSection() {
                   {/* Animated gradient mesh background */}
                   <div className="absolute inset-0 opacity-40">
                     <div
-                      className="absolute top-0 right-0 h-64 w-64 translate-x-[20%] -translate-y-[20%] rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none"
+                      className="-translate-y-[20%] absolute top-0 right-0 h-64 w-64 translate-x-[20%] rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none"
                       style={{
                         background: `radial-gradient(circle, ${cert.color}70, transparent 70%)`,
                       }}
                     />
                     <div
-                      className="absolute bottom-0 left-0 h-56 w-56 -translate-x-[20%] translate-y-[20%] rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none"
+                      className="-translate-x-[20%] absolute bottom-0 left-0 h-56 w-56 translate-y-[20%] rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none"
                       style={{
                         background: `radial-gradient(circle, ${cert.color}50, transparent 70%)`,
                       }}
@@ -112,10 +112,10 @@ export function CertificatesSection() {
                     )}
 
                     {/* Title */}
-                    <h3 className="relative mb-2 text-xl font-bold text-white md:text-2xl">
+                    <h3 className="relative mb-2 font-bold text-white text-xl md:text-2xl">
                       {cert.title}
                       <div
-                        className="absolute -bottom-1 left-0 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-14 motion-reduce:transition-none"
+                        className="-bottom-1 absolute left-0 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-14 motion-reduce:transition-none"
                         style={{
                           background: `linear-gradient(90deg, ${cert.color}, transparent)`,
                           boxShadow: `0 0 15px ${cert.color}80`,
@@ -131,7 +131,7 @@ export function CertificatesSection() {
                     {/* Year badge */}
                     <div className="mt-4 flex items-center justify-between">
                       <span
-                        className="rounded-full border px-4 py-2 text-xs font-bold backdrop-blur-md transition-all duration-300 group-hover:scale-110 motion-reduce:transition-none md:text-sm"
+                        className="rounded-full border px-4 py-2 font-bold text-xs backdrop-blur-md transition-all duration-300 group-hover:scale-110 motion-reduce:transition-none md:text-sm"
                         style={{
                           background: `${cert.color}20`,
                           borderColor: `${cert.color}60`,
@@ -206,21 +206,22 @@ export function CertificatesSection() {
             }}
           >
             {/* Glow effect */}
-            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-cyan-400/50 via-blue-500/50 to-purple-600/50 opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none" />
+            <div className="-inset-2 absolute rounded-3xl bg-gradient-to-r from-cyan-400/50 via-blue-500/50 to-purple-600/50 opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none" />
 
             {/* Main card */}
             <div className="relative flex h-full min-h-[200px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none">
               {/* Animated gradient mesh background */}
               <div className="absolute inset-0 opacity-40">
-                <div className="absolute top-0 right-0 h-64 w-64 translate-x-[20%] -translate-y-[20%] rounded-full bg-gradient-to-br from-cyan-400/70 via-blue-500/70 to-purple-600/70 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
-                <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-[20%] translate-y-[20%] rounded-full bg-gradient-to-tl from-purple-600/50 via-blue-500/50 to-cyan-400/50 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
+                <div className="-translate-y-[20%] absolute top-0 right-0 h-64 w-64 translate-x-[20%] rounded-full bg-gradient-to-br from-cyan-400/70 via-blue-500/70 to-purple-600/70 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
+                <div className="-translate-x-[20%] absolute bottom-0 left-0 h-56 w-56 translate-y-[20%] rounded-full bg-gradient-to-tl from-purple-600/50 via-blue-500/50 to-cyan-400/50 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
               </div>
 
               {/* Animated border */}
               <div
                 className="absolute inset-0 rounded-2xl bg-[length:200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
                 style={{
-                  backgroundImage: `linear-gradient(135deg, rgba(0, 211, 242, 0.4), transparent 50%, rgba(168, 85, 247, 0.4))`,
+                  backgroundImage:
+                    "linear-gradient(135deg, rgba(0, 211, 242, 0.4), transparent 50%, rgba(168, 85, 247, 0.4))",
                   animation: "borderFlow 3s ease infinite",
                 }}
               />
@@ -261,7 +262,8 @@ export function CertificatesSection() {
               <div
                 className="pointer-events-none absolute inset-0 bg-[length:200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none"
                 style={{
-                  backgroundImage: `linear-gradient(110deg, transparent 25%, rgba(34, 211, 238, 0.15) 50%, transparent 75%)`,
+                  backgroundImage:
+                    "linear-gradient(110deg, transparent 25%, rgba(34, 211, 238, 0.15) 50%, transparent 75%)",
                   animation: "shimmer 2s infinite",
                 }}
               />

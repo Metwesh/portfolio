@@ -1,5 +1,5 @@
-import { experiences } from "../constants/experiences";
 import { ANIMATION_CONFIG, INTERSECTION_OBSERVER_CONFIG } from "../constants";
+import { experiences } from "../constants/experiences";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
@@ -29,7 +29,7 @@ export function ExperienceSection() {
       <div className="relative mb-20">
         <h2
           id="experience-heading"
-          className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-5xl font-black tracking-tight text-transparent md:text-6xl"
+          className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text font-black text-5xl text-transparent tracking-tight md:text-6xl"
           style={{
             opacity: isIntersecting ? 1 : 0,
             transform: `translateY(${isIntersecting ? 0 : 50}px) scale(${isIntersecting ? 1 : 0.9})`,
@@ -38,14 +38,14 @@ export function ExperienceSection() {
           }}
         >
           Experience
-          <div className="absolute -inset-1 -z-10 bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
+          <div className="-inset-1 -z-10 absolute bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
         </h2>
       </div>
 
       <div className="relative w-full max-w-5xl">
         {/* Timeline line */}
         <div
-          className="absolute top-0 left-1/2 z-0 h-full w-4 -translate-x-1/2 rounded-full max-sm:left-8"
+          className="-translate-x-1/2 absolute top-0 left-1/2 z-0 h-full w-4 rounded-full max-sm:left-8"
           style={{
             filter: "blur(24px)",
             backgroundImage: `linear-gradient(to bottom, ${experiences
@@ -60,7 +60,7 @@ export function ExperienceSection() {
           }}
         />
         <div
-          className="absolute top-0 left-1/2 z-0 h-full w-1 -translate-x-1/2 rounded-full max-sm:left-8"
+          className="-translate-x-1/2 absolute top-0 left-1/2 z-0 h-full w-1 rounded-full max-sm:left-8"
           style={{
             backgroundImage: `linear-gradient(to bottom, ${experiences
               .map((exp) => exp.color)
@@ -95,7 +95,7 @@ export function ExperienceSection() {
                 <div className="relative mx-auto max-sm:mb-4 sm:min-h-16 sm:min-w-16">
                   {/* Glow effect */}
                   <div
-                    className="absolute -inset-3 rounded-full opacity-0 blur-xl transition-all duration-500 group-hover:opacity-100 motion-reduce:transition-none"
+                    className="-inset-3 absolute rounded-full opacity-0 blur-xl transition-all duration-500 group-hover:opacity-100 motion-reduce:transition-none"
                     style={{
                       background: `radial-gradient(circle, ${experience.color}80, transparent 70%)`,
                     }}
@@ -119,7 +119,7 @@ export function ExperienceSection() {
                 {/* Card */}
                 <div className="flex flex-1 flex-col items-center gap-6 rounded-2xl">
                   <div
-                    className="relative w-full overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl transition-all duration-500 not-motion-reduce:group-hover:-translate-y-1 motion-reduce:transition-none"
+                    className="not-motion-reduce:group-hover:-translate-y-1 relative w-full overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl transition-all duration-500 motion-reduce:transition-none"
                     style={{
                       background:
                         "linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))",
@@ -129,7 +129,7 @@ export function ExperienceSection() {
                     {/* Gradient mesh background */}
                     <div className="pointer-events-none absolute inset-0 opacity-20">
                       <div
-                        className="absolute top-0 right-0 h-64 w-64 translate-x-[30%] -translate-y-[30%] rounded-full blur-3xl transition-all duration-700 group-hover:translate-x-[10%] group-hover:-translate-y-[10%] group-hover:scale-120 motion-reduce:transition-none"
+                        className="-translate-y-[30%] group-hover:-translate-y-[10%] absolute top-0 right-0 h-64 w-64 translate-x-[30%] rounded-full blur-3xl transition-all duration-700 group-hover:translate-x-[10%] group-hover:scale-120 motion-reduce:transition-none"
                         style={{
                           background: `radial-gradient(circle, ${experience.color}70, transparent 70%)`,
                         }}
@@ -139,10 +139,10 @@ export function ExperienceSection() {
                     {/* Content */}
                     <div className="relative p-6 sm:p-8">
                       {/* Title with underline */}
-                      <h3 className="relative mb-2 inline-block text-xl font-bold text-white sm:text-2xl">
+                      <h3 className="relative mb-2 inline-block font-bold text-white text-xl sm:text-2xl">
                         {experience.company}
                         <div
-                          className="absolute -bottom-1 left-0 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-16 motion-reduce:transition-none"
+                          className="-bottom-1 absolute left-0 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-16 motion-reduce:transition-none"
                           style={{
                             background: experience.color,
                           }}

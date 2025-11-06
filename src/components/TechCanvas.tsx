@@ -1,13 +1,13 @@
-import { TrackballControls, Html } from "@react-three/drei";
-import { Canvas, useThree, useFrame } from "@react-three/fiber";
-import { TrackballControls as TrackballControlsImpl } from "three-stdlib";
+import { Html, TrackballControls } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
-  useMemo,
-  useState,
-  useRef,
   type PointerEvent as ReactPointerEvent,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import { Vector3 as ThreeVector3 } from "three";
+import type { TrackballControls as TrackballControlsImpl } from "three-stdlib";
 import { technologies } from "../constants/technologies";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "../shaders/FogArguments";
 import { TechBox } from "./TechBox";
@@ -27,7 +27,7 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
     const increment = Math.PI * (3 - Math.sqrt(5));
     for (let i = 0; i < technologies.length; i++) {
       const y = i * offset - 1 + offset / 2;
-      const r = Math.sqrt(1 - Math.pow(y, 2));
+      const r = Math.sqrt(1 - y ** 2);
       const phi = ((i + 1) % technologies.length) * increment;
       const x = Math.cos(phi) * r;
       const z = Math.sin(phi) * r;
@@ -35,8 +35,8 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
         new ThreeVector3(
           x * SPHERE_RADIUS,
           y * SPHERE_RADIUS,
-          z * SPHERE_RADIUS,
-        ),
+          z * SPHERE_RADIUS
+        )
       );
     }
     return temp;
@@ -67,7 +67,7 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
 
       {/* Hint overlay */}
       {showHint && selectedIndex === null && (
-        <div className="animate-fade-in-up pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2">
+        <div className="-translate-x-1/2 pointer-events-none absolute bottom-8 left-1/2 animate-fade-in-up">
           <div className="relative flex items-center gap-2 rounded-full border border-white/10 bg-gradient-to-r from-white/5 to-white/10 px-5 py-2.5 backdrop-blur-sm">
             <svg
               className="h-4 w-4 animate-pulse text-cyan-400"
@@ -80,7 +80,7 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
                 clipRule="evenodd"
               />
             </svg>
-            <p className="text-xs font-medium text-white/80 md:text-sm">
+            <p className="font-medium text-white/80 text-xs md:text-sm">
               Click to explore
             </p>
           </div>
@@ -212,7 +212,7 @@ function Controls({
 
           return (
             <TechBox
-              key={`technology-${index}`}
+              key={`${technologies[index].name}-${index}`}
               position={targetPosition}
               data={technologies[index]}
               onClick={handleBoxClick(index)}
