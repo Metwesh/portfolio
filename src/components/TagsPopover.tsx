@@ -33,7 +33,7 @@ export function TagsPopover({
       {/* +N badge with popover */}
       {hiddenTags.length > 0 && (
         <div
-          className="relative"
+          className="relative z-50"
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
         >
@@ -64,7 +64,7 @@ export function TagsPopover({
 
           {/* Popover */}
           <div
-            className="absolute top-full z-50 mt-2 transition-all duration-300"
+            className="absolute top-full z-[100] mt-2 transition-all duration-300"
             style={{
               left: "50%",
               opacity: isOpen ? 1 : 0,

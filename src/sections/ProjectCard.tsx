@@ -1,13 +1,21 @@
 import { TagsPopover } from "../components/TagsPopover";
+import { ANIMATION_CONFIG } from "../constants";
 import type { Project } from "../constants/projects";
 import { cn } from "../lib/utils";
 
 interface ProjectCardProps {
   project: Project;
   index: number;
+  isVisible?: boolean;
+  isMobile?: boolean;
 }
 
-export function ProjectCard({ project, index }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  index,
+  isVisible = false,
+  isMobile = false,
+}: ProjectCardProps) {
   const isEven = index % 2 === 0;
 
   // Determine if card is clickable
@@ -15,7 +23,27 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
 
   return (
     // Full viewport width card for horizontal scroll on desktop, auto width on mobile
-    <article className="w-full md:h-full md:w-screen md:flex-shrink-0">
+    <article
+      className="w-full md:h-full md:w-screen md:flex-shrink-0"
+      style={
+        isMobile
+          ? {
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible
+                ? "translateX(0) scale(1)"
+                : `translateX(${
+                    isEven
+                      ? ANIMATION_CONFIG.PROJECTS_SLIDE_DISTANCE
+                      : -ANIMATION_CONFIG.PROJECTS_SLIDE_DISTANCE
+                  }px) scale(0.85)`,
+              transition: `all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) ${
+                isVisible ? index * ANIMATION_CONFIG.PROJECTS_STAGGER_DELAY : 0
+              }s`,
+              willChange: isVisible ? "auto" : "opacity, transform",
+            }
+          : undefined
+      }
+    >
       <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-center md:px-8">
         <div className="group relative w-full">
           {/* Glow effect on hover - similar to certificates */}

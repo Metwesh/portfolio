@@ -8,15 +8,18 @@ import { ProjectCard } from "./ProjectCard";
 export function ProjectsSection({ scrollY }: { scrollY: number }) {
   const { targetRef: sectionRef, isIntersecting } = useIntersectionObserver({
     threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
-    rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
+    rootMargin: INTERSECTION_OBSERVER_CONFIG.PROJECTS_ROOT_MARGIN,
   });
 
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [isMobile, setIsMobile] = useState(
+    window.innerWidth < breakpoints.mobile
+  );
 
   useEffect(() => {
     const controller = new AbortController();
 
-    const handleResize = () => setWindowWidth(window.innerWidth);
+    const handleResize = () =>
+      setIsMobile(window.innerWidth < breakpoints.mobile);
 
     window.addEventListener("resize", handleResize, {
       signal: controller.signal,
@@ -35,7 +38,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
   // Function to scroll to a specific project
   const scrollToProject = (targetIndex: number, smooth = true) => {
     const element = sectionRef.current;
-    if (!element || windowWidth < breakpoints.mobile) return;
+    if (!element || isMobile) return;
 
     const rect = element.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
@@ -82,7 +85,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
 
   // Keyboard navigation support
   useEffect(() => {
-    if (windowWidth < breakpoints.mobile) return;
+    if (isMobile) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const section = sectionRef.current;
@@ -121,7 +124,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [windowWidth, sectionRef]);
+  }, [isMobile, sectionRef]);
 
   return (
     <section
@@ -132,12 +135,9 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
       aria-atomic="false"
       aria-describedby="projects-navigation-help"
       tabIndex={-1}
-      className="relative z-10 py-20 outline-none md:px-0 md:py-0"
+      className="relative z-10 overflow-x-clip py-20 outline-none md:px-0 md:py-0"
       style={{
-        height:
-          windowWidth >= breakpoints.mobile
-            ? `${100 + (projects.length + 1) * 100}vh`
-            : "auto",
+        height: !isMobile ? `${100 + (projects.length + 1) * 100}vh` : "auto",
       }}
     >
       {/* Keyboard navigation help for screen readers */}
@@ -149,7 +149,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
 
       {/* Screen reader announcement */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {windowWidth >= breakpoints.mobile && currentProjectIndex > 0
+        {!isMobile && currentProjectIndex > 0
           ? `Viewing project ${currentProjectIndex} of ${projects.length}: ${
               projects[currentProjectIndex - 1]?.name
             }`
@@ -157,30 +157,37 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
       </div>
 
       {/* Mobile: vertical stack, Desktop: horizontal scroll */}
-      <div className="md:-ms-gutter flex flex-col gap-8 md:sticky md:top-0 md:h-screen md:w-screen md:flex-row md:items-center md:gap-0 md:overflow-hidden">
+      <div className="md:-ms-gutter flex flex-col gap-8 overflow-x-clip md:sticky md:top-0 md:h-screen md:w-screen md:flex-row md:items-center md:gap-0 md:overflow-hidden">
         <div
           className="flex flex-col gap-8 md:h-full md:flex-row md:items-center md:gap-0"
           style={{
-            transform:
-              windowWidth >= breakpoints.mobile
-                ? `translateX(${horizontalTranslate}vw)`
-                : "none",
+            transform: !isMobile
+              ? `translateX(${horizontalTranslate}vw)`
+              : "none",
             transition: "transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-            willChange:
-              isIntersecting && windowWidth >= breakpoints.mobile
-                ? "transform"
-                : "auto",
-            width:
-              windowWidth >= breakpoints.mobile
-                ? `${(projects.length + 1) * 100}vw`
-                : "auto",
+            willChange: isIntersecting && !isMobile ? "transform" : "auto",
+            width: !isMobile ? `${(projects.length + 1) * 100}vw` : "auto",
           }}
         >
           {/* Title card - slides with projects */}
           <div className="mb-12 flex h-full w-full items-center justify-center md:mb-0 md:w-screen md:flex-shrink-0">
             <h2
               id="projects-heading"
-              className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text font-black text-4xl text-transparent tracking-tight md:text-6xl"
+              className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text font-black text-5xl text-transparent tracking-tight md:text-6xl"
+              style={
+                isMobile
+                  ? {
+                      opacity: isIntersecting ? 1 : 0,
+                      transform: `translateY(${
+                        isIntersecting ? 0 : 50
+                      }px) scale(${isIntersecting ? 1 : 0.9})`,
+                      transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                      willChange: isIntersecting
+                        ? "auto"
+                        : "opacity, transform",
+                    }
+                  : undefined
+              }
             >
               Featured Projects
               <div className="-inset-1 -z-10 absolute bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
@@ -188,12 +195,18 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
           </div>
 
           {projects.map((proj, index) => (
-            <ProjectCard key={proj.name} project={proj} index={index} />
+            <ProjectCard
+              key={proj.name}
+              project={proj}
+              index={index}
+              isVisible={isIntersecting && isMobile}
+              isMobile={isMobile}
+            />
           ))}
         </div>
 
         {/* Progress indicator / Scrollbar - only on desktop */}
-        {windowWidth >= breakpoints.mobile && (
+        {!isMobile && (
           <ProjectScrollbar
             projectCount={projects.length}
             currentIndex={currentProjectIndex}
