@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "./useReducedMotion";
 
 interface UseIntersectionObserverOptions {
-  threshold?: number;
+  threshold?: number | number[];
   root?: Element | null;
   rootMargin?: string;
+  enabled?: boolean;
 }
 
 /**
@@ -15,12 +16,23 @@ interface UseIntersectionObserverOptions {
 export function useIntersectionObserver(
   options: UseIntersectionObserverOptions = {}
 ) {
-  const { threshold = 0.1, root = null, rootMargin = "0px" } = options;
+  const {
+    threshold = 0.1,
+    root = null,
+    rootMargin = "0px",
+    enabled = true,
+  } = options;
   const prefersReducedMotion = useReducedMotion();
   const [observerIntersecting, setObserverIntersecting] = useState(false);
   const targetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // If disabled, set to true (always visible)
+    if (!enabled) {
+      setObserverIntersecting(true);
+      return;
+    }
+
     // Skip observer if user prefers reduced motion
     if (prefersReducedMotion) return;
 
@@ -39,11 +51,11 @@ export function useIntersectionObserver(
     return () => {
       observer.disconnect();
     };
-  }, [threshold, root, rootMargin, prefersReducedMotion]);
+  }, [threshold, root, rootMargin, prefersReducedMotion, enabled]);
 
-  // Derive final value: always true for reduced motion, otherwise use observer
+  // Derive final value: always true for reduced motion or disabled, otherwise use observer
   return {
     targetRef,
-    isIntersecting: prefersReducedMotion || observerIntersecting,
+    isIntersecting: !enabled || prefersReducedMotion || observerIntersecting,
   };
 }

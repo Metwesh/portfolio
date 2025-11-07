@@ -1,4 +1,5 @@
-import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
+import { SectionHeading } from "../components/SectionHeading";
+import { ANIMATION_CONFIG, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { certificates } from "../constants/certificates";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { cn } from "../lib/utils";
@@ -18,20 +19,12 @@ export function CertificatesSection() {
     >
       {/* Animated section title */}
       <div className="relative mb-20">
-        <h2
+        <SectionHeading
           id="certificates-heading"
-          className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text font-black text-5xl text-transparent tracking-tight md:text-6xl"
-          style={{
-            opacity: isIntersecting ? 1 : 0,
-            transform: `translate3d(0, ${isIntersecting ? 0 : 50}px, 0) scale(${isIntersecting ? 1 : 0.9})`,
-            transition:
-              "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-            willChange: isIntersecting ? "auto" : "opacity, transform",
-          }}
+          isIntersecting={isIntersecting}
         >
           Certifications
-          <div className="-inset-1 -z-10 absolute bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
-        </h2>
+        </SectionHeading>
       </div>
 
       {/* Bento-style grid layout */}
@@ -51,7 +44,19 @@ export function CertificatesSection() {
                   transform: isIntersecting
                     ? "translate3d(0, 0, 0)"
                     : `translate3d(0, ${Math.min(30 + index * 5, 80)}px, 0)`,
-                  transition: `opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(index * 0.05, 0.4)}s, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(index * 0.05, 0.4)}s`,
+                  transition: `opacity ${
+                    ANIMATION_CONFIG.CERTIFICATES_DURATION
+                  }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
+                    ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
+                      index * ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
+                    ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
+                  )}s, transform ${
+                    ANIMATION_CONFIG.CERTIFICATES_DURATION
+                  }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
+                    ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
+                      index * ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
+                    ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
+                  )}s`,
                   willChange: isIntersecting ? "auto" : "opacity, transform",
                 }}
               >
@@ -200,8 +205,17 @@ export function CertificatesSection() {
               opacity: isIntersecting ? 1 : 0,
               transform: isIntersecting
                 ? "translate3d(0, 0, 0)"
-                : `translate3d(0, ${Math.min(30 + certificates.length * 5, 80)}px, 0)`,
-              transition: `opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(certificates.length * 0.05, 0.4)}s, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(certificates.length * 0.05, 0.4)}s`,
+                : `translate3d(0, ${Math.min(
+                    30 + certificates.length * 5,
+                    80
+                  )}px, 0)`,
+              transition: `opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
+                certificates.length * 0.05,
+                0.4
+              )}s, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
+                certificates.length * 0.05,
+                0.4
+              )}s`,
               willChange: isIntersecting ? "auto" : "opacity, transform",
             }}
           >

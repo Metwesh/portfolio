@@ -392,6 +392,7 @@ export const projects: readonly Project[] = [
     darkLogo: true,
     image: sideupDashboardV3,
     color: accentColors.amber,
+    link: "https://portal.sideup.co/login",
   },
   {
     name: "BELTONE Holding Company Site",

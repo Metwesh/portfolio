@@ -24,6 +24,9 @@ export const ANIMATION_CONFIG = {
 
   // Certificates section
   CERTIFICATES_STAGGER_DELAY: 0.12,
+  CERTIFICATES_BASE_DELAY: 0.2, // Initial delay before first card
+  CERTIFICATES_MAX_DELAY: 1.2, // Maximum delay for stagger effect
+  CERTIFICATES_DURATION: 0.8, // Animation duration
   CERTIFICATES_DEPTH_OFFSET: 50,
   CERTIFICATES_ROTATION_FACTOR: 3,
   CERTIFICATES_BASE_OFFSET: 150,
@@ -32,7 +35,6 @@ export const ANIMATION_CONFIG = {
 
 export const INTERSECTION_OBSERVER_CONFIG = {
   DEFAULT_THRESHOLD: 0.1,
-  DEFAULT_ROOT_MARGIN: "50px",
-  PROJECTS_ROOT_MARGIN: "50px 0px 200px 0px",
+  DEFAULT_ROOT_MARGIN: "50px 0px 50px",
   TECH_STACKS_ROOT_MARGIN: "50px 0px 200px 0px",
 } as const;

@@ -17,7 +17,7 @@
     "format:check": "biome format .",
     "compile": "tsc --noEmit",
     "system:check": "biome check .",
-    "system:fix": "yarn check && yarn compile",
+    "system:fix": "yarn lint && yarn format && yarn compile",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/favicons/logo.svg",

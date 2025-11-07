@@ -1,22 +1,28 @@
 import { TagsPopover } from "../components/TagsPopover";
-import { ANIMATION_CONFIG } from "../constants";
+import { ANIMATION_CONFIG, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import type { Project } from "../constants/projects";
+import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { cn } from "../lib/utils";
 
 interface ProjectCardProps {
   project: Project;
   index: number;
-  isVisible?: boolean;
   isMobile?: boolean;
 }
 
 export function ProjectCard({
   project,
   index,
-  isVisible = false,
   isMobile = false,
 }: ProjectCardProps) {
   const isEven = index % 2 === 0;
+
+  // Each card has its own intersection observer (only enabled on mobile)
+  const { targetRef, isIntersecting } = useIntersectionObserver({
+    threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
+    rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
+    enabled: isMobile,
+  });
 
   // Determine if card is clickable
   const isClickable = !!project.link;
@@ -24,22 +30,21 @@ export function ProjectCard({
   return (
     // Full viewport width card for horizontal scroll on desktop, auto width on mobile
     <article
+      ref={targetRef}
       className="w-full md:h-full md:w-screen md:flex-shrink-0"
       style={
         isMobile
           ? {
-              opacity: isVisible ? 1 : 0,
-              transform: isVisible
+              opacity: isIntersecting ? 1 : 0,
+              transform: isIntersecting
                 ? "translateX(0) scale(1)"
                 : `translateX(${
                     isEven
                       ? ANIMATION_CONFIG.PROJECTS_SLIDE_DISTANCE
                       : -ANIMATION_CONFIG.PROJECTS_SLIDE_DISTANCE
                   }px) scale(0.85)`,
-              transition: `all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) ${
-                isVisible ? index * ANIMATION_CONFIG.PROJECTS_STAGGER_DELAY : 0
-              }s`,
-              willChange: isVisible ? "auto" : "opacity, transform",
+              transition: "all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              willChange: isIntersecting ? "auto" : "opacity, transform",
             }
           : undefined
       }
@@ -97,7 +102,7 @@ export function ProjectCard({
               >
                 {/* Clickable indicator - positioned on image */}
                 {isClickable && (
-                  <div className="absolute top-4 right-4 z-20 flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-3 py-2 backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:border-white/40 group-hover:bg-black/60">
+                  <div className="absolute top-3 right-3 z-20 flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-3 py-2 backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:border-white/40 group-hover:bg-black/60 md:top-4 md:right-4">
                     <span className="font-semibold text-white text-xs">
                       Visit
                     </span>

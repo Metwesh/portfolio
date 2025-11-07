@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ScrollHelper } from "../components";
+import { SectionHeading } from "../components/SectionHeading";
 import { Switch } from "../components/Switch";
 import { TechCanvas } from "../components/TechCanvas";
 import { TechList } from "../components/TechList";
@@ -31,19 +32,12 @@ export function TechStacksSection() {
     >
       {/* Animated section title */}
       <div className="relative mb-20">
-        <h2
+        <SectionHeading
           id="tech-stacks-heading"
-          className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text font-black text-5xl text-transparent tracking-tight md:text-6xl"
-          style={{
-            opacity: isIntersecting ? 1 : 0,
-            transform: `translateY(${isIntersecting ? 0 : 50}px) scale(${isIntersecting ? 1 : 0.9})`,
-            transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            willChange: isIntersecting ? "auto" : "opacity, transform",
-          }}
+          isIntersecting={isIntersecting}
         >
           Tech Stacks
-          <div className="-inset-1 -z-10 absolute bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
-        </h2>
+        </SectionHeading>
       </div>
       <div
         ref={targetRef}

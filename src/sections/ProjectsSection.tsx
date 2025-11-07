@@ -1,15 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProjectScrollbar } from "../components/ProjectScrollbar";
+import { SectionHeading } from "../components/SectionHeading";
 import { INTERSECTION_OBSERVER_CONFIG, breakpoints } from "../constants";
 import { projects } from "../constants/projects";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { ProjectCard } from "./ProjectCard";
 
 export function ProjectsSection({ scrollY }: { scrollY: number }) {
-  const { targetRef: sectionRef, isIntersecting } = useIntersectionObserver({
+  // Intersection observer for title animation (mobile only)
+  const { targetRef: titleRef, isIntersecting } = useIntersectionObserver({
     threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
-    rootMargin: INTERSECTION_OBSERVER_CONFIG.PROJECTS_ROOT_MARGIN,
+    rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
+    enabled: window.innerWidth < breakpoints.mobile,
   });
+
+  // Section ref for horizontal scroll calculations (desktop)
+  const sectionRef = useRef<HTMLElement>(null);
 
   const [isMobile, setIsMobile] = useState(
     window.innerWidth < breakpoints.mobile
@@ -124,28 +130,34 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isMobile, sectionRef]);
+  }, [isMobile]);
 
   return (
     <section
       ref={sectionRef}
       id="projects"
       aria-labelledby="projects-heading"
-      aria-live="polite"
-      aria-atomic="false"
-      aria-describedby="projects-navigation-help"
-      tabIndex={-1}
+      aria-live={!isMobile ? "polite" : undefined}
+      aria-atomic={!isMobile ? "false" : undefined}
+      aria-describedby={!isMobile ? "projects-navigation-help" : undefined}
+      tabIndex={!isMobile ? -1 : undefined}
       className="relative z-10 overflow-x-clip py-20 outline-none md:px-0 md:py-0"
-      style={{
-        height: !isMobile ? `${100 + (projects.length + 1) * 100}vh` : "auto",
-      }}
+      style={
+        !isMobile
+          ? {
+              height: `${100 + (projects.length + 1) * 100}vh`,
+            }
+          : undefined
+      }
     >
-      {/* Keyboard navigation help for screen readers */}
-      <div id="projects-navigation-help" className="sr-only">
-        Horizontal scrolling section. Use arrow keys or scroll to navigate
-        through projects. Press Home to go to the beginning, End to go to the
-        end.
-      </div>
+      {/* Keyboard navigation help for screen readers - Desktop only */}
+      {!isMobile && (
+        <div id="projects-navigation-help" className="sr-only">
+          Horizontal scrolling section. Use arrow keys or scroll to navigate
+          through projects. Press Home to go to the beginning, End to go to the
+          end.
+        </div>
+      )}
 
       {/* Screen reader announcement */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
@@ -170,28 +182,16 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
           }}
         >
           {/* Title card - slides with projects */}
-          <div className="mb-12 flex h-full w-full items-center justify-center md:mb-0 md:w-screen md:flex-shrink-0">
-            <h2
+          <div
+            ref={titleRef}
+            className="mb-12 flex h-full w-full items-center justify-center md:mb-0 md:w-screen md:flex-shrink-0"
+          >
+            <SectionHeading
               id="projects-heading"
-              className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text font-black text-5xl text-transparent tracking-tight md:text-6xl"
-              style={
-                isMobile
-                  ? {
-                      opacity: isIntersecting ? 1 : 0,
-                      transform: `translateY(${
-                        isIntersecting ? 0 : 50
-                      }px) scale(${isIntersecting ? 1 : 0.9})`,
-                      transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                      willChange: isIntersecting
-                        ? "auto"
-                        : "opacity, transform",
-                    }
-                  : undefined
-              }
+              isIntersecting={isMobile ? isIntersecting : true}
             >
-              Featured Projects
-              <div className="-inset-1 -z-10 absolute bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-purple-600/20 blur-3xl" />
-            </h2>
+              Projects
+            </SectionHeading>
           </div>
 
           {projects.map((proj, index) => (
@@ -199,7 +199,6 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
               key={proj.name}
               project={proj}
               index={index}
-              isVisible={isIntersecting && isMobile}
               isMobile={isMobile}
             />
           ))}
