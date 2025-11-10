@@ -4,6 +4,7 @@ import { SectionHeading } from "../components/SectionHeading";
 import { INTERSECTION_OBSERVER_CONFIG, breakpoints } from "../constants";
 import { projects } from "../constants/projects";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
+import { useScrollSnap } from "../hooks/useScrollSnap";
 import { ProjectCard } from "./ProjectCard";
 
 export function ProjectsSection({ scrollY }: { scrollY: number }) {
@@ -15,7 +16,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
   });
 
   // Section ref for horizontal scroll calculations (desktop)
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
 
   const [isMobile, setIsMobile] = useState(
     window.innerWidth < breakpoints.mobile
@@ -88,6 +89,15 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
     const maxTranslate = projects.length * 100;
     setHorizontalTranslate(-(scrollProgress * maxTranslate));
   }, [scrollY, sectionRef]);
+
+  // Smooth scroll snapping - snaps to nearest project when scrolling stops
+  useScrollSnap({
+    enabled: !isMobile,
+    itemCount: projects.length, // Match the maxTranslate calculation
+    sectionRef,
+    debounceMs: 150, // Wait 150ms after scroll stops before snapping
+    threshold: 0.15, // Snap if more than 15% away from center
+  });
 
   // Keyboard navigation support
   useEffect(() => {
@@ -176,7 +186,8 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
             transform: !isMobile
               ? `translateX(${horizontalTranslate}vw)`
               : "none",
-            transition: "transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            // Smooth transition for both user scrolling and snap animations
+            transition: "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
             willChange: isIntersecting && !isMobile ? "transform" : "auto",
             width: !isMobile ? `${(projects.length + 1) * 100}vw` : "auto",
           }}
