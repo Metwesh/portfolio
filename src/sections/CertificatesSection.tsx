@@ -111,6 +111,8 @@ export function CertificatesSection() {
                         <img
                           src={cert.icon}
                           alt={`${cert.title} icon`}
+                          loading="lazy"
+                          decoding="async"
                           className="relative h-full w-full rounded-2xl object-contain transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
                         />
                       </div>

@@ -17,6 +17,12 @@ const getColumnCount = (width: number): number => {
 export function TechList({ isInView }: TechListProps) {
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
   const [columns, setColumns] = useState(getColumnCount(window.innerWidth));
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  // Trigger animation on mount or when coming into view
+  useEffect(() => {
+    if (isInView && !hasAnimated) setHasAnimated(true);
+  }, [isInView, hasAnimated]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -54,8 +60,8 @@ export function TechList({ isInView }: TechListProps) {
               className="group perspective-1000 relative h-32 cursor-pointer"
               onClick={() => handleCardClick(index)}
               style={{
-                opacity: isInView ? 1 : 0,
-                transform: isInView
+                opacity: hasAnimated ? 1 : 0,
+                transform: hasAnimated
                   ? "translate3d(0, 0, 0) scale(1)"
                   : "translate3d(0, 50px, 0) scale(0.8)",
                 transition: `opacity 0.6s ease-out ${staggerDelay}s, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${staggerDelay}s`,
@@ -95,6 +101,8 @@ export function TechList({ isInView }: TechListProps) {
                       <img
                         src={tech.icon}
                         alt={tech.name}
+                        loading="lazy"
+                        decoding="async"
                         className="relative z-10 h-full w-full object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none"
                       />
                     </div>

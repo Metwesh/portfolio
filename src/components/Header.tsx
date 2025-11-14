@@ -106,7 +106,7 @@ export function Header({ scrollY }: { scrollY: number }) {
           <a
             key={link.href}
             href={link.href}
-            className="transition-colors hover:text-cyan-400 max-lg:text-base"
+            className="transition-colors hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2 max-lg:text-base"
           >
             {link.label}
           </a>

@@ -73,6 +73,7 @@ export default function BoxShader(props: {
     name: string;
     wip?: boolean;
   };
+  isHovered?: boolean;
 }) {
   // Load the decals & backgrounds
   const rawDecalTexture = useLoader(ThreeTextureLoader, props.data.icon);
@@ -116,7 +117,7 @@ export default function BoxShader(props: {
   // fogColor, fogNear, and fogFar are used for fog calculations in the shader.
   // Memoize shader material to avoid recreating on every render (CRITICAL for preventing memory leaks)
   // Note: React Compiler warning is a false positive - we need ALL these dependencies for WebGL
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  // biome-ignore lint/correctness/useExhaustiveDependencies: The uniform is updated via useEffect below for better performance
   const decalMaterial = useMemo(() => {
     // Define the uniforms for the shader - initialize with actual textures for iOS compatibility
     const decalShaderUniforms: { [uniform: string]: ThreeIUniform } = {
@@ -129,6 +130,7 @@ export default function BoxShader(props: {
       fogColor: { value: fogOptions.color },
       fogNear: { value: fogOptions.near },
       fogFar: { value: fogOptions.far },
+      glowIntensity: { value: props.isHovered ? 1.5 : 1.0 },
     };
 
     // Define the decal shader
@@ -211,6 +213,7 @@ export default function BoxShader(props: {
         uniform vec3 fogColor;
         uniform float fogNear;
         uniform float fogFar;
+        uniform float glowIntensity;
         varying vec2 vUv;
         varying vec3 vNormal;
         varying vec3 vLightDirection;
@@ -229,7 +232,7 @@ export default function BoxShader(props: {
           }
           float depth = gl_FragCoord.z / gl_FragCoord.w;
           float fogFactor = smoothstep(fogNear, fogFar, depth);
-          vec3 finalColor = mix(color * lightEffect, fogColor, fogFactor);
+          vec3 finalColor = mix(color * lightEffect * glowIntensity, fogColor, fogFactor);
           gl_FragColor = vec4(finalColor, 1.0);
         }
       `,
@@ -251,7 +254,15 @@ export default function BoxShader(props: {
     wipTexture,
     props.data?.wip,
     fogOptions,
+    // Note: props.isHovered is intentionally excluded to avoid recreating material on hover
+    // The uniform is updated via useEffect below for better performance
   ]);
+
+  // Update glow intensity when hover state changes
+  useEffect(() => {
+    if (decalMaterial.uniforms.glowIntensity)
+      decalMaterial.uniforms.glowIntensity.value = props.isHovered ? 1.5 : 1.0;
+  }, [props.isHovered, decalMaterial]);
 
   // Dispose of material on unmount to prevent memory leaks
   useEffect(() => {

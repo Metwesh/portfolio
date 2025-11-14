@@ -19,6 +19,7 @@ interface TechBoxProps {
   scale: number | undefined;
   animateTo: ThreeVector3;
   isInView: boolean;
+  isSelected?: boolean;
 }
 
 export function TechBox({
@@ -28,14 +29,16 @@ export function TechBox({
   scale,
   animateTo,
   isInView,
+  isSelected,
 }: TechBoxProps) {
   const [meshRotation] = useState(
     () => new ThreeEuler(Math.random(), Math.random(), Math.random())
   );
 
   const meshRef = useRef<ThreeMesh>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
 
   const prevCameraPosition = useRef(new ThreeVector3());
   const rotationSpeed = useRef(0);
@@ -52,9 +55,7 @@ export function TechBox({
   useEffect(() => {
     if (meshRef.current?.geometry) {
       const geometry = meshRef.current.geometry;
-      if (geometry.attributes.uv) {
-        geometry.attributes.uv.needsUpdate = true;
-      }
+      if (geometry.attributes.uv) geometry.attributes.uv.needsUpdate = true;
     }
   }, []);
 
@@ -103,6 +104,16 @@ export function TechBox({
       e.stopPropagation();
       onClick();
     }
+  };
+
+  const handlePointerEnter = () => {
+    setIsHovered(true);
+    gl.domElement.style.cursor = "pointer";
+  };
+
+  const handlePointerLeave = () => {
+    setIsHovered(false);
+    gl.domElement.style.cursor = "unset";
   };
 
   useFrame(() => {
@@ -164,9 +175,11 @@ export function TechBox({
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onClick={handleClick}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
       >
         <boxGeometry args={[1, 1, 1]} />
-        <BoxShader data={data} />
+        <BoxShader data={data} isHovered={isHovered || isSelected} />
       </mesh>
     </Float>
   );

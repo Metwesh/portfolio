@@ -328,7 +328,7 @@ export const projects: readonly Project[] = [
     logo: amanLogo,
     image: amanDashboard,
     color: accentColors.darkBlue,
-    link: "https://www.amanaccept.com/",
+    // link: "https://www.amanaccept.com/",
   },
   {
     name: "SIDEUP Dashboard v3",

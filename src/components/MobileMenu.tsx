@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { navLinks, socialLinks } from "../constants";
 import { cn } from "../lib/utils";
@@ -8,9 +9,26 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
+  const firstLinkRef = useRef<HTMLAnchorElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  // Manage dialog open/close with proper showModal/close
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (isOpen && !dialog.open) {
+      dialog.showModal();
+      // Focus first link when menu opens
+      setTimeout(() => firstLinkRef.current?.focus(), 100);
+    } else if (!isOpen && dialog.open) dialog.close();
+  }, [isOpen]);
+
   return createPortal(
     <dialog
-      aria-modal="true"
+      ref={dialogRef}
+      id="mobile-menu"
+      aria-label="Mobile navigation menu"
       className={cn(
         "fixed inset-0 z-10 flex h-screen w-screen flex-col items-center justify-center gap-8 bg-black/80 font-bold text-2xl text-white backdrop-blur-xl transition-[opacity,transform] duration-500 md:hidden",
         isOpen
@@ -22,10 +40,11 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
       {navLinks.map((link, index) => (
         <a
           key={link.href}
+          ref={index === 0 ? firstLinkRef : undefined}
           href={link.href}
           onClick={onNavClick}
           className={cn(
-            "focus rounded transition-all duration-500 hover:text-cyan-400 focus:text-cyan-400 focus:outline-none focus:ring-none",
+            "focus rounded transition-all duration-500 hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2",
             isOpen
               ? "translate-y-0 opacity-100"
               : "pointer-events-none translate-y-8 opacity-0"
@@ -34,7 +53,6 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
             transitionDelay: isOpen ? `${index * 80 + 120}ms` : "0ms",
           }}
           tabIndex={isOpen ? 0 : -1}
-          id={index === 0 ? "mobile-nav-first-link" : undefined}
         >
           {link.label}
         </a>
@@ -74,7 +92,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={onNavClick}
-            className="transition-colors hover:text-cyan-400 focus:text-cyan-400 focus:outline-none"
+            className="transition-colors hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2"
             tabIndex={isOpen ? 0 : -1}
           >
             {link.label}

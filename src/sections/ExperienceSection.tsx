@@ -109,6 +109,7 @@ export function ExperienceSection() {
                       src={experience.icon}
                       alt={`${experience.company} logo`}
                       loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
                     />
                   </div>
@@ -160,7 +161,7 @@ export function ExperienceSection() {
                       </p>
 
                       {/* Points */}
-                      <ul className="space-y-2 text-sm text-white/80 group-hover:text-white/95 sm:text-base">
+                      <ul className="space-y-2 text-sm text-white/90 group-hover:text-white sm:text-base">
                         {experience.points.map((point, pointIndex) => (
                           <li
                             key={`experience-point-${point.title}`}

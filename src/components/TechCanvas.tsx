@@ -80,7 +80,7 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
                 clipRule="evenodd"
               />
             </svg>
-            <p className="font-medium text-white/80 text-xs md:text-sm">
+            <p className="font-medium text-white/90 text-xs md:text-sm">
               Click to explore
             </p>
           </div>
@@ -219,6 +219,7 @@ function Controls({
               scale={isSelected ? 20 : undefined}
               isInView={isInView}
               animateTo={targetPosition}
+              isSelected={isSelected}
             />
           );
         })}

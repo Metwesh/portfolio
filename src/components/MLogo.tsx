@@ -58,7 +58,6 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
 
   // Camera parallax effect
   // Note: Three.js animation loops require mutations - this is intentional
-  /* eslint-disable react-compiler/react-compiler */
   useFrame((state) => {
     // Skip animations if user prefers reduced motion
     if (reducedMotion || !group.current) return;
@@ -109,7 +108,6 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
     currentPos.y += (targetY - currentPos.y) * 0.08;
     camera.lookAt(0, 0, 0);
   });
-  /* eslint-enable react-compiler/react-compiler */
 
   // Set rotation and materials BEFORE first paint (prevents flip and ensures proper setup)
   useLayoutEffect(() => {
