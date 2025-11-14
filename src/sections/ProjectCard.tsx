@@ -128,8 +128,6 @@ export function ProjectCard({
                       <img
                         src={project.image}
                         alt={`${project.name} preview`}
-                        loading="lazy"
-                        decoding="async"
                         className="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-110 md:h-[360px]"
                       />
                       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -172,8 +170,6 @@ export function ProjectCard({
                           <img
                             src={project.logo}
                             alt={`${project.name} logo`}
-                            loading="lazy"
-                            decoding="async"
                             className="h-full w-full object-contain transition-all duration-500"
                           />
                           {project.darkLogo && (
