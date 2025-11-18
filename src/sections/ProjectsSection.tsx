@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ProjectScrollbar } from "../components/ProjectScrollbar";
 import { SectionHeading } from "../components/SectionHeading";
-import { INTERSECTION_OBSERVER_CONFIG, breakpoints } from "../constants";
+import { breakpoints, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { projects } from "../constants/projects";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useScrollSnap } from "../hooks/useScrollSnap";

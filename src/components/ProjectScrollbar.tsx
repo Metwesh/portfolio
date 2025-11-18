@@ -24,7 +24,7 @@ export function ProjectScrollbar({
         return (
           <button
             key={`project-scrollbar-${
-              // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+              // biome-ignore lint/suspicious/noArrayIndexKey: Index is stable and deterministic for static scrollbar items
               index
             }`}
             onClick={() => onNavigate(index)}

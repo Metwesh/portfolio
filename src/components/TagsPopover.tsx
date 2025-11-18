@@ -32,11 +32,7 @@ export function TagsPopover({
 
       {/* +N badge with popover */}
       {hiddenTags.length > 0 && (
-        <div
-          className="relative z-50"
-          onMouseEnter={() => setIsOpen(true)}
-          onMouseLeave={() => setIsOpen(false)}
-        >
+        <div className="relative z-50">
           {/* Badge trigger */}
           <button
             type="button"
@@ -47,6 +43,8 @@ export function TagsPopover({
                 : "rgba(255,255,255,0.1)",
               backgroundColor: isOpen ? `${projectColor}20` : "rgba(0,0,0,0.4)",
             }}
+            onMouseEnter={() => setIsOpen(true)}
+            onMouseLeave={() => setIsOpen(false)}
             onClick={() => setIsOpen((prev) => !prev)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
@@ -64,7 +62,7 @@ export function TagsPopover({
 
           {/* Popover */}
           <div
-            className="absolute top-full z-[100] mt-2 transition-all duration-300"
+            className="absolute top-full z-100 mt-2 transition-all duration-300"
             style={{
               left: "50%",
               opacity: isOpen ? 1 : 0,

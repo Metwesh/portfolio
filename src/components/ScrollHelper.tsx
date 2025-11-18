@@ -22,7 +22,7 @@ export function ScrollHelper({
         {[...Array(3)].map((_, index) => (
           <svg
             key={`scroll-helper-${
-              // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+              /** biome-ignore lint/suspicious/noArrayIndexKey: ignore array index key */
               index
             }`}
             className={cn(

@@ -1,40 +1,40 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.6/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
   "files": {
-    "ignore": [
-      "node_modules",
-      "dist",
-      "dist-ssr",
-      "*.local",
-      "exclude/",
-      "coverage/**",
-      ".vite-node",
-      "vite.config.ts.timestamp-*",
-      "*.log",
-      "logs",
-      "npm-debug.log*",
-      "yarn-debug.log*",
-      "yarn-error.log*",
-      "pnpm-debug.log*",
-      "lerna-debug.log*",
-      ".vscode/",
-      ".idea",
-      ".DS_Store",
-      "*.suo",
-      "*.ntvs*",
-      "*.njsproj",
-      "*.sln",
-      "*.sw?",
-      ".env",
-      ".env.local",
-      ".env.*.local",
-      "tsconfig*.json",
-      "*.tsbuildinfo"
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/dist-ssr",
+      "!**/*.local",
+      "!**/exclude/",
+      "!**/coverage",
+      "!**/.vite-node",
+      "!**/vite.config.ts.timestamp-*",
+      "!**/*.log",
+      "!**/logs",
+      "!**/npm-debug.log*",
+      "!**/yarn-debug.log*",
+      "!**/yarn-error.log*",
+      "!**/pnpm-debug.log*",
+      "!**/lerna-debug.log*",
+      "!**/.vscode/",
+      "!**/.idea",
+      "!**/.DS_Store",
+      "!**/*.suo",
+      "!**/*.ntvs*",
+      "!**/*.njsproj",
+      "!**/*.sln",
+      "!**/.env",
+      "!**/.env.local",
+      "!**/.env.*.local",
+      "!**/tsconfig*.json",
+      "!**/*.tsbuildinfo"
     ]
   },
   "formatter": {
@@ -46,9 +46,7 @@
     "lineWidth": 80,
     "attributePosition": "auto"
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
@@ -92,9 +90,22 @@
     },
     "globals": ["React"]
   },
+  "css": {
+    "parser": {
+      "cssModules": false,
+      "allowWrongLineComments": true,
+      "tailwindDirectives": true
+    },
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineWidth": 80
+    }
+  },
   "overrides": [
     {
-      "include": ["*.ts", "*.tsx"],
+      "includes": ["**/*.ts", "**/*.tsx"],
       "linter": {
         "rules": {
           "correctness": {

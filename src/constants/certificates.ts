@@ -1,8 +1,8 @@
 import {
   algorithms,
   bachelorsDegree,
-  cLanguage,
   cisa,
+  cLanguage,
   completeWebDev,
   jsCert,
   ossa,

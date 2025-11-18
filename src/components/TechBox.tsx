@@ -164,7 +164,7 @@ export function TechBox({
       position={[0, 0, 0.05]}
       floatingRange={[0.25, 0.25]}
     >
-      {/* biome-ignore lint/a11y/useKeyWithClickEvents: We need to use onClick for the mesh */}
+      {/** biome-ignore lint/a11y/noStaticElementInteractions: ignore all static elements should not be interactive */}
       <mesh
         ref={meshRef}
         name={data.name}
