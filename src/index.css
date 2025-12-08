@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/complexity/noImportantStyles: biome-ignore-all disable animations for all elements except loading screen and scroll chevrons */
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -48,8 +49,8 @@
 
   --animate-scroll-chevrons: scroll-chevrons 1s linear infinite;
   --animate-header-gradient-move: header-gradient-move 5s ease-in-out infinite;
-  --animate-header-gradient-move-pulse: header-gradient-move 5s ease-in-out
-    infinite, pulse 2s infinite;
+  --animate-header-gradient-move-pulse:
+    header-gradient-move 5s ease-in-out infinite, pulse 2s infinite;
   --animate-float: float 6s ease-in-out infinite;
   --animate-float-2: float-2 6s ease-in-out infinite;
   --animate-card-float: cardFloat 8s ease-in-out infinite;
@@ -101,9 +102,12 @@
   /* Global focus styles */
   *:focus-visible {
     @apply rounded-md ring-2 ring-white outline-none;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8), 0 0 20px
-      rgba(255, 255, 255, 0.6);
-    transition: box-shadow 0.2s ease-in-out, outline 0.2s ease-in-out;
+    box-shadow:
+      0 0 0 3px rgba(255, 255, 255, 0.8),
+      0 0 20px rgba(255, 255, 255, 0.6);
+    transition:
+      box-shadow 0.2s ease-in-out,
+      outline 0.2s ease-in-out;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -152,7 +156,7 @@
     }
   }
   body {
-    @apply bg-background relative min-h-svh bg-gradient-to-br from-gray-900 to-black font-sans text-white;
+    @apply bg-background relative min-h-svh bg-linear-to-br from-gray-900 to-black font-sans text-white;
   }
 }
 @layer utilities {
@@ -317,6 +321,202 @@
       opacity: 1;
       transform: scale(1.2);
     }
+  }
+
+  @keyframes tunnel-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+  }
+
+  @keyframes logo-gradient-shift {
+    0%,
+    100% {
+      filter: hue-rotate(0deg) saturate(1) brightness(1);
+    }
+    25% {
+      filter: hue-rotate(20deg) saturate(1.3) brightness(1.1);
+    }
+    50% {
+      filter: hue-rotate(-20deg) saturate(1.5) brightness(1.2);
+    }
+    75% {
+      filter: hue-rotate(10deg) saturate(1.2) brightness(1.05);
+    }
+  }
+
+  /* Logo glitch effect */
+  @keyframes glitch-1 {
+    0%,
+    20%,
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 0;
+    }
+    3% {
+      transform: translate(-3px, -2px) rotate(-1deg);
+      opacity: 0.8;
+    }
+    6% {
+      transform: translate(5px, 3px) rotate(2deg);
+      opacity: 0.6;
+    }
+    9% {
+      transform: translate(-4px, 1px) rotate(-2deg);
+      opacity: 0.7;
+    }
+    12% {
+      transform: translate(2px, -3px) rotate(1deg);
+      opacity: 0.5;
+    }
+    15% {
+      transform: translate(-6px, 2px) rotate(-3deg);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes glitch-2 {
+    0%,
+    22%,
+    100% {
+      transform: translate(0, 0) rotate(0deg) scaleX(1);
+      opacity: 0;
+    }
+    4% {
+      transform: translate(7px, -4px) rotate(3deg) scaleX(1.05);
+      opacity: 0.7;
+    }
+    7% {
+      transform: translate(-6px, 2px) rotate(-2deg) scaleX(0.95);
+      opacity: 0.5;
+    }
+    10% {
+      transform: translate(4px, -3px) rotate(1deg) scaleX(1.03);
+      opacity: 0.6;
+    }
+    13% {
+      transform: translate(-8px, 1px) rotate(-3deg) scaleX(0.97);
+      opacity: 0.8;
+    }
+    16% {
+      transform: translate(5px, 3px) rotate(2deg) scaleX(1.02);
+      opacity: 0.6;
+    }
+  }
+
+  @keyframes glitch-3 {
+    0%,
+    24%,
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 0;
+      filter: hue-rotate(0deg);
+    }
+    3.5% {
+      transform: translate(-8px, 4px) rotate(-4deg);
+      opacity: 0.6;
+      filter: hue-rotate(15deg);
+    }
+    6.5% {
+      transform: translate(9px, -3px) rotate(3deg);
+      opacity: 0.4;
+      filter: hue-rotate(-20deg);
+    }
+    9.5% {
+      transform: translate(-5px, 2px) rotate(-2deg);
+      opacity: 0.7;
+      filter: hue-rotate(10deg);
+    }
+    12.5% {
+      transform: translate(6px, -4px) rotate(4deg);
+      opacity: 0.5;
+      filter: hue-rotate(-15deg);
+    }
+    15.5% {
+      transform: translate(-7px, 3px) rotate(-3deg);
+      opacity: 0.6;
+      filter: hue-rotate(20deg);
+    }
+  }
+
+  @keyframes glitch-4 {
+    0%,
+    26%,
+    100% {
+      transform: translate(0, 0) skewX(0deg);
+      opacity: 0;
+    }
+    4.5% {
+      transform: translate(10px, -5px) skewX(5deg);
+      opacity: 0.8;
+    }
+    7.5% {
+      transform: translate(-9px, 3px) skewX(-4deg);
+      opacity: 0.5;
+    }
+    10.5% {
+      transform: translate(7px, -2px) skewX(3deg);
+      opacity: 0.6;
+    }
+    13.5% {
+      transform: translate(-8px, 4px) skewX(-5deg);
+      opacity: 0.7;
+    }
+    16.5% {
+      transform: translate(6px, -3px) skewX(4deg);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes glitch-5 {
+    0%,
+    28%,
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 0;
+    }
+    5% {
+      transform: translate(-10px, 6px) rotate(-5deg);
+      opacity: 0.4;
+    }
+    8% {
+      transform: translate(11px, -4px) rotate(4deg);
+      opacity: 0.3;
+    }
+    11% {
+      transform: translate(-7px, 3px) rotate(-3deg);
+      opacity: 0.5;
+    }
+    14% {
+      transform: translate(8px, -5px) rotate(5deg);
+      opacity: 0.4;
+    }
+    17% {
+      transform: translate(-9px, 4px) rotate(-4deg);
+      opacity: 0.3;
+    }
+  }
+
+  .group:hover [data-fan-index="0"] {
+    animation: glitch-1 3.5s ease-in-out infinite;
+  }
+  .group:hover [data-fan-index="1"] {
+    animation: glitch-2 3.8s ease-in-out infinite;
+  }
+  .group:hover [data-fan-index="2"] {
+    animation: glitch-3 4s ease-in-out infinite;
+  }
+  .group:hover [data-fan-index="3"] {
+    animation: glitch-4 4.2s ease-in-out infinite;
+  }
+  .group:hover [data-fan-index="4"] {
+    animation: glitch-5 4.5s ease-in-out infinite;
   }
 }
 

@@ -1,0 +1,6 @@
+echo "Running pre-push checks..."
+echo "--------------------------------"
+yarn lint
+yarn compile
+yarn format:check
+echo "All pre-push checks passed!"

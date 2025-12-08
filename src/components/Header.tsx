@@ -65,7 +65,7 @@ export function Header({ scrollY }: { scrollY: number }) {
         </svg>
         <span
           className={cn(
-            "bg-gradient-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text font-extrabold text-2xl text-transparent tracking-tight drop-shadow-lg transition-opacity delay-1000 duration-1000 group-focus-visible:opacity-100 group-focus-visible:delay-0 group-focus-visible:duration-300 md:text-3xl",
+            "bg-linear-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text font-extrabold text-2xl text-transparent tracking-tight drop-shadow-lg transition-opacity delay-1000 duration-1000 group-focus-visible:opacity-100 group-focus-visible:delay-0 group-focus-visible:duration-300 md:text-3xl",
             headerBg ? "opacity-100" : "opacity-0"
           )}
         >

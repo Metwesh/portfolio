@@ -5,8 +5,8 @@ import { Switch } from "../components/Switch";
 import { TechCanvas } from "../components/TechCanvas";
 import { TechList } from "../components/TechList";
 import {
-  INTERSECTION_OBSERVER_CONFIG,
   breakpoints,
+  INTERSECTION_OBSERVER_CONFIG,
   navLinks,
 } from "../constants";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";

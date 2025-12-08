@@ -12,7 +12,7 @@ export function SectionHeading({
   return (
     <h2
       id={id}
-      className="relative bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-center font-black text-5xl text-transparent tracking-tight md:text-6xl"
+      className="relative bg-linear-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-center font-black text-5xl text-transparent tracking-tight md:text-6xl"
       style={{
         opacity: isIntersecting ? 1 : 0,
         transform: `translateY(${isIntersecting ? 0 : 50}px) scale(${

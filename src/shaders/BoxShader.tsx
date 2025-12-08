@@ -11,7 +11,7 @@ import {
   type Texture as ThreeTexture,
   TextureLoader as ThreeTextureLoader,
 } from "three";
-import { WIP, boxBg } from "../assets";
+import { boxBg, WIP } from "../assets";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "./FogArguments";
 
 // Cache processed textures globally to avoid reprocessing the same texture multiple times

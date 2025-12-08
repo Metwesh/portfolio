@@ -1,6 +1,7 @@
 import { useGLTF } from "@react-three/drei";
-import { Suspense, lazy } from "react";
+import { lazy, Suspense } from "react";
 import { Footer, Header, MainCanvas, SkipToContent } from "./components";
+import { Scene } from "./components/museum/Scene";
 import { mainLogoPath } from "./constants";
 import { useScrollPosition } from "./hooks/useScrollPosition";
 
@@ -46,41 +47,40 @@ export default function App() {
   };
 
   return (
-    <>
-      <div className="px-gutter">
-        {/* Skip to content for accessibility */}
-        <SkipToContent />
+    <div className="px-gutter">
+      {/* Skip to content for accessibility */}
+      <SkipToContent />
 
-        {/* Fixed 3D Canvas */}
-        <MainCanvas scrollY={scrollY} onReady={handleCanvasReady} />
+      {/* Fixed 3D Canvas */}
+      <MainCanvas scrollY={scrollY} onReady={handleCanvasReady} />
 
-        {/* Sticky Header with Logo and lively text */}
-        <Header scrollY={scrollY} />
+      {/* Sticky Header with Logo and lively text */}
+      <Header scrollY={scrollY} />
 
-        <main id="main-content">
+      <main id="main-content">
+        <Suspense fallback={null}>
+          <HeroSection scrollY={scrollY} />
+        </Suspense>
+
+        {/* <Suspense fallback={null}> */}
+        {/* <ProjectsSection scrollY={scrollY} /> */}
+        <Scene scrollY={scrollY} />
+        {/* </Suspense> */}
+
+        <Suspense fallback={null}>
+          <ExperienceSection />
+        </Suspense>
+
+        <TechStacksSection />
+
+        <div className="relative z-10 bg-linear-to-b from-black/0 to-black">
           <Suspense fallback={null}>
-            <HeroSection scrollY={scrollY} />
+            <CertificatesSection />
           </Suspense>
 
-          <Suspense fallback={null}>
-            <ProjectsSection scrollY={scrollY} />
-          </Suspense>
-
-          <Suspense fallback={null}>
-            <ExperienceSection />
-          </Suspense>
-
-          <TechStacksSection />
-
-          <div className="relative z-10 bg-gradient-to-b from-black/0 to-black">
-            <Suspense fallback={null}>
-              <CertificatesSection />
-            </Suspense>
-
-            <Footer />
-          </div>
-        </main>
-      </div>
-    </>
+          <Footer />
+        </div>
+      </main>
+    </div>
   );
 }

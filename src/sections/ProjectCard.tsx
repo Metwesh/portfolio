@@ -31,7 +31,7 @@ export function ProjectCard({
     // Full viewport width card for horizontal scroll on desktop, auto width on mobile
     <article
       ref={targetRef}
-      className="w-full md:h-full md:w-screen md:flex-shrink-0"
+      className="w-full md:h-full md:w-screen md:shrink-0"
       style={
         isMobile
           ? {
@@ -130,7 +130,7 @@ export function ProjectCard({
                         alt={`${project.name} preview`}
                         className="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-110 md:h-[360px]"
                       />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                       <div
                         className="pointer-events-none absolute inset-0 mix-blend-overlay transition-opacity duration-500 group-hover:opacity-50"
                         style={{

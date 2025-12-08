@@ -4,6 +4,18 @@ import { certificates } from "../constants/certificates";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { cn } from "../lib/utils";
 
+const logoArray = Array.from({ length: 5 }, (_, i) => `logo-fan-${i}`);
+const tunnelArray = Array.from({ length: 8 }, (_, i) => ({
+  id: `tunnel-ring-${i}`,
+  scale: 1 - i * 0.12,
+  opacity: 0.15 - i * 0.015,
+  backgroundOpacity: 0.3 + i * 0.08,
+  borderOpacity: 0.3 - i * 0.03,
+  animationDelay: i * 0.15,
+  zIndex: -i, // Stack rings properly, smaller ones on top
+  hueRotate: i * 15, // Color shift for each ring
+}));
+
 export function CertificatesSection() {
   const { targetRef, isIntersecting } = useIntersectionObserver({
     threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
@@ -44,19 +56,21 @@ export function CertificatesSection() {
                   transform: isIntersecting
                     ? "translate3d(0, 0, 0)"
                     : `translate3d(0, ${Math.min(30 + index * 5, 80)}px, 0)`,
-                  transition: `opacity ${
-                    ANIMATION_CONFIG.CERTIFICATES_DURATION
-                  }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
-                    ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
-                      index * ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
-                    ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
-                  )}s, transform ${
-                    ANIMATION_CONFIG.CERTIFICATES_DURATION
-                  }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
-                    ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
-                      index * ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
-                    ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
-                  )}s`,
+                  transition: isIntersecting
+                    ? `opacity ${
+                        ANIMATION_CONFIG.CERTIFICATES_DURATION
+                      }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
+                        ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
+                          index * ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
+                        ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
+                      )}s, transform ${
+                        ANIMATION_CONFIG.CERTIFICATES_DURATION
+                      }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
+                        ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
+                          index * ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
+                        ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
+                      )}s`
+                    : "none",
                   willChange: isIntersecting ? "auto" : "opacity, transform",
                 }}
               >
@@ -73,7 +87,7 @@ export function CertificatesSection() {
                   href={cert.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative flex h-full min-h-[200px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none"
+                  className="relative flex h-full min-h-[200px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none"
                 >
                   {/* Animated gradient mesh background */}
                   <div className="absolute inset-0 opacity-40">
@@ -93,7 +107,7 @@ export function CertificatesSection() {
 
                   {/* Animated border */}
                   <div
-                    className="absolute inset-0 animate-[borderFlow_3s_ease_infinite] rounded-2xl bg-[length:200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
+                    className="absolute inset-0 animate-[borderFlow_3s_ease_infinite] rounded-2xl bg-size-[200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
                     style={{
                       backgroundImage: `linear-gradient(135deg, ${cert.color}40, transparent 50%, ${cert.color}40)`,
                     }}
@@ -176,7 +190,7 @@ export function CertificatesSection() {
 
                   {/* Shimmer effect */}
                   <div
-                    className="pointer-events-none absolute inset-0 animate-[shimmer_2s_infinite] bg-[length:200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none"
+                    className="pointer-events-none absolute inset-0 animate-[shimmer_2s_infinite] bg-size-[200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none"
                     style={{
                       backgroundImage: `linear-gradient(110deg, transparent 25%, ${cert.color}15 50%, transparent 75%)`,
                     }}
@@ -211,30 +225,40 @@ export function CertificatesSection() {
                     30 + certificates.length * 5,
                     80
                   )}px, 0)`,
-              transition: `opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
-                certificates.length * 0.05,
-                0.4
-              )}s, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
-                certificates.length * 0.05,
-                0.4
-              )}s`,
+              transition: isIntersecting
+                ? `opacity ${
+                    ANIMATION_CONFIG.CERTIFICATES_DURATION
+                  }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
+                    ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
+                      certificates.length *
+                        ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
+                    ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
+                  )}s, transform ${
+                    ANIMATION_CONFIG.CERTIFICATES_DURATION
+                  }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
+                    ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
+                      certificates.length *
+                        ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
+                    ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
+                  )}s`
+                : "none",
               willChange: isIntersecting ? "auto" : "opacity, transform",
             }}
           >
             {/* Glow effect */}
-            <div className="-inset-2 absolute rounded-3xl bg-gradient-to-r from-cyan-400/50 via-blue-500/50 to-purple-600/50 opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none" />
+            <div className="-inset-2 absolute rounded-3xl bg-linear-to-r from-cyan-400/50 via-blue-500/50 to-purple-600/50 opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none" />
 
             {/* Main card */}
-            <div className="relative flex h-full min-h-[200px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none">
+            <div className="relative flex h-full min-h-[200px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none">
               {/* Animated gradient mesh background */}
               <div className="absolute inset-0 opacity-40">
-                <div className="-translate-y-[20%] absolute top-0 right-0 h-64 w-64 translate-x-[20%] rounded-full bg-gradient-to-br from-cyan-400/70 via-blue-500/70 to-purple-600/70 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
-                <div className="-translate-x-[20%] absolute bottom-0 left-0 h-56 w-56 translate-y-[20%] rounded-full bg-gradient-to-tl from-purple-600/50 via-blue-500/50 to-cyan-400/50 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
+                <div className="-translate-y-[20%] absolute top-0 right-0 h-64 w-64 translate-x-[20%] rounded-full bg-linear-to-br from-cyan-400/70 via-blue-500/70 to-purple-600/70 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
+                <div className="-translate-x-[20%] absolute bottom-0 left-0 h-56 w-56 translate-y-[20%] rounded-full bg-linear-to-tl from-purple-600/50 via-blue-500/50 to-cyan-400/50 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
               </div>
 
               {/* Animated border */}
               <div
-                className="absolute inset-0 rounded-2xl bg-[length:200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
+                className="absolute inset-0 rounded-2xl bg-size-[200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
                 style={{
                   backgroundImage:
                     "linear-gradient(135deg, rgba(0, 211, 242, 0.4), transparent 50%, rgba(168, 85, 247, 0.4))",
@@ -242,24 +266,98 @@ export function CertificatesSection() {
                 }}
               />
 
-              {/* Logo SVG */}
+              {/* Tunnel effect - rings getting smaller */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none">
+                {tunnelArray.map(
+                  ({
+                    id,
+                    scale,
+                    opacity,
+                    backgroundOpacity,
+                    borderOpacity,
+                    hueRotate,
+                    animationDelay,
+                    zIndex,
+                  }) => (
+                    <div
+                      key={id}
+                      className="absolute rounded-2xl"
+                      style={{
+                        width: `${scale * 100}%`,
+                        height: `${scale * 100}%`,
+                        opacity: opacity,
+                        background: `rgba(0, 0, 0, ${backgroundOpacity})`,
+                        border: `1px solid rgba(0, 211, 242, ${borderOpacity})`,
+                        boxShadow: `0 0 ${
+                          10 + scale * 20
+                        }px rgba(0, 211, 242, ${
+                          borderOpacity * 0.5
+                        }), inset 0 0 ${5 + scale * 10}px rgba(168, 85, 247, ${
+                          borderOpacity * 0.3
+                        })`,
+                        animation: `tunnel-pulse 3s ease-in-out ${animationDelay}s infinite`,
+                        filter: `hue-rotate(${hueRotate}deg)`,
+                        zIndex,
+                      }}
+                    />
+                  )
+                )}
+              </div>
+
+              {/* Logo SVG with glitch effect */}
               <div className="relative z-10 p-8">
+                {/* Fan-out copies (background layers) - glitch effect */}
+                {logoArray.map((fanId, i) => (
+                  <svg
+                    key={fanId}
+                    width="120"
+                    height="120"
+                    viewBox="0 0 478 478"
+                    fill="none"
+                    className="absolute top-8 left-8 opacity-0 motion-reduce:transition-none"
+                    data-fan-index={i}
+                  >
+                    <rect width="478" height="478" rx="32" fill="transparent" />
+                    <path
+                      d="M39 39C69 109 69 319 39 399C79.6667 397 164.5 399 119 439C137 439 159 406 159 359C159 279 150.5 275 99 275C109 255 109 219 99 199C119 209 159 209 179 199L239 419L299 199C319 209 359 209 379 199C369 219 369 255 379 275C327.5 275 319 279 319 359C319 406 341 439 359 439C313.5 399 398.333 397 439 399C409 319 409 109 439 39C418.5 52.5 311.4 71.4 279 39L239 199L199 39C166.6 71.4 59.5 52.5 39 39Z"
+                      fill={`url(#logo-gradient-${i})`}
+                    />
+                    <defs>
+                      <linearGradient
+                        id={`logo-gradient-${i}`}
+                        x1="39"
+                        y1="39"
+                        x2="439"
+                        y2="439"
+                        gradientUnits="userSpaceOnUse"
+                      >
+                        <stop stopColor="#22D3EE" />
+                        <stop offset="0.5" stopColor="#3B82F6" />
+                        <stop offset="1" stopColor="#A855F7" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                ))}
+
+                {/* Main logo (front layer) */}
                 <svg
                   width="120"
                   height="120"
                   viewBox="0 0 478 478"
                   fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
+                  className="relative transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
+                  style={{
+                    animation: "logo-gradient-shift 4s ease-in-out infinite",
+                  }}
                 >
                   <rect width="478" height="478" rx="32" fill="transparent" />
                   <path
                     d="M39 39C69 109 69 319 39 399C79.6667 397 164.5 399 119 439C137 439 159 406 159 359C159 279 150.5 275 99 275C109 255 109 219 99 199C119 209 159 209 179 199L239 419L299 199C319 209 359 209 379 199C369 219 369 255 379 275C327.5 275 319 279 319 359C319 406 341 439 359 439C313.5 399 398.333 397 439 399C409 319 409 109 439 39C418.5 52.5 311.4 71.4 279 39L239 199L199 39C166.6 71.4 59.5 52.5 39 39Z"
-                    fill="url(#logo-gradient)"
+                    fill="url(#logo-gradient-main)"
                   />
                   <defs>
                     <linearGradient
-                      id="logo-gradient"
+                      id="logo-gradient-main"
                       x1="39"
                       y1="39"
                       x2="439"
@@ -276,7 +374,7 @@ export function CertificatesSection() {
 
               {/* Shimmer effect */}
               <div
-                className="pointer-events-none absolute inset-0 bg-[length:200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none"
+                className="pointer-events-none absolute inset-0 bg-size-[200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none"
                 style={{
                   backgroundImage:
                     "linear-gradient(110deg, transparent 25%, rgba(34, 211, 238, 0.15) 50%, transparent 75%)",
@@ -285,8 +383,8 @@ export function CertificatesSection() {
               />
 
               {/* Corner accents */}
-              <div className="pointer-events-none absolute top-0 left-0 h-20 w-20 rounded-full bg-gradient-to-br from-cyan-400/60 to-transparent opacity-0 blur-lg transition-all duration-700 group-hover:opacity-60 motion-reduce:transition-none" />
-              <div className="pointer-events-none absolute right-0 bottom-0 h-20 w-20 rounded-full bg-gradient-to-tl from-purple-600/60 to-transparent opacity-0 blur-lg transition-all duration-700 group-hover:opacity-60 motion-reduce:transition-none" />
+              <div className="pointer-events-none absolute top-0 left-0 h-20 w-20 rounded-full bg-linear-to-br from-cyan-400/60 to-transparent opacity-0 blur-lg transition-all duration-700 group-hover:opacity-60 motion-reduce:transition-none" />
+              <div className="pointer-events-none absolute right-0 bottom-0 h-20 w-20 rounded-full bg-linear-to-tl from-purple-600/60 to-transparent opacity-0 blur-lg transition-all duration-700 group-hover:opacity-60 motion-reduce:transition-none" />
             </div>
           </article>
         </div>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ProjectScrollbar } from "../components/ProjectScrollbar";
 import { SectionHeading } from "../components/SectionHeading";
-import { INTERSECTION_OBSERVER_CONFIG, breakpoints } from "../constants";
+import { breakpoints, INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { projects } from "../constants/projects";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useScrollSnap } from "../hooks/useScrollSnap";
@@ -195,7 +195,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
           {/* Title card - slides with projects */}
           <div
             ref={titleRef}
-            className="mb-12 flex h-full w-full items-center justify-center md:mb-0 md:w-screen md:flex-shrink-0"
+            className="mb-12 flex h-full w-full items-center justify-center md:mb-0 md:w-screen md:shrink-0"
           >
             <SectionHeading
               id="projects-heading"

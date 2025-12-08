@@ -1,5 +1,4 @@
 import {
-  BRGRSpinTheWheel,
   addOn,
   addOnCms,
   amanDashboard,
@@ -7,6 +6,7 @@ import {
   aradyMisr,
   aradyMisrCms,
   aradyMisrLogo,
+  BRGRSpinTheWheel,
   beltoneHolding,
   beltoneLogo,
   brgrLogo,

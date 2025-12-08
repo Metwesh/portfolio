@@ -75,7 +75,7 @@ export function TechList({ isInView }: TechListProps) {
                 )}
               >
                 {/* Front side */}
-                <div className="backface-hidden absolute inset-0 rounded-xl border border-white/30 bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-lg backdrop-blur-md transition-all duration-500 ease-out hover:scale-105 hover:border-cyan-400 hover:from-cyan-500/30 hover:to-blue-600/30 hover:shadow-cyan-400/20 hover:shadow-xl motion-reduce:transition-none">
+                <div className="backface-hidden absolute inset-0 rounded-xl border border-white/30 bg-linear-to-br from-white/10 to-white/5 p-4 shadow-lg backdrop-blur-md transition-all duration-500 ease-out hover:scale-105 hover:border-cyan-400 hover:from-cyan-500/30 hover:to-blue-600/30 hover:shadow-cyan-400/20 hover:shadow-xl motion-reduce:transition-none">
                   {tech.wip && (
                     <div
                       className="absolute inset-0 rounded-lg opacity-60 transition-opacity duration-300 group-hover:opacity-40 motion-reduce:transition-none"
@@ -88,15 +88,15 @@ export function TechList({ isInView }: TechListProps) {
                     />
                   )}
                   {/* Animated background gradient */}
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-cyan-400/0 to-blue-600/0 opacity-0 transition-opacity duration-500 group-hover:from-cyan-400/10 group-hover:to-blue-600/5 group-hover:opacity-100 motion-reduce:transition-none" />
+                  <div className="absolute inset-0 rounded-xl bg-linear-to-br from-cyan-400/0 to-blue-600/0 opacity-0 transition-opacity duration-500 group-hover:from-cyan-400/10 group-hover:to-blue-600/5 group-hover:opacity-100 motion-reduce:transition-none" />
 
                   {/* Glow effect */}
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-cyan-400/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-30 motion-reduce:transition-none" />
+                  <div className="absolute inset-0 rounded-xl bg-linear-to-br from-cyan-400/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-30 motion-reduce:transition-none" />
 
                   <div className="relative z-10 flex h-full items-center justify-center">
                     <div className="relative flex h-16 w-16 items-center justify-center">
                       {/* Icon glow */}
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-600/20 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none" />
+                      <div className="absolute inset-0 rounded-full bg-linear-to-br from-cyan-400/20 to-blue-600/20 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none" />
 
                       <img
                         src={tech.icon}
@@ -110,7 +110,7 @@ export function TechList({ isInView }: TechListProps) {
                 </div>
 
                 {/* Back side */}
-                <div className="backface-hidden absolute inset-0 rotate-y-180 rounded-xl border border-cyan-400/50 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 p-4 shadow-lg backdrop-blur-md">
+                <div className="backface-hidden absolute inset-0 rotate-y-180 rounded-xl border border-cyan-400/50 bg-linear-to-br from-cyan-500/20 to-blue-600/20 p-4 shadow-lg backdrop-blur-md">
                   <div className="relative z-10 flex h-full flex-col items-center justify-center space-y-2 text-center">
                     <div className="font-bold text-cyan-100 text-lg">
                       {tech.name}
