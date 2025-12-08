@@ -4,10 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { experiences } from "../../constants/experiences";
 
-export function Walkway({ 
-  length = 50, 
-  isIntersecting = false 
-}: { 
+export function Walkway({
+  length = 50,
+  isIntersecting = false,
+}: {
   length?: number;
   isIntersecting?: boolean;
 }) {
