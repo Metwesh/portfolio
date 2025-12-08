@@ -1,6 +1,7 @@
 import { useGLTF } from "@react-three/drei";
 import { lazy, Suspense } from "react";
 import { Footer, Header, MainCanvas, SkipToContent } from "./components";
+import { Scene } from "./components/museum/Scene";
 import { mainLogoPath } from "./constants";
 import { useScrollPosition } from "./hooks/useScrollPosition";
 
@@ -61,9 +62,10 @@ export default function App() {
           <HeroSection scrollY={scrollY} />
         </Suspense>
 
-        <Suspense fallback={null}>
-          <ProjectsSection scrollY={scrollY} />
-        </Suspense>
+        {/* <Suspense fallback={null}> */}
+        {/* <ProjectsSection scrollY={scrollY} /> */}
+        <Scene scrollY={scrollY} />
+        {/* </Suspense> */}
 
         <Suspense fallback={null}>
           <ExperienceSection />

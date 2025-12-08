@@ -61,7 +61,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
       {/* Divider */}
       <div
         className={cn(
-          "h-px w-32 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-all duration-500",
+          "h-px w-32 bg-linear-to-r from-transparent via-white/30 to-transparent transition-all duration-500",
           isOpen
             ? "translate-y-0 opacity-100"
             : "pointer-events-none translate-y-8 opacity-0"

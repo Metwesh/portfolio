@@ -171,7 +171,7 @@ export function ExperienceSection() {
                             }}
                           >
                             <span
-                              className="mt-2 h-1 w-1 flex-shrink-0 rounded-full transition-all duration-300 motion-reduce:transition-none"
+                              className="mt-2 h-1 w-1 shrink-0 rounded-full transition-all duration-300 motion-reduce:transition-none"
                               style={{
                                 background: experience.color,
                               }}
@@ -187,7 +187,7 @@ export function ExperienceSection() {
 
                     {/* Shimmer effect */}
                     <div
-                      className="pointer-events-none absolute inset-0 bg-[length:200%_100%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
+                      className="pointer-events-none absolute inset-0 bg-size-[200%_100%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
                       style={{
                         backgroundImage: `linear-gradient(110deg, transparent 25%, ${experience.color}15 50%, transparent 75%)`,
                         animation: !prefersReducedMotion
