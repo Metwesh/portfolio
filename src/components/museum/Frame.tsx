@@ -1,3 +1,4 @@
+import { Text } from "@react-three/drei";
 import { useFrame, useLoader } from "@react-three/fiber";
 import { useRef, useState } from "react";
 import type * as THREE from "three";
@@ -9,6 +10,8 @@ interface FrameProps {
   index: number;
   spacing?: number;
   cameraZ?: number;
+  title: string;
+  description: string;
 }
 
 export function Frame({
@@ -17,6 +20,8 @@ export function Frame({
   index,
   spacing = 8,
   cameraZ = 0,
+  title,
+  description,
 }: FrameProps) {
   const meshRef = useRef<THREE.Group>(null);
   const texture = useLoader(TextureLoader, imageUrl);
@@ -118,6 +123,31 @@ export function Frame({
           reflectivity={0.9}
         />
       </mesh>
+
+      {/* Title text below frame */}
+      <Text
+        position={[0, -(frameHeight / 2) - 0.4, 0.1]}
+        fontSize={0.25}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="top"
+        maxWidth={frameWidth}
+      >
+        {title}
+      </Text>
+
+      {/* Description text below title */}
+      <Text
+        position={[0, -(frameHeight / 2) - 0.75, 0.1]}
+        fontSize={0.15}
+        color="#cccccc"
+        anchorX="center"
+        anchorY="top"
+        maxWidth={frameWidth}
+        lineHeight={1.2}
+      >
+        {description}
+      </Text>
     </group>
   );
 }

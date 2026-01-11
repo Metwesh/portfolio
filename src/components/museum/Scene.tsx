@@ -23,6 +23,7 @@ function CameraController({
   const cameraRef = useRef<THREE.Camera | null>(null);
   const spotlightRef = useRef<THREE.SpotLight | null>(null);
   const [scrollTarget, setScrollTarget] = useState(0);
+  const [lateralTarget, setLateralTarget] = useState(0);
   const spotlightTargetRef = useRef({ x: 0, y: 1.5, z: 0 });
 
   const maxZ = (projects.length - 1) * SPACING + 10;
@@ -50,9 +51,38 @@ function CameraController({
 
   useFrame(({ camera }) => {
     cameraRef.current = camera;
-    // Smooth lerp to target position
+    // Smooth lerp to target position (Z-axis for forward/backward)
     const lerpFactor = 0.05;
     camera.position.z += (scrollTarget - camera.position.z) * lerpFactor;
+
+    // Calculate lateral movement based on focused frame
+    const cameraZ = camera.position.z;
+    const activationRange = 15; // Same as in Frame.tsx
+    const maxLateralNudge = 1; // How far to nudge the camera laterally
+
+    // Find the closest frame
+    const lookaheadDistance = 5;
+    const adjustedZ = cameraZ + lookaheadDistance;
+    const closestIndex = Math.round(adjustedZ / SPACING - 1);
+    const closestFrameZ = (closestIndex + 1) * SPACING;
+    const distanceToClosestFrame = Math.abs(cameraZ - closestFrameZ);
+
+    // Calculate lateral nudge
+    if (distanceToClosestFrame < activationRange) {
+      const slideProgress = 1 - distanceToClosestFrame / activationRange;
+      const easedProgress = 1 - (1 - slideProgress) ** 3;
+
+      // Determine which side the frame is on
+      const isLeftSide = closestIndex % 2 === 0;
+      const nudgeDirection = isLeftSide ? -1 : 1; // Nudge towards the frame
+      const targetLateral = easedProgress * maxLateralNudge * nudgeDirection;
+      setLateralTarget(targetLateral);
+    } else {
+      setLateralTarget(0);
+    }
+
+    // Apply lateral movement smoothly
+    camera.position.x += (lateralTarget - camera.position.x) * lerpFactor;
 
     // Notify parent of camera position
     if (onCameraMove) {
@@ -98,7 +128,7 @@ function CameraController({
   return (
     <spotLight
       ref={spotlightRef}
-      intensity={6}
+      intensity={15}
       angle={Math.PI / 6}
       penumbra={0.4}
       distance={30}
@@ -152,10 +182,10 @@ export function Scene({ scrollY }: { scrollY: number }) {
           <fog attach="fog" args={["#000000", 10, 80]} />
 
           {/* Lighting */}
-          <ambientLight intensity={0.15} />
+          <ambientLight intensity={0.5} />
           <directionalLight
             position={[0, 5, 5]}
-            intensity={0.3}
+            intensity={0.5}
             castShadow
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
@@ -192,6 +222,8 @@ export function Scene({ scrollY }: { scrollY: number }) {
               index={index + 1}
               spacing={SPACING}
               cameraZ={cameraZ}
+              title={project.name}
+              description={project.description}
             />
           ))}
         </Canvas>
