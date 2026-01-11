@@ -42,7 +42,7 @@ export function Switch({
         className={cn(
           "relative inline-flex h-8 w-14 items-center rounded-full border backdrop-blur-md transition-all duration-300 ease-in-out",
           value
-            ? "border-cyan-400/50 bg-gradient-to-r from-cyan-500/30 to-blue-600/30 shadow-[0_8px_25px_rgba(6,182,212,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]"
+            ? "border-cyan-400/50 bg-linear-to-r from-cyan-500/30 to-blue-600/30 shadow-[0_8px_25px_rgba(6,182,212,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]"
             : "border-white/20 bg-white/10 shadow-[0_8px_25px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]"
         )}
       >

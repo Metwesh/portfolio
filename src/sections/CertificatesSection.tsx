@@ -87,7 +87,7 @@ export function CertificatesSection() {
                   href={cert.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative flex h-full min-h-[200px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none"
+                  className="relative flex h-full min-h-[200px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none"
                 >
                   {/* Animated gradient mesh background */}
                   <div className="absolute inset-0 opacity-40">
@@ -107,7 +107,7 @@ export function CertificatesSection() {
 
                   {/* Animated border */}
                   <div
-                    className="absolute inset-0 animate-[borderFlow_3s_ease_infinite] rounded-2xl bg-[length:200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
+                    className="absolute inset-0 animate-[borderFlow_3s_ease_infinite] rounded-2xl bg-size-[200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
                     style={{
                       backgroundImage: `linear-gradient(135deg, ${cert.color}40, transparent 50%, ${cert.color}40)`,
                     }}
@@ -190,7 +190,7 @@ export function CertificatesSection() {
 
                   {/* Shimmer effect */}
                   <div
-                    className="pointer-events-none absolute inset-0 animate-[shimmer_2s_infinite] bg-[length:200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none"
+                    className="pointer-events-none absolute inset-0 animate-[shimmer_2s_infinite] bg-size-[200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none"
                     style={{
                       backgroundImage: `linear-gradient(110deg, transparent 25%, ${cert.color}15 50%, transparent 75%)`,
                     }}
@@ -246,19 +246,19 @@ export function CertificatesSection() {
             }}
           >
             {/* Glow effect */}
-            <div className="-inset-2 absolute rounded-3xl bg-gradient-to-r from-cyan-400/50 via-blue-500/50 to-purple-600/50 opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none" />
+            <div className="-inset-2 absolute rounded-3xl bg-linear-to-r from-cyan-400/50 via-blue-500/50 to-purple-600/50 opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none" />
 
             {/* Main card */}
-            <div className="relative flex h-full min-h-[200px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none">
+            <div className="relative flex h-full min-h-[200px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none">
               {/* Animated gradient mesh background */}
               <div className="absolute inset-0 opacity-40">
-                <div className="-translate-y-[20%] absolute top-0 right-0 h-64 w-64 translate-x-[20%] rounded-full bg-gradient-to-br from-cyan-400/70 via-blue-500/70 to-purple-600/70 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
-                <div className="-translate-x-[20%] absolute bottom-0 left-0 h-56 w-56 translate-y-[20%] rounded-full bg-gradient-to-tl from-purple-600/50 via-blue-500/50 to-cyan-400/50 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
+                <div className="-translate-y-[20%] absolute top-0 right-0 h-64 w-64 translate-x-[20%] rounded-full bg-linear-to-br from-cyan-400/70 via-blue-500/70 to-purple-600/70 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
+                <div className="-translate-x-[20%] absolute bottom-0 left-0 h-56 w-56 translate-y-[20%] rounded-full bg-linear-to-tl from-purple-600/50 via-blue-500/50 to-cyan-400/50 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
               </div>
 
               {/* Animated border */}
               <div
-                className="absolute inset-0 rounded-2xl bg-[length:200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
+                className="absolute inset-0 rounded-2xl bg-size-[200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
                 style={{
                   backgroundImage:
                     "linear-gradient(135deg, rgba(0, 211, 242, 0.4), transparent 50%, rgba(168, 85, 247, 0.4))",
@@ -374,7 +374,7 @@ export function CertificatesSection() {
 
               {/* Shimmer effect */}
               <div
-                className="pointer-events-none absolute inset-0 bg-[length:200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none"
+                className="pointer-events-none absolute inset-0 bg-size-[200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none"
                 style={{
                   backgroundImage:
                     "linear-gradient(110deg, transparent 25%, rgba(34, 211, 238, 0.15) 50%, transparent 75%)",
@@ -383,8 +383,8 @@ export function CertificatesSection() {
               />
 
               {/* Corner accents */}
-              <div className="pointer-events-none absolute top-0 left-0 h-20 w-20 rounded-full bg-gradient-to-br from-cyan-400/60 to-transparent opacity-0 blur-lg transition-all duration-700 group-hover:opacity-60 motion-reduce:transition-none" />
-              <div className="pointer-events-none absolute right-0 bottom-0 h-20 w-20 rounded-full bg-gradient-to-tl from-purple-600/60 to-transparent opacity-0 blur-lg transition-all duration-700 group-hover:opacity-60 motion-reduce:transition-none" />
+              <div className="pointer-events-none absolute top-0 left-0 h-20 w-20 rounded-full bg-linear-to-br from-cyan-400/60 to-transparent opacity-0 blur-lg transition-all duration-700 group-hover:opacity-60 motion-reduce:transition-none" />
+              <div className="pointer-events-none absolute right-0 bottom-0 h-20 w-20 rounded-full bg-linear-to-tl from-purple-600/60 to-transparent opacity-0 blur-lg transition-all duration-700 group-hover:opacity-60 motion-reduce:transition-none" />
             </div>
           </article>
         </div>
