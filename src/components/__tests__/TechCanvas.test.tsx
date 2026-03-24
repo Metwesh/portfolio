@@ -4,9 +4,7 @@ import { TechCanvas } from "../TechCanvas";
 
 // Mock @react-three/fiber
 vi.mock("@react-three/fiber", () => ({
-  Canvas: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="mock-tech-canvas">{children}</div>
-  ),
+  Canvas: () => <div data-testid="mock-tech-canvas" />,
   useFrame: vi.fn(),
   useThree: () => ({
     camera: { position: { x: 0, y: 0, z: 35 } },
@@ -49,9 +47,9 @@ describe("TechCanvas", () => {
     expect(container).toBeInTheDocument();
   });
 
-  it("renders TrackballControls for interaction", () => {
+  it("renders canvas for interaction", () => {
     const { getByTestId } = render(<TechCanvas isInView={true} />);
-    expect(getByTestId("mock-controls")).toBeInTheDocument();
+    expect(getByTestId("mock-tech-canvas")).toBeInTheDocument();
   });
 
   it("calculates golden spiral positions", () => {

@@ -20,6 +20,7 @@ export default defineConfig(async ({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ["three"],
   },
   build: {
     rollupOptions: {

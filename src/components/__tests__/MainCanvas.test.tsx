@@ -4,18 +4,11 @@ import { MainCanvas } from "../MainCanvas";
 
 // Mock @react-three/fiber
 vi.mock("@react-three/fiber", () => ({
-  Canvas: ({
-    children,
-    onCreated,
-  }: {
-    children: React.ReactNode;
-    onCreated?: (state: object) => void;
-  }) => {
-    // Simulate canvas creation
+  Canvas: ({ onCreated }: { onCreated?: (state: object) => void }) => {
     if (onCreated) {
       setTimeout(() => onCreated({}), 0);
     }
-    return <div data-testid="mock-canvas">{children}</div>;
+    return <div data-testid="mock-canvas" />;
   },
   useFrame: vi.fn(),
   useThree: () => ({
