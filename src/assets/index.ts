@@ -1,8 +1,6 @@
-// Services
-
+// Certificates
 import cisa from "./certificates/CISA.webp";
 import completeWebDev from "./certificates/Complete-web-developer-certification.webp";
-// Certificates
 import bachelorsDegree from "./certificates/English-certificate.webp";
 import jsCert from "./certificates/JS-Certification.webp";
 import ossa from "./certificates/OSSA.webp";
@@ -42,12 +40,6 @@ import marqCrm from "./projects/MARQ-CRM.webp";
 import sideupDashboardV2 from "./projects/SIDEUP-dashboard-V2.webp";
 import sideupDashboardV3 from "./projects/SIDEUP-dashboard-V3.webp";
 import taskHandlerApp from "./projects/Task-handler.webp";
-import blockService from "./service-icons/block-service.png";
-import cubeService from "./service-icons/cube-service.webp";
-import gearService from "./service-icons/gear-service.png";
-import icosahedronService from "./service-icons/icosahedron-service.webp";
-import origamiFlowerService from "./service-icons/origami-flower-service.webp";
-import ringService from "./service-icons/ring-service.webp";
 import Algorithms from "./technologies/Algorithms.svg";
 import Angular from "./technologies/Angular.svg";
 import ArtificialIntelligence from "./technologies/Artificial-Intelligence.svg";
@@ -117,7 +109,6 @@ export {
   bachelorsDegree,
   beltoneHolding,
   beltoneLogo,
-  blockService,
   bookRentalProject,
   boxBg,
   brgrLogo,
@@ -130,7 +121,6 @@ export {
   cLanguage,
   clinicWebsite,
   completeWebDev,
-  cubeService,
   DataStructures,
   Docker,
   dartSpace,
@@ -142,12 +132,10 @@ export {
   Git,
   Github,
   GoogleCloud,
-  gearService,
   githubSquare,
   Heroku,
   HTML5,
   Ionic,
-  icosahedronService,
   JavaScript,
   Jira,
   jsCert,
@@ -160,7 +148,6 @@ export {
   NestJS,
   NextJS,
   NodeJS,
-  origamiFlowerService,
   ossa,
   PHP,
   PostgreSQL,
@@ -171,7 +158,6 @@ export {
   React,
   Redis,
   resumeIcon,
-  ringService,
   SASS,
   Serverless,
   seniorWebDev,

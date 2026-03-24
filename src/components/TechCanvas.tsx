@@ -2,6 +2,7 @@ import { Html, TrackballControls } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   type PointerEvent as ReactPointerEvent,
+  Suspense,
   useMemo,
   useRef,
   useState,
@@ -55,14 +56,16 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
         className="cursor-grab active:cursor-grabbing"
         style={{ touchAction: "none" }}
       >
-        <Controls
-          points={points}
-          selectedIndex={selectedIndex}
-          setSelectedIndex={setSelectedIndex}
-          isInView={isInView}
-          onInteraction={() => setShowHint(false)}
-        />
-        <ControlsReset isInView={isInView} />
+        <Suspense fallback={null}>
+          <Controls
+            points={points}
+            selectedIndex={selectedIndex}
+            setSelectedIndex={setSelectedIndex}
+            isInView={isInView}
+            onInteraction={() => setShowHint(false)}
+          />
+          <ControlsReset isInView={isInView} />
+        </Suspense>
       </Canvas>
 
       {/* Hint overlay */}

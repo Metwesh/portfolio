@@ -44,7 +44,7 @@ export function TechStacksSection() {
         className={cn(
           "scroll-mt-18",
           !isList
-            ? "-mx-4 h-[520px] w-screen md:h-[650px] lg:h-[750px]"
+            ? "-mx-4 h-130 w-screen md:h-162.5 lg:h-187.5"
             : "w-full max-w-6xl",
         )}
         id="tech-stacks-container"

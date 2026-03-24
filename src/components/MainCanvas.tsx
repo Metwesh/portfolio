@@ -1,7 +1,10 @@
 import { Environment, Float, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useRef } from "react";
-import type { PerspectiveCamera as ThreePerspectiveCamera } from "three";
+import {
+  PCFShadowMap,
+  type PerspectiveCamera as ThreePerspectiveCamera,
+} from "three";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { AnimatedStars } from "./AnimatedStars";
 import { MLogo } from "./MLogo";
@@ -48,7 +51,7 @@ export function MainCanvas({
   return (
     <div className="fade-in pointer-events-none fixed inset-0 z-0 h-lvh animate-in duration-1000">
       <Canvas
-        shadows
+        shadows={{ type: PCFShadowMap }}
         dpr={[1, 2]}
         camera={{ fov: 60, position: [0, 0, 10] }}
         frameloop={prefersReducedMotion ? "demand" : "always"}
