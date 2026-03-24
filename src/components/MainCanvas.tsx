@@ -49,7 +49,7 @@ export function MainCanvas({
     <div className="fade-in pointer-events-none fixed inset-0 z-0 h-lvh animate-in duration-1000">
       <Canvas
         shadows
-        dpr={[window.devicePixelRatio, 2]}
+        dpr={[1, 2]}
         camera={{ fov: 60, position: [0, 0, 10] }}
         frameloop={prefersReducedMotion ? "demand" : "always"}
         performance={{ min: 0.5 }}

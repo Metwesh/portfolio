@@ -28,7 +28,7 @@ export function useScrollSnap({
   debounceMs = 150,
   threshold = 0.15,
 }: UseScrollSnapOptions) {
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSnappingRef = useRef(false);
 
   useEffect(() => {

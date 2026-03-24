@@ -1,4 +1,5 @@
 import path from "node:path";
+import babelPlugin from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { visualizer } from "rollup-plugin-visualizer";
@@ -6,11 +7,14 @@ import { defineConfig, type Plugin } from "vite";
 import viteCompression from "vite-plugin-compression";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Three.js components that use direct mutations — skip React Compiler for these
+const SKIP_COMPILER = ["MLogo", "AnimatedStars", "TechBox", "TechCanvas"];
+
 const getBasePath = (mode: string) =>
   mode === "development" ? undefined : "/portfolio/";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(async ({ mode }) => ({
   base: getBasePath(mode),
   resolve: {
     alias: {
@@ -20,35 +24,33 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          three: ["three", "@react-three/fiber", "@react-three/drei"],
-          vendor: ["react", "react-dom"],
-          animation: ["@react-spring/three"],
+        manualChunks(id: string) {
+          if (
+            id.includes("three") ||
+            id.includes("@react-three/fiber") ||
+            id.includes("@react-three/drei")
+          )
+            return "three";
+          if (id.includes("@react-spring/three")) return "animation";
+          if (id.includes("react-dom") || id.includes("react/"))
+            return "vendor";
         },
       },
     },
     sourcemap: mode === "development",
   },
   plugins: [
-    react({
-      babel: {
-        plugins: [
-          [
-            "babel-plugin-react-compiler",
-            {
-              // Skip Three.js components that require direct mutations
-              sources: (filename: string) => {
-                return (
-                  filename.indexOf("MLogo") === -1 &&
-                  filename.indexOf("AnimatedStars") === -1 &&
-                  filename.indexOf("TechBox") === -1 &&
-                  filename.indexOf("TechCanvas") === -1
-                );
-              },
-            },
-          ],
+    react(),
+    await babelPlugin({
+      plugins: [
+        [
+          "babel-plugin-react-compiler",
+          {
+            sources: (filename: string) =>
+              SKIP_COMPILER.every((c) => !filename.includes(c)),
+          },
         ],
-      },
+      ],
     }),
     tailwindcss(),
     ...(mode === "analyze"

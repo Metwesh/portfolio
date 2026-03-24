@@ -84,7 +84,7 @@ export function TagsPopover({
 
             {/* Content */}
             <div
-              className="relative min-w-[240px] rounded-xl border p-3 shadow-2xl backdrop-blur-xl"
+              className="relative min-w-60 rounded-xl border p-3 shadow-2xl backdrop-blur-xl"
               style={{
                 background: `linear-gradient(135deg, ${projectColor}15, rgba(0,0,0,0.8))`,
                 borderColor: `${projectColor}30`,

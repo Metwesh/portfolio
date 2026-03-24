@@ -48,7 +48,7 @@ export function Header({ scrollY }: { scrollY: number }) {
     <header className="pointer-events-auto fixed top-0 left-0 z-40 flex w-full items-center justify-between px-4 py-4 md:px-8">
       <div
         className={cn(
-          "absolute inset-0 bg-gradient-to-b from-black/80 to-black-0 shadow-lg backdrop-blur-md transition-opacity duration-500",
+          "absolute inset-0 bg-linear-to-b from-black/80 to-black-0 shadow-lg backdrop-blur-md transition-opacity duration-500",
           headerBg ? "opacity-100" : "opacity-0",
         )}
       />
@@ -57,6 +57,7 @@ export function Header({ scrollY }: { scrollY: number }) {
           viewBox="0 0 478 478"
           fill="none"
           className="h-10 w-10 drop-shadow-lg"
+          aria-hidden="true"
         >
           <path
             d="M39 39C69 109 69 319 39 399C79.6667 397 164.5 399 119 439C137 439 159 406 159 359C159 279 150.5 275 99 275C109 255 109 219 99 199C119 209 159 209 179 199L239 419L299 199C319 209 359 209 379 199C369 219 369 255 379 275C327.5 275 319 279 319 359C319 406 341 439 359 439C313.5 399 398.333 397 439 399C409 319 409 109 439 39C418.5 52.5 311.4 71.4 279 39L239 199L199 39C166.6 71.4 59.5 52.5 39 39Z"

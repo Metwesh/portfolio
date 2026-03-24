@@ -1,15 +1,16 @@
+import { useState } from "react";
 import { ScrollHelper } from "../components";
 import { ANIMATION_CONFIG, navLinks } from "../constants";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
 export function HeroSection({ scrollY }: { scrollY: number }) {
   const prefersReducedMotion = useReducedMotion();
-  // React Compiler will optimize this - no need for useMemo
-  const initialHeight = window.innerHeight;
+  const [initialHeight] = useState(() => window.innerHeight);
 
   return (
     <section
       id="scroll-section"
+      aria-labelledby="hero-heading"
       className="relative z-10 flex h-screen items-center justify-center"
     >
       <div
@@ -35,7 +36,10 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
         }}
       >
         <div className="animate-fade-in-up text-center">
-          <h1 className="relative z-10 mb-4 font-extrabold text-5xl tracking-tight md:text-7xl">
+          <h1
+            id="hero-heading"
+            className="relative z-10 mb-4 font-extrabold text-5xl tracking-tight md:text-7xl"
+          >
             <span className="animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-cyan-300 via-blue-400 to-fuchsia-500 bg-clip-text text-transparent drop-shadow-black drop-shadow-md">
               Mohamed H. Aly
             </span>

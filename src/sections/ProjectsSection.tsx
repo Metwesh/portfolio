@@ -1,9 +1,10 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ProjectScrollbar } from "../components/ProjectScrollbar";
 import { SectionHeading } from "../components/SectionHeading";
-import { breakpoints, INTERSECTION_OBSERVER_CONFIG } from "../constants";
+import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { projects } from "../constants/projects";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
+import { useIsMobile } from "../hooks/useIsMobile";
 import { ProjectCard } from "./ProjectCard";
 
 const TOTAL_ITEMS = projects.length + 1; // +1 for title card
@@ -52,28 +53,16 @@ export const ProjectsSection = memo(function ProjectsSection() {
   const currentIndexRef = useRef(0);
   const isSnappingRef = useRef(false);
 
+  const isMobile = useIsMobile();
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   const { targetRef: mobileTitleRef, isIntersecting } = useIntersectionObserver(
     {
       threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
       rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
-      enabled: window.innerWidth < breakpoints.mobile,
+      enabled: isMobile,
     },
   );
-
-  const [isMobile, setIsMobile] = useState(
-    window.innerWidth < breakpoints.mobile,
-  );
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const handleResize = () =>
-      setIsMobile(window.innerWidth < breakpoints.mobile);
-    window.addEventListener("resize", handleResize, {
-      signal: controller.signal,
-    });
-    return () => controller.abort();
-  }, []);
 
   // Scroll to a specific coverflow index
   const scrollToProject = useCallback(
@@ -213,8 +202,6 @@ export const ProjectsSection = memo(function ProjectsSection() {
       ref={sectionRef}
       id="projects"
       aria-labelledby="projects-heading"
-      aria-live={!isMobile ? "polite" : undefined}
-      aria-atomic={!isMobile ? "false" : undefined}
       aria-describedby={!isMobile ? "projects-navigation-help" : undefined}
       tabIndex={!isMobile ? -1 : undefined}
       className="relative z-10 overflow-x-clip py-20 outline-none focus:ring-0 md:px-0 md:py-0"

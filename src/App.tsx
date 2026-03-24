@@ -69,7 +69,9 @@ export default function App() {
           <ExperienceSection />
         </Suspense>
 
-        <TechStacksSection />
+        <Suspense fallback={null}>
+          <TechStacksSection />
+        </Suspense>
 
         <div className="relative z-10 bg-linear-to-b from-black/0 to-black">
           <Suspense fallback={null}>

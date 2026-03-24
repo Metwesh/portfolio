@@ -69,7 +69,7 @@ if (mixpanelToken && mixpanelHost) {
     // Fallback for browsers without requestIdleCallback
     setTimeout(initMixpanel, 1);
   }
-} else {
+} else if (import.meta.env.DEV) {
   console.warn("Mixpanel not initialized: Missing environment variables");
 }
 
