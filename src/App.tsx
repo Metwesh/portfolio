@@ -62,7 +62,7 @@ export default function App() {
         </Suspense>
 
         <Suspense fallback={null}>
-          <ProjectsSection scrollY={scrollY} />
+          <ProjectsSection />
         </Suspense>
 
         <Suspense fallback={null}>
