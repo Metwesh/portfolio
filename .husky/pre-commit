@@ -1,6 +1,6 @@
-echo "Running pre-push checks..."
+echo "Running pre-commit checks..."
 echo "--------------------------------"
 yarn lint
 yarn compile
 yarn format:check
-echo "All pre-push checks passed!"
+echo "All pre-commit checks passed!"
