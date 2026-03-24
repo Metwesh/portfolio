@@ -48,7 +48,7 @@ export function useScrollSnap({
       const totalScrollDistance = sectionHeight - viewportHeight;
       const scrollProgress = Math.max(
         0,
-        Math.min(1, enterProgress / totalScrollDistance)
+        Math.min(1, enterProgress / totalScrollDistance),
       );
 
       // Calculate which item we're closest to

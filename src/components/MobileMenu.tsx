@@ -33,7 +33,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
         "fixed inset-0 z-10 flex h-screen w-screen flex-col items-center justify-center gap-8 bg-black/80 font-bold text-2xl text-white backdrop-blur-xl transition-[opacity,transform] duration-500 md:hidden",
         isOpen
           ? "pointer-events-auto opacity-100"
-          : "pointer-events-none opacity-0"
+          : "pointer-events-none opacity-0",
       )}
     >
       {/* Navigation Links */}
@@ -47,7 +47,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
             "focus rounded transition-all duration-500 hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2",
             isOpen
               ? "translate-y-0 opacity-100"
-              : "pointer-events-none translate-y-8 opacity-0"
+              : "pointer-events-none translate-y-8 opacity-0",
           )}
           style={{
             transitionDelay: isOpen ? `${index * 80 + 120}ms` : "0ms",
@@ -64,7 +64,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
           "h-px w-32 bg-linear-to-r from-transparent via-white/30 to-transparent transition-all duration-500",
           isOpen
             ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-8 opacity-0"
+            : "pointer-events-none translate-y-8 opacity-0",
         )}
         style={{
           transitionDelay: isOpen ? `${navLinks.length * 80 + 120}ms` : "0ms",
@@ -77,7 +77,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
           "flex gap-6 font-semibold text-lg transition-all duration-500",
           isOpen
             ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-8 opacity-0"
+            : "pointer-events-none translate-y-8 opacity-0",
         )}
         style={{
           transitionDelay: isOpen
@@ -100,6 +100,6 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
         ))}
       </div>
     </dialog>,
-    document.body
+    document.body,
   );
 }

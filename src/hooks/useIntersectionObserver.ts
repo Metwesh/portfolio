@@ -14,7 +14,7 @@ interface UseIntersectionObserverOptions {
  * Respects prefers-reduced-motion by immediately showing content
  */
 export function useIntersectionObserver(
-  options: UseIntersectionObserverOptions = {}
+  options: UseIntersectionObserverOptions = {},
 ) {
   const {
     threshold = 0.1,
@@ -43,7 +43,7 @@ export function useIntersectionObserver(
       ([entry]) => {
         setObserverIntersecting(entry.isIntersecting);
       },
-      { threshold, root, rootMargin }
+      { threshold, root, rootMargin },
     );
 
     observer.observe(target);

@@ -74,7 +74,7 @@ export function TagsPopover({
           >
             {/* Arrow */}
             <div
-              className="-top-1 -translate-x-1/2 absolute left-1/2 h-2 w-2 rotate-45 border-t border-l backdrop-blur-xl"
+              className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-t border-l backdrop-blur-xl"
               style={{
                 background: `linear-gradient(135deg, ${projectColor}20, rgba(0,0,0,0.6))`,
                 borderTopColor: `${projectColor}30`,
@@ -108,7 +108,7 @@ export function TagsPopover({
 
               {/* Glow effect */}
               <div
-                className="-inset-2 -z-10 absolute rounded-xl opacity-40 blur-xl"
+                className="absolute -inset-2 -z-10 rounded-xl opacity-40 blur-xl"
                 style={{
                   background: `radial-gradient(circle at center, ${projectColor}60, transparent 70%)`,
                 }}

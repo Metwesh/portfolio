@@ -57,10 +57,10 @@ const breakpoints = {
 } as const;
 
 export {
+  accentColors,
+  breakpoints,
+  mainLogoPath,
   navLinks,
   socialLinks,
-  accentColors,
-  mainLogoPath,
   storageKey,
-  breakpoints,
 };

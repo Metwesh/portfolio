@@ -14,7 +14,7 @@ export function ProjectScrollbar({
   const totalItems = projectCount + 1; // +1 for title
 
   return (
-    <div className="-translate-x-1/2 absolute bottom-8 left-1/2 z-50 flex gap-2">
+    <div className="absolute bottom-8 left-1/2 z-50 flex -translate-x-1/2 gap-2">
       {[...Array(totalItems)].map((_, index) => {
         const isActive = currentIndex === index;
         // Calculate distance from current position for "approaching" effect
@@ -23,10 +23,7 @@ export function ProjectScrollbar({
 
         return (
           <button
-            key={`project-scrollbar-${
-              // biome-ignore lint/suspicious/noArrayIndexKey: Index is stable and deterministic for static scrollbar items
-              index
-            }`}
+            key={`project-scrollbar-${index}`}
             onClick={() => onNavigate(index)}
             className={cn(
               "h-2 cursor-pointer rounded transition-all duration-300 hover:scale-110",
@@ -34,7 +31,7 @@ export function ProjectScrollbar({
                 ? "w-8 bg-white/90"
                 : isNear
                   ? "w-4 bg-white/50"
-                  : "w-2 bg-white/30"
+                  : "w-2 bg-white/30",
             )}
             aria-label={index === 0 ? "Go to title" : `Go to project ${index}`}
             aria-current={isActive ? "true" : "false"}

@@ -15,7 +15,7 @@ describe("Footer", () => {
     render(<Footer />);
     const currentYear = new Date().getFullYear();
     expect(
-      screen.getByText(new RegExp(currentYear.toString()))
+      screen.getByText(new RegExp(currentYear.toString())),
     ).toBeInTheDocument();
   });
 
@@ -25,7 +25,7 @@ describe("Footer", () => {
     const linkedinLink = screen.getByText(/Linkedin/i).closest("a");
     expect(linkedinLink).toHaveAttribute(
       "href",
-      "https://www.linkedin.com/in/mohamed-h-aly/"
+      "https://www.linkedin.com/in/mohamed-h-aly/",
     );
 
     const githubLink = screen.getByText(/Github/i).closest("a");

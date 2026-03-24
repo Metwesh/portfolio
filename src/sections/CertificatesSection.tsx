@@ -62,13 +62,13 @@ export function CertificatesSection() {
                       }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
                         ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
                           index * ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
-                        ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
+                        ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY,
                       )}s, transform ${
                         ANIMATION_CONFIG.CERTIFICATES_DURATION
                       }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
                         ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
                           index * ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
-                        ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
+                        ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY,
                       )}s`
                     : "none",
                   willChange: isIntersecting ? "auto" : "opacity, transform",
@@ -76,7 +76,7 @@ export function CertificatesSection() {
               >
                 {/* Glow effect */}
                 <div
-                  className="-inset-2 absolute rounded-3xl opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none"
+                  className="absolute -inset-2 rounded-3xl opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none"
                   style={{
                     background: `radial-gradient(circle at center, ${cert.color}50, transparent 70%)`,
                   }}
@@ -87,18 +87,18 @@ export function CertificatesSection() {
                   href={cert.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative flex h-full min-h-[200px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none"
+                  className="relative flex h-full min-h-50 flex-col overflow-hidden rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none"
                 >
                   {/* Animated gradient mesh background */}
                   <div className="absolute inset-0 opacity-40">
                     <div
-                      className="-translate-y-[20%] absolute top-0 right-0 h-64 w-64 translate-x-[20%] rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none"
+                      className="absolute top-0 right-0 h-64 w-64 translate-x-[20%] -translate-y-[20%] rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none"
                       style={{
                         background: `radial-gradient(circle, ${cert.color}70, transparent 70%)`,
                       }}
                     />
                     <div
-                      className="-translate-x-[20%] absolute bottom-0 left-0 h-56 w-56 translate-y-[20%] rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none"
+                      className="absolute bottom-0 left-0 h-56 w-56 -translate-x-[20%] translate-y-[20%] rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none"
                       style={{
                         background: `radial-gradient(circle, ${cert.color}50, transparent 70%)`,
                       }}
@@ -136,7 +136,7 @@ export function CertificatesSection() {
                     <h3 className="relative mb-2 font-bold text-white text-xl md:text-2xl">
                       {cert.title}
                       <div
-                        className="-bottom-1 absolute left-0 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-14 motion-reduce:transition-none"
+                        className="absolute -bottom-1 left-0 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-14 motion-reduce:transition-none"
                         style={{
                           background: `linear-gradient(90deg, ${cert.color}, transparent)`,
                           boxShadow: `0 0 15px ${cert.color}80`,
@@ -223,7 +223,7 @@ export function CertificatesSection() {
                 ? "translate3d(0, 0, 0)"
                 : `translate3d(0, ${Math.min(
                     30 + certificates.length * 5,
-                    80
+                    80,
                   )}px, 0)`,
               transition: isIntersecting
                 ? `opacity ${
@@ -232,28 +232,28 @@ export function CertificatesSection() {
                     ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
                       certificates.length *
                         ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
-                    ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
+                    ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY,
                   )}s, transform ${
                     ANIMATION_CONFIG.CERTIFICATES_DURATION
                   }s cubic-bezier(0.4, 0, 0.2, 1) ${Math.min(
                     ANIMATION_CONFIG.CERTIFICATES_BASE_DELAY +
                       certificates.length *
                         ANIMATION_CONFIG.CERTIFICATES_STAGGER_DELAY,
-                    ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY
+                    ANIMATION_CONFIG.CERTIFICATES_MAX_DELAY,
                   )}s`
                 : "none",
               willChange: isIntersecting ? "auto" : "opacity, transform",
             }}
           >
             {/* Glow effect */}
-            <div className="-inset-2 absolute rounded-3xl bg-linear-to-r from-cyan-400/50 via-blue-500/50 to-purple-600/50 opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none" />
+            <div className="absolute -inset-2 rounded-3xl bg-linear-to-r from-cyan-400/50 via-blue-500/50 to-purple-600/50 opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100 motion-reduce:transition-none" />
 
             {/* Main card */}
-            <div className="relative flex h-full min-h-[200px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none">
+            <div className="relative flex h-full min-h-50 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl motion-reduce:transition-none">
               {/* Animated gradient mesh background */}
               <div className="absolute inset-0 opacity-40">
-                <div className="-translate-y-[20%] absolute top-0 right-0 h-64 w-64 translate-x-[20%] rounded-full bg-linear-to-br from-cyan-400/70 via-blue-500/70 to-purple-600/70 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
-                <div className="-translate-x-[20%] absolute bottom-0 left-0 h-56 w-56 translate-y-[20%] rounded-full bg-linear-to-tl from-purple-600/50 via-blue-500/50 to-cyan-400/50 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
+                <div className="absolute top-0 right-0 h-64 w-64 translate-x-[20%] -translate-y-[20%] rounded-full bg-linear-to-br from-cyan-400/70 via-blue-500/70 to-purple-600/70 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
+                <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-[20%] translate-y-[20%] rounded-full bg-linear-to-tl from-purple-600/50 via-blue-500/50 to-cyan-400/50 blur-3xl transition-all duration-1000 group-hover:scale-125 motion-reduce:transition-none" />
               </div>
 
               {/* Animated border */}
@@ -300,7 +300,7 @@ export function CertificatesSection() {
                         zIndex,
                       }}
                     />
-                  )
+                  ),
                 )}
               </div>
 

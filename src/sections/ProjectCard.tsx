@@ -53,7 +53,7 @@ export function ProjectCard({
         <div className="group relative w-full">
           {/* Glow effect on hover - similar to certificates */}
           <div
-            className="-inset-4 absolute rounded-3xl opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100"
+            className="absolute -inset-4 rounded-3xl opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100"
             style={{
               background: `linear-gradient(135deg, ${project.color}50, ${project.color}30)`,
             }}
@@ -62,7 +62,7 @@ export function ProjectCard({
           <a
             className={cn(
               "relative block rounded-[22px] border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl",
-              isClickable && "cursor-pointer"
+              isClickable && "cursor-pointer",
             )}
             href={project.link}
             target="_blank"
@@ -71,13 +71,13 @@ export function ProjectCard({
             {/* Animated gradient mesh background */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[22px] opacity-30">
               <div
-                className="-top-20 -right-20 absolute h-64 w-64 rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125"
+                className="absolute -top-20 -right-20 h-64 w-64 rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125"
                 style={{
                   background: `radial-gradient(circle, ${project.color}70, transparent 70%)`,
                 }}
               />
               <div
-                className="-bottom-20 -left-20 absolute h-56 w-56 rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125"
+                className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full blur-3xl transition-all duration-1000 group-hover:scale-125"
                 style={{
                   background: `radial-gradient(circle, ${project.color}40, transparent 70%)`,
                 }}
@@ -97,7 +97,7 @@ export function ProjectCard({
               <div
                 className={cn(
                   "relative",
-                  isEven ? "md:col-span-7" : "md:order-2 md:col-span-7"
+                  isEven ? "md:col-span-7" : "md:order-2 md:col-span-7",
                 )}
               >
                 {/* Clickable indicator - positioned on image */}
@@ -107,7 +107,7 @@ export function ProjectCard({
                       Visit
                     </span>
                     <svg
-                      className="group-hover:-translate-y-0.5 h-4 w-4 text-white transition-transform duration-300 group-hover:translate-x-0.5"
+                      className="h-4 w-4 text-white transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -128,7 +128,7 @@ export function ProjectCard({
                       <img
                         src={project.image}
                         alt={`${project.name} preview`}
-                        className="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-110 md:h-[360px]"
+                        className="h-64 w-full object-cover transition-transform duration-700 group-hover:scale-110 md:h-90"
                       />
                       <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                       <div
@@ -162,7 +162,7 @@ export function ProjectCard({
                         "relative flex h-20 w-20 items-center justify-center rounded-xl border p-1 transition-all duration-500 group-hover:scale-105",
                         project.darkLogo
                           ? "border-white/30 bg-white/95 group-hover:border-white/40 group-hover:bg-white"
-                          : "border-white/10 bg-white/5 backdrop-blur-sm group-hover:border-white/20 group-hover:bg-white/10"
+                          : "border-white/10 bg-white/5 backdrop-blur-sm group-hover:border-white/20 group-hover:bg-white/10",
                       )}
                     >
                       {project.logo ? (
@@ -183,7 +183,7 @@ export function ProjectCard({
                               />
                               {/* Glow effect behind logo */}
                               <div
-                                className="-z-10 pointer-events-none absolute inset-0 rounded-lg opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-60"
+                                className="pointer-events-none absolute inset-0 -z-10 rounded-lg opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-60"
                                 style={{
                                   background: project.color,
                                 }}
@@ -210,7 +210,7 @@ export function ProjectCard({
                   <span className="relative">
                     {project.name}
                     <span
-                      className="-bottom-1 absolute left-0 h-[3px] w-16 rounded-full transition-all duration-500 group-hover:w-32"
+                      className="absolute -bottom-1 left-0 h-0.75 w-16 rounded-full transition-all duration-500 group-hover:w-32"
                       style={{
                         background: `linear-gradient(90deg, ${project.color}, transparent)`,
                       }}

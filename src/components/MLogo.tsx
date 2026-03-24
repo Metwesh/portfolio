@@ -84,7 +84,7 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
     targetColorRef.current.lerpColors(
       colorARef.current,
       colorBRef.current,
-      shimmer * 0.5
+      shimmer * 0.5,
     );
 
     const emissiveIntensity = 0.18 + shimmer * 0.22;

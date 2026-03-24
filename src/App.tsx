@@ -9,25 +9,25 @@ useGLTF.preload(mainLogoPath);
 
 // Lazy load sections for better performance
 const HeroSection = lazy(() =>
-  import("./sections").then((module) => ({ default: module.HeroSection }))
+  import("./sections").then((module) => ({ default: module.HeroSection })),
 );
 const ProjectsSection = lazy(() =>
-  import("./sections").then((module) => ({ default: module.ProjectsSection }))
+  import("./sections").then((module) => ({ default: module.ProjectsSection })),
 );
 const ExperienceSection = lazy(() =>
   import("./sections").then((module) => ({
     default: module.ExperienceSection,
-  }))
+  })),
 );
 const TechStacksSection = lazy(() =>
   import("./sections").then((module) => ({
     default: module.TechStacksSection,
-  }))
+  })),
 );
 const CertificatesSection = lazy(() =>
   import("./sections").then((module) => ({
     default: module.CertificatesSection,
-  }))
+  })),
 );
 
 // Track scroll position for 3D parallax

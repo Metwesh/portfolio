@@ -19,7 +19,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
   const sectionRef = useRef<HTMLElement | null>(null);
 
   const [isMobile, setIsMobile] = useState(
-    window.innerWidth < breakpoints.mobile
+    window.innerWidth < breakpoints.mobile,
   );
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
   // Calculate current project index for accessibility announcements
   const currentProjectIndex = Math.max(
     0,
-    Math.min(projects.length, Math.round(-horizontalTranslate / 100))
+    Math.min(projects.length, Math.round(-horizontalTranslate / 100)),
   );
 
   // Function to scroll to a specific project
@@ -82,7 +82,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
     const totalScrollDistance = sectionHeight - viewportHeight;
     const scrollProgress = Math.max(
       0,
-      Math.min(1, enterProgress / totalScrollDistance)
+      Math.min(1, enterProgress / totalScrollDistance),
     );
 
     // Calculate horizontal translation (projects.length + title card)
@@ -179,7 +179,7 @@ export function ProjectsSection({ scrollY }: { scrollY: number }) {
       </div>
 
       {/* Mobile: vertical stack, Desktop: horizontal scroll */}
-      <div className="md:-ms-gutter flex flex-col gap-8 overflow-x-clip md:sticky md:top-0 md:h-screen md:w-screen md:flex-row md:items-center md:gap-0 md:overflow-hidden">
+      <div className="flex flex-col gap-8 overflow-x-clip md:sticky md:top-0 md:-ms-gutter md:h-screen md:w-screen md:flex-row md:items-center md:gap-0 md:overflow-hidden">
         <div
           className="flex flex-col gap-8 md:h-full md:flex-row md:items-center md:gap-0"
           style={{

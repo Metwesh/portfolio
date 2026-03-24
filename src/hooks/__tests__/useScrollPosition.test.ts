@@ -15,7 +15,7 @@ describe("useScrollPosition", () => {
       (callback: FrameRequestCallback) => {
         rafCallbacks.push(callback);
         return ++rafId;
-      }
+      },
     );
 
     // Mock cancelAnimationFrame
@@ -162,7 +162,7 @@ describe("useScrollPosition", () => {
       expect.objectContaining({
         passive: true,
         signal: expect.any(AbortSignal),
-      })
+      }),
     );
 
     unmount();

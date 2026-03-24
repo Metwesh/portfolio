@@ -94,7 +94,7 @@ describe("Mixpanel Initialization", () => {
 
     expect(mockInit).not.toHaveBeenCalled();
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      "Mixpanel not initialized: Missing environment variables"
+      "Mixpanel not initialized: Missing environment variables",
     );
 
     vi.unstubAllEnvs();
@@ -127,7 +127,7 @@ describe("Mixpanel Initialization", () => {
 
     // Pre-populate localStorage
     (localStorage.getItem as ReturnType<typeof vi.fn>).mockReturnValue(
-      existingUserId
+      existingUserId,
     );
 
     // Simulate getUserId logic
@@ -175,7 +175,7 @@ describe("Mixpanel Initialization", () => {
         user_agent: expect.any(String),
         screen_resolution: expect.any(String),
         timezone: expect.any(String),
-      })
+      }),
     );
   });
 });

@@ -24,7 +24,7 @@ const isIOS =
 
 const processTexture = (
   texture: ThreeTexture,
-  cacheKey: string
+  cacheKey: string,
 ): ThreeTexture => {
   // Return cached texture if available
   if (textureCache.has(cacheKey)) {
@@ -83,15 +83,15 @@ export default function BoxShader(props: {
   // Process textures with global caching and iOS detection
   const decalTexture = useMemo(
     () => processTexture(rawDecalTexture, props.data.icon),
-    [rawDecalTexture, props.data.icon]
+    [rawDecalTexture, props.data.icon],
   );
   const backgroundTexture = useMemo(
     () => processTexture(rawBackgroundTexture, "background"),
-    [rawBackgroundTexture]
+    [rawBackgroundTexture],
   );
   const wipTexture = useMemo(
     () => processTexture(rawWipTexture, "wip"),
-    [rawWipTexture]
+    [rawWipTexture],
   );
 
   // Define the options for the fog effect in the shader.
@@ -107,7 +107,7 @@ export default function BoxShader(props: {
       near: FOG_ARGUMENTS.near,
       far: FOG_ARGUMENTS.far,
     }),
-    []
+    [],
   );
 
   // Define the uniforms for the shader. These are the variables that can be accessed from both the vertex and fragment shaders.

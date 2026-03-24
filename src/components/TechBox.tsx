@@ -32,7 +32,7 @@ export function TechBox({
   isSelected,
 }: TechBoxProps) {
   const [meshRotation] = useState(
-    () => new ThreeEuler(Math.random(), Math.random(), Math.random())
+    () => new ThreeEuler(Math.random(), Math.random(), Math.random()),
   );
 
   const meshRef = useRef<ThreeMesh>(null);
@@ -48,7 +48,7 @@ export function TechBox({
 
   // Track touch/pointer events to distinguish between tap and drag
   const pointerDown = useRef<{ x: number; y: number; time: number } | null>(
-    null
+    null,
   );
 
   // Ensure geometry UVs are properly set for iOS

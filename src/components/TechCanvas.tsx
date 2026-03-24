@@ -35,8 +35,8 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
         new ThreeVector3(
           x * SPHERE_RADIUS,
           y * SPHERE_RADIUS,
-          z * SPHERE_RADIUS
-        )
+          z * SPHERE_RADIUS,
+        ),
       );
     }
     return temp;
@@ -67,7 +67,7 @@ export function TechCanvas({ isInView }: TechCanvasProps) {
 
       {/* Hint overlay */}
       {showHint && selectedIndex === null && (
-        <div className="-translate-x-1/2 pointer-events-none absolute bottom-8 left-1/2 animate-fade-in-up">
+        <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 animate-fade-in-up">
           <div className="relative flex items-center gap-2 rounded-full border border-white/10 bg-linear-to-r from-white/5 to-white/10 px-5 py-2.5 backdrop-blur-sm">
             <svg
               className="h-4 w-4 animate-pulse text-cyan-400"

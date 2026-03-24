@@ -78,5 +78,5 @@ createRoot(document.getElementById("root") ?? document.body).render(
     <ErrorBoundary>
       <App />
     </ErrorBoundary>
-  </StrictMode>
+  </StrictMode>,
 );

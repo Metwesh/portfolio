@@ -19,13 +19,13 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
           ...(!prefersReducedMotion && {
             transform: `translateY(-${Math.min(
               scrollY * ANIMATION_CONFIG.HERO_PARALLAX_SPEED,
-              ANIMATION_CONFIG.HERO_MAX_OFFSET
+              ANIMATION_CONFIG.HERO_MAX_OFFSET,
             )}px)`,
             opacity:
               1 -
               Math.min(
                 scrollY / (initialHeight * ANIMATION_CONFIG.HERO_FADE_FACTOR),
-                1
+                1,
               ),
             willChange:
               scrollY > 0 && scrollY < initialHeight
@@ -39,7 +39,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
             <span className="animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-cyan-300 via-blue-400 to-fuchsia-500 bg-clip-text text-transparent drop-shadow-black drop-shadow-md">
               Mohamed H. Aly
             </span>
-            <span className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/2 left-1/2 animate-header-gradient-move-pulse select-none bg-linear-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text text-5xl text-transparent blur-2xl md:whitespace-pre md:text-7xl">
+            <span className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-header-gradient-move-pulse select-none bg-linear-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text text-5xl text-transparent blur-2xl md:whitespace-pre md:text-7xl">
               Mohamed H. Aly
             </span>
           </h1>

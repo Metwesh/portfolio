@@ -16,7 +16,7 @@ import { cn } from "../lib/utils";
 export function TechStacksSection() {
   const prefersReducedMotion = useReducedMotion();
   const [isList, setIsList] = useState(
-    () => window.innerWidth < breakpoints.mobile || prefersReducedMotion
+    () => window.innerWidth < breakpoints.mobile || prefersReducedMotion,
   );
 
   const { targetRef, isIntersecting } = useIntersectionObserver({
@@ -45,7 +45,7 @@ export function TechStacksSection() {
           "scroll-mt-18",
           !isList
             ? "-mx-4 h-[520px] w-screen md:h-[650px] lg:h-[750px]"
-            : "w-full max-w-6xl"
+            : "w-full max-w-6xl",
         )}
         id="tech-stacks-container"
       >

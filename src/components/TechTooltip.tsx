@@ -20,7 +20,7 @@ export function TechTooltip({
     <div className="flex animate-fade-in-up flex-col items-center gap-4">
       <button
         type="button"
-        className="hover:-translate-y-0.5 relative cursor-pointer overflow-hidden whitespace-pre rounded-3xl border border-white/20 px-10 py-6 text-center font-bold text-4xl text-white tracking-wide backdrop-blur-md transition-all duration-300 ease-in-out hover:scale-[1.02]"
+        className="relative cursor-pointer overflow-hidden whitespace-pre rounded-3xl border border-white/20 px-10 py-6 text-center font-bold text-4xl text-white tracking-wide backdrop-blur-md transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02]"
         style={{
           background:
             "linear-gradient(135deg, rgba(20,24,32,0.95) 0%, rgba(30,35,45,0.95) 100%)",

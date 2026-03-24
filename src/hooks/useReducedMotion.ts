@@ -17,7 +17,7 @@ export function useReducedMotion(): boolean {
     mediaQuery.addEventListener(
       "change",
       ({ matches }) => setPrefersReducedMotion(matches),
-      { signal: controller.signal }
+      { signal: controller.signal },
     );
     return () => controller.abort();
   }, []);

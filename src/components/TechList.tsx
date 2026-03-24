@@ -71,7 +71,7 @@ export function TechList({ isInView }: TechListProps) {
               <div
                 className={cn(
                   "preserve-3d relative h-full w-full transform-gpu rounded-xl transition-transform duration-700 motion-reduce:transition-none",
-                  isFlipped && "rotate-y-180"
+                  isFlipped && "rotate-y-180",
                 )}
               >
                 {/* Front side */}

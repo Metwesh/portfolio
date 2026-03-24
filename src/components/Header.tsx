@@ -49,7 +49,7 @@ export function Header({ scrollY }: { scrollY: number }) {
       <div
         className={cn(
           "absolute inset-0 bg-gradient-to-b from-black/80 to-black-0 shadow-lg backdrop-blur-md transition-opacity duration-500",
-          headerBg ? "opacity-100" : "opacity-0"
+          headerBg ? "opacity-100" : "opacity-0",
         )}
       />
       <a className="group flex items-center gap-4" href="#" aria-label="Home">
@@ -66,7 +66,7 @@ export function Header({ scrollY }: { scrollY: number }) {
         <span
           className={cn(
             "bg-linear-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text font-extrabold text-2xl text-transparent tracking-tight drop-shadow-lg transition-opacity delay-1000 duration-1000 group-focus-visible:opacity-100 group-focus-visible:delay-0 group-focus-visible:duration-300 md:text-3xl",
-            headerBg ? "opacity-100" : "opacity-0"
+            headerBg ? "opacity-100" : "opacity-0",
           )}
         >
           Mohamed H. Aly
@@ -84,19 +84,19 @@ export function Header({ scrollY }: { scrollY: number }) {
         <span
           className={cn(
             "block h-0.5 w-7 rounded bg-white transition-all duration-300",
-            menuOpen ? "translate-y-1.5 rotate-45" : ""
+            menuOpen ? "translate-y-1.5 rotate-45" : "",
           )}
         />
         <span
           className={cn(
             "my-1 block h-0.5 w-7 rounded bg-white transition-all duration-300",
-            menuOpen ? "opacity-0" : ""
+            menuOpen ? "opacity-0" : "",
           )}
         />
         <span
           className={cn(
             "block h-0.5 w-7 rounded bg-white transition-all duration-300",
-            menuOpen ? "-translate-y-1.5 -rotate-45" : ""
+            menuOpen ? "-translate-y-1.5 -rotate-45" : "",
           )}
         />
       </button>

@@ -90,7 +90,7 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
     const axis = new ThreeVector3(0, 1, 0);
     const quaternion = new ThreeQuaternion().setFromUnitVectors(
       axis,
-      direction
+      direction,
     );
     trailMesh.quaternion.copy(quaternion);
     group.add(trailMesh);
@@ -119,7 +119,7 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
         return;
 
       const activeStars = starsRef.current.filter(
-        (star) => star.lifetime < star.maxLifetime
+        (star) => star.lifetime < star.maxLifetime,
       );
 
       if (activeStars.length < count) {
