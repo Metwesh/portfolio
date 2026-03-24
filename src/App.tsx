@@ -15,6 +15,9 @@ const HeroSection = lazy(() =>
 const ProjectsSection = lazy(() =>
   import("./sections").then((module) => ({ default: module.ProjectsSection }))
 );
+const ProjectsBentoGrid = lazy(() =>
+  import("./sections").then((module) => ({ default: module.ProjectsBentoGrid }))
+);
 const ExperienceSection = lazy(() =>
   import("./sections").then((module) => ({
     default: module.ExperienceSection,
@@ -62,9 +65,15 @@ export default function App() {
           <HeroSection scrollY={scrollY} />
         </Suspense>
 
+        {/* Demo Switcher - Toggle between different project display modes */}
+        <Suspense fallback={null}>
+          <ProjectsBentoGrid />
+        </Suspense>
+
+        {/* Original implementations (commented for demo) */}
         {/* <Suspense fallback={null}> */}
         {/* <ProjectsSection scrollY={scrollY} /> */}
-        <Scene scrollY={scrollY} />
+        {/* <Scene scrollY={scrollY} /> */}
         {/* </Suspense> */}
 
         <Suspense fallback={null}>
