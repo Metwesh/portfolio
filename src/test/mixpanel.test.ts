@@ -1,6 +1,17 @@
 import mixpanel from "mixpanel-browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// Mock mixpanel
+vi.mock("mixpanel-browser", () => ({
+  default: {
+    init: vi.fn(),
+    identify: vi.fn(),
+    people: {
+      set: vi.fn(),
+    },
+  },
+}));
+
 describe("Mixpanel Initialization", () => {
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
@@ -22,17 +33,6 @@ describe("Mixpanel Initialization", () => {
 
     // Mock console.warn
     consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-
-    // Mock mixpanel
-    vi.mock("mixpanel-browser", () => ({
-      default: {
-        init: vi.fn(),
-        identify: vi.fn(),
-        people: {
-          set: vi.fn(),
-        },
-      },
-    }));
   });
 
   afterEach(() => {

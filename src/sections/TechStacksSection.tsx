@@ -31,13 +31,22 @@ export function TechStacksSection() {
       aria-labelledby="tech-stacks-heading"
     >
       {/* Animated section title */}
-      <div className="relative mb-20">
+      <div className="relative mb-20 w-full space-y-4">
         <SectionHeading
           id="tech-stacks-heading"
           isIntersecting={isIntersecting}
         >
           Tech Stacks
         </SectionHeading>
+        {!prefersReducedMotion && (
+          <Switch
+            value={isList}
+            onChange={setIsList}
+            className="mx-auto w-fit md:ms-auto"
+            target="tech-stacks-container"
+            labels={["Canvas", "List"]}
+          />
+        )}
       </div>
       <div
         ref={targetRef}
@@ -55,21 +64,12 @@ export function TechStacksSection() {
           <TechCanvas isInView={isIntersecting} />
         )}
       </div>
-      <div className="mx-8 mt-2 grid w-full items-center gap-8 md:grid-cols-3 md:gap-4">
+      <div className="mx-8 mt-2 flex w-full items-center gap-8 md:gap-4">
         <ScrollHelper
           href={navLinks[3].href}
           ariaLabel="Scroll to projects"
           className="mx-auto flex w-fit justify-center md:col-start-2 md:col-end-3"
         />
-        {!prefersReducedMotion && (
-          <Switch
-            value={isList}
-            onChange={setIsList}
-            className="max-md:mx-auto md:col-start-3 md:col-end-4 md:ml-auto"
-            target="tech-stacks-container"
-            labels={["Canvas", "List"]}
-          />
-        )}
       </div>
     </section>
   );

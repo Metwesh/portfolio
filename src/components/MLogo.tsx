@@ -10,6 +10,7 @@ import {
   type PerspectiveCamera as ThreePerspectiveCamera,
 } from "three";
 import { mainLogoPath } from "../constants";
+import { useIsMobile } from "../hooks/useIsMobile";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
 interface SassyMLogoProps {
@@ -24,6 +25,8 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
   const { scene } = useGLTF(mainLogoPath);
 
   const group = useRef<ThreeGroup>(null);
+
+  const isMobile = useIsMobile();
 
   // Scale and opacity - animated entrance for normal mode, instant for reduced motion
   const springConfig = useSpring({
@@ -66,10 +69,14 @@ export function MLogo({ scrollY, cameraRef, mouse }: SassyMLogoProps) {
 
     // Smooth/lerp scroll values for weight/inertia (0.05 = heavy, 0.2 = light)
     const damping = 0.08;
+    const minYOffset = -4;
+    const yTarget = Math.max(scrollY * -0.003, minYOffset);
     smoothScrollRef.current.y +=
-      (scrollY * -0.003 - smoothScrollRef.current.y) * damping;
+      (yTarget - smoothScrollRef.current.y) * damping;
+    const maxZOffset = isMobile ? -20 : -12;
+    const zTarget = Math.max(scrollY * -0.01, maxZOffset);
     smoothScrollRef.current.z +=
-      (scrollY * -0.01 - smoothScrollRef.current.z) * damping;
+      (zTarget - smoothScrollRef.current.z) * damping;
     smoothScrollRef.current.rot +=
       (scrollY * 0.002 - smoothScrollRef.current.rot) * damping;
 

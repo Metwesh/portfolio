@@ -45,7 +45,7 @@ export function TechList({ isInView }: TechListProps) {
     });
   };
   return (
-    <div className="relative mx-auto w-full max-w-4xl md:p-6">
+    <div className="relative mx-auto w-full max-w-4xl px-gutter md:p-6">
       <div className="relative z-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {technologies.map((tech, index) => {
           const isFlipped = flippedCards.has(index);

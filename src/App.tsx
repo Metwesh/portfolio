@@ -46,7 +46,7 @@ export default function App() {
   };
 
   return (
-    <div className="px-gutter">
+    <>
       {/* Skip to content for accessibility */}
       <SkipToContent />
 
@@ -81,6 +81,6 @@ export default function App() {
           <Footer />
         </div>
       </main>
-    </div>
+    </>
   );
 }

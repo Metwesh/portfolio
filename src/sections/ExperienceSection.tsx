@@ -24,7 +24,7 @@ export function ExperienceSection() {
       ref={targetRef}
       id="experience"
       aria-labelledby="experience-heading"
-      className="flex min-h-screen flex-col items-center justify-center py-24 sm:px-8 md:py-32"
+      className="flex min-h-screen flex-col items-center justify-center px-gutter py-24 sm:px-8 md:py-32"
     >
       {/* Animated section title */}
       <div className="relative mb-20">

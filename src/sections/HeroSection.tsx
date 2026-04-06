@@ -38,7 +38,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
         <div className="animate-fade-in-up text-center">
           <h1
             id="hero-heading"
-            className="relative z-10 mb-4 font-extrabold text-5xl tracking-tight md:text-7xl"
+            className="relative z-10 mb-4 px-gutter font-extrabold text-5xl tracking-tight md:text-7xl"
           >
             <span className="animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-cyan-300 via-blue-400 to-fuchsia-500 bg-clip-text text-transparent drop-shadow-black drop-shadow-md">
               Mohamed H. Aly
@@ -47,7 +47,7 @@ export function HeroSection({ scrollY }: { scrollY: number }) {
               Mohamed H. Aly
             </span>
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl animate-header-gradient-move bg-linear-to-r from-cyan-200 via-fuchsia-300 to-yellow-200 bg-clip-text font-bold text-transparent text-xl drop-shadow-black drop-shadow-md md:text-3xl">
+          <p className="mx-auto mb-10 max-w-2xl animate-header-gradient-move text-pretty bg-linear-to-r from-cyan-200 via-fuchsia-300 to-yellow-200 bg-clip-text font-bold text-transparent text-xl drop-shadow-black drop-shadow-md supports-[text-wrap:balance]:text-balance md:text-3xl">
             Creative Developer, 3D Enthusiast &mdash;&nbsp;
             <span className="bg-none text-white/95">
               Crafting mind-bending digital experiences.

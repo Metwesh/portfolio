@@ -165,7 +165,7 @@ export const ProjectsSection = memo(function ProjectsSection() {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const section = sectionRef.current;
-      if (!section || !section.contains(document.activeElement)) return;
+      if (!section?.contains(document.activeElement)) return;
 
       const scrollAmount = window.innerHeight * 0.8;
       switch (e.key) {
@@ -227,7 +227,7 @@ export const ProjectsSection = memo(function ProjectsSection() {
       <div className="flex flex-col gap-8 overflow-x-clip md:sticky md:top-0 md:h-screen md:overflow-hidden">
         {/* Perspective container — all cards absolutely positioned inside */}
         <div
-          className="relative flex flex-col gap-8 md:h-full md:w-full"
+          className="relative flex flex-col gap-8 max-md:px-gutter md:h-full md:w-full"
           style={
             !isMobile
               ? { perspective: "1200px", perspectiveOrigin: "50% 50%" }
