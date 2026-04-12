@@ -13,6 +13,5 @@ export { ShootingStars } from "./ShootingStars";
 export { SkipToContent } from "./SkipToContent";
 export { TagsPopover } from "./TagsPopover";
 export { TechBox } from "./TechBox";
-export { TechList } from "./TechList";
 export { TechTooltip } from "./TechTooltip";
 export { UniverseCanvas } from "./UniverseCanvas";
