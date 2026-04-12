@@ -1,3 +1,5 @@
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 import mixpanel from "mixpanel-browser";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -5,6 +7,9 @@ import App from "./App.tsx";
 import { ErrorBoundary } from "./components";
 import "./index.css";
 import { storageKey } from "./constants/misc";
+
+// Register GSAP plugins once for the entire app
+gsap.registerPlugin(ScrollTrigger);
 
 // Initialize Mixpanel only if token is available
 const mixpanelToken = import.meta.env.VITE_MIXPANEL_TOKEN;

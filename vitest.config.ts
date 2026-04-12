@@ -23,6 +23,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@hashintel/refractive": path.resolve(
+        __dirname,
+        "./src/test/mocks/refractive.tsx",
+      ),
     },
     dedupe: ["three"],
   },

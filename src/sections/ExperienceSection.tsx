@@ -1,205 +1,239 @@
+import gsap from "gsap";
+import { useEffect, useRef } from "react";
 import { SectionHeading } from "../components/SectionHeading";
-import { ANIMATION_CONFIG, INTERSECTION_OBSERVER_CONFIG } from "../constants";
+import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { experiences } from "../constants/experiences";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
-import { useReducedMotion } from "../hooks/useReducedMotion";
 
 export function ExperienceSection() {
-  const { targetRef, isIntersecting } = useIntersectionObserver({
+  const sectionRef = useRef<HTMLElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const glowDotRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLLIElement | null)[]>([]);
+
+  // Small observer only for the heading gradient reveal
+  const { targetRef: headingRef, isIntersecting } = useIntersectionObserver({
     threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
     rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
   });
 
-  const prefersReducedMotion = useReducedMotion();
+  useEffect(() => {
+    const section = sectionRef.current;
+    const line = timelineRef.current;
+    const dot = glowDotRef.current;
+    if (!section || !line) return;
 
-  // Calculate when all cards finish animating
-  const lastCardDelay =
-    ANIMATION_CONFIG.EXPERIENCE_BASE_DELAY +
-    (experiences.length - 1) * ANIMATION_CONFIG.EXPERIENCE_STAGGER_DELAY;
-  const cardAnimationDuration = 0.9; // From the card transition duration
-  const timelineDelay = lastCardDelay + cardAnimationDuration;
+    // Use clipPath instead of scaleY — the gradient spans full height so the
+    // revealed tip color naturally matches the current scroll position in the
+    // section (experience 1 color at top → last experience color at bottom).
+    const lineTween = gsap.fromTo(
+      line,
+      { clipPath: "inset(0 0 100% 0)" },
+      {
+        clipPath: "inset(0 0 0% 0)",
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top 70%",
+          end: "bottom 30%",
+          scrub: 1,
+          onUpdate: (self) => {
+            if (!dot) return;
+            const p = self.progress;
+            const idx = Math.min(
+              Math.floor(p * experiences.length),
+              experiences.length - 1,
+            );
+            const color = experiences[idx].color;
+            dot.style.top = `${p * 100}%`;
+            dot.style.background = color;
+            dot.style.boxShadow = `0 0 16px 6px ${color}90`;
+          },
+        },
+      },
+    );
+
+    // Clip-path card reveals triggered individually
+    const cardTweens = cardRefs.current.filter(Boolean).map((card) =>
+      gsap.fromTo(
+        card,
+        { opacity: 0, y: 32 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.0,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 88%",
+          },
+        },
+      ),
+    );
+
+    return () => {
+      lineTween.scrollTrigger?.kill();
+      lineTween.kill();
+      for (const t of cardTweens) {
+        t.scrollTrigger?.kill();
+        t.kill();
+      }
+    };
+  }, []);
 
   return (
     <section
-      ref={targetRef}
+      ref={sectionRef}
       id="experience"
       aria-labelledby="experience-heading"
-      className="flex min-h-screen flex-col items-center justify-center px-gutter py-24 sm:px-8 md:py-32"
+      className="relative z-10 flex flex-col items-center px-gutter py-24 sm:px-8 md:py-32"
     >
-      {/* Animated section title */}
-      <div className="relative mb-20">
+      <div
+        ref={headingRef as React.RefObject<HTMLDivElement>}
+        className="mb-20"
+      >
         <SectionHeading id="experience-heading" isIntersecting={isIntersecting}>
           Experience
         </SectionHeading>
       </div>
 
       <div className="relative w-full max-w-5xl">
-        {/* Timeline line */}
+        {/* Vertical timeline track — full height, dimmed */}
         <div
-          className="absolute top-0 left-1/2 z-0 h-full w-4 -translate-x-1/2 rounded-full max-sm:left-8"
+          className="absolute top-0 left-8 z-0 h-full w-px rounded-full opacity-20 max-sm:left-4"
           style={{
-            filter: "blur(24px)",
-            backgroundImage: `linear-gradient(to bottom, ${experiences
-              .map((exp) => exp.color)
-              .join(", ")})`,
-            transform: `scaleY(${isIntersecting ? 1 : 0})`,
-            transformOrigin: "top",
-            transition: isIntersecting
-              ? `transform 3s cubic-bezier(0.34, 1.56, 0.64, 1) ${timelineDelay}s`
-              : "transform 0.3s ease-out",
-            willChange: isIntersecting ? "auto" : "transform",
+            backgroundImage: `linear-gradient(to bottom, ${experiences.map((e) => e.color).join(", ")})`,
           }}
         />
+
+        {/* Filled line — clip-path revealed from top as you scroll.
+            Gradient spans full height so the tip color matches the current
+            experience section dynamically. */}
         <div
-          className="absolute top-0 left-1/2 z-0 h-full w-1 -translate-x-1/2 rounded-full max-sm:left-8"
+          ref={timelineRef}
+          className="absolute top-0 left-8 z-0 h-full w-px rounded-full [clip-path:inset(0_0_100%_0)] max-sm:left-4"
           style={{
-            backgroundImage: `linear-gradient(to bottom, ${experiences
-              .map((exp) => exp.color)
-              .join(", ")})`,
-            transform: `scaleY(${isIntersecting ? 1 : 0})`,
-            transformOrigin: "top",
-            transition: isIntersecting
-              ? `transform 3s cubic-bezier(0.34, 1.56, 0.64, 1) ${timelineDelay}s`
-              : "transform 0.3s ease-out",
-            willChange: isIntersecting ? "auto" : "transform",
+            backgroundImage: `linear-gradient(to bottom, ${experiences.map((e) => e.color).join(", ")})`,
+          }}
+        />
+
+        {/* Glow dot — rides the tip of the line, color follows current entry */}
+        <div
+          ref={glowDotRef}
+          aria-hidden="true"
+          className="absolute top-0 left-8 z-10 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full max-sm:left-4"
+          style={{
+            background: experiences[0].color,
+            boxShadow: `0 0 16px 6px ${experiences[0].color}90`,
           }}
         />
 
         <ul className="relative z-10 space-y-16 py-12">
-          {experiences.map((experience, index) => {
-            const isEven = index % 2 === 0;
-
-            return (
-              <li
-                key={`experience-${experience.company}-${index}`}
-                className="group flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-8"
+          {experiences.map((experience, index) => (
+            <li
+              key={`experience-${experience.company}-${index}`}
+              ref={(el) => {
+                cardRefs.current[index] = el;
+              }}
+              className="group relative pl-20 opacity-0 max-sm:pl-8"
+            >
+              {/* Timeline dot */}
+              <div
+                className="absolute top-7 left-8 z-10 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-black transition-transform duration-300 group-hover:scale-150 max-sm:left-4"
                 style={{
-                  opacity: isIntersecting ? 1 : 0,
-                  transform: isIntersecting
-                    ? "translateY(0) scale(1) rotate(0deg)"
-                    : `translateY(100px) scale(0.85) rotate(${
-                        isEven
-                          ? -ANIMATION_CONFIG.EXPERIENCE_ROTATION_ANGLE
-                          : ANIMATION_CONFIG.EXPERIENCE_ROTATION_ANGLE
-                      }deg)`,
-                  transition: `all 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) ${
-                    ANIMATION_CONFIG.EXPERIENCE_BASE_DELAY +
-                    index * ANIMATION_CONFIG.EXPERIENCE_STAGGER_DELAY
-                  }s`,
-                  willChange: isIntersecting ? "auto" : "opacity, transform",
+                  background: experience.color,
+                  boxShadow: `0 0 12px 2px ${experience.color}80`,
                 }}
-              >
-                {/* Logo with enhanced hover */}
-                <div className="relative mx-auto max-sm:mb-4 sm:min-h-16 sm:min-w-16">
-                  {/* Glow effect */}
+              />
+
+              {/* Card */}
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-500 group-hover:-translate-y-1">
+                {/* Giant watermark — clipped to card bounds by overflow-hidden */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute top-0 left-3 select-none font-black text-[clamp(3rem,8vw,6rem)] text-white/[0.035] leading-none tracking-tighter"
+                >
+                  {experience.abbreviation}
+                </span>
+
+                {/* Gradient mesh */}
+                <div className="pointer-events-none absolute inset-0 opacity-20">
                   <div
-                    className="absolute -inset-3 rounded-full opacity-0 blur-xl transition-all duration-500 group-hover:opacity-100 motion-reduce:transition-none"
+                    className="absolute top-0 right-0 h-64 w-64 translate-x-1/3 -translate-y-1/3 rounded-full blur-3xl transition-all duration-700 group-hover:scale-110"
                     style={{
-                      background: `radial-gradient(circle, ${experience.color}80, transparent 70%)`,
+                      background: `radial-gradient(circle, ${experience.color}70, transparent 70%)`,
                     }}
                   />
-
-                  <div
-                    className="relative h-14 w-14 overflow-hidden rounded-2xl border-2 border-white/10 bg-white/5 backdrop-blur-md transition-all duration-500 group-hover:scale-110 motion-reduce:transition-none sm:h-16 sm:w-16"
-                    style={{
-                      boxShadow: `0 0 24px 4px ${experience.color}88`,
-                    }}
-                  >
-                    <img
-                      src={experience.icon}
-                      alt={`${experience.company} logo`}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
-                    />
-                  </div>
                 </div>
 
-                {/* Card */}
-                <div className="flex flex-1 flex-col items-center gap-6 rounded-2xl">
-                  <div
-                    className="relative w-full overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl transition-all duration-500 not-motion-reduce:group-hover:-translate-y-1 motion-reduce:transition-none"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))",
-                      boxShadow: `0 8px 32px -10px ${experience.color}30`,
-                    }}
-                  >
-                    {/* Gradient mesh background */}
-                    <div className="pointer-events-none absolute inset-0 opacity-20">
-                      <div
-                        className="absolute top-0 right-0 h-64 w-64 translate-x-[30%] -translate-y-[30%] rounded-full blur-3xl transition-all duration-700 group-hover:translate-x-[10%] group-hover:-translate-y-[10%] group-hover:scale-120 motion-reduce:transition-none"
-                        style={{
-                          background: `radial-gradient(circle, ${experience.color}70, transparent 70%)`,
-                        }}
+                <div className="relative p-6 sm:p-8">
+                  {/* Header row */}
+                  <div className="mb-5 flex items-center gap-4">
+                    <div
+                      className="h-12 w-12 shrink-0 overflow-hidden rounded-xl border-2 border-white/10"
+                      style={{
+                        boxShadow: `0 0 20px ${experience.color}50`,
+                      }}
+                    >
+                      <img
+                        src={experience.icon}
+                        alt={`${experience.company} logo`}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-contain p-1.5"
                       />
                     </div>
-
-                    {/* Content */}
-                    <div className="relative p-6 sm:p-8">
-                      {/* Title with underline */}
-                      <h3 className="relative mb-2 inline-block font-bold text-white text-xl sm:text-2xl">
+                    <div>
+                      <h3 className="relative inline-block font-bold text-white text-xl sm:text-2xl">
                         {experience.company}
                         <div
-                          className="absolute -bottom-1 left-0 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-16 motion-reduce:transition-none"
-                          style={{
-                            background: experience.color,
-                          }}
+                          className="absolute -bottom-1 left-0 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-full"
+                          style={{ background: experience.color }}
                         />
                       </h3>
-
                       <p
-                        className="mb-4 font-semibold transition-all duration-300 motion-reduce:transition-none"
-                        style={{
-                          color: experience.color,
-                        }}
+                        className="mt-1.5 text-sm"
+                        style={{ color: experience.color }}
                       >
                         {experience.title}
-                        <span className="text-white/60">
+                        <span className="text-white/50">
                           &nbsp;&mdash;&nbsp;{experience.date}
                         </span>
                       </p>
-
-                      {/* Points */}
-                      <ul className="space-y-2 text-sm text-white/90 group-hover:text-white sm:text-base">
-                        {experience.points.map((point, pointIndex) => (
-                          <li
-                            key={`experience-point-${point.title}`}
-                            className="flex gap-2 transition-all duration-300 not-motion-reduce:group-hover:translate-x-1 motion-reduce:transition-none"
-                            style={{
-                              transitionDelay: `${pointIndex * 30}ms`,
-                            }}
-                          >
-                            <span
-                              className="mt-2 h-1 w-1 shrink-0 rounded-full transition-all duration-300 motion-reduce:transition-none"
-                              style={{
-                                background: experience.color,
-                              }}
-                            />
-                            <div>
-                              <strong>{point.title}</strong>
-                              <span>{`: ${point.subtitle}`}</span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
-
-                    {/* Shimmer effect */}
-                    <div
-                      className="pointer-events-none absolute inset-0 bg-size-[200%_100%] opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
-                      style={{
-                        backgroundImage: `linear-gradient(110deg, transparent 25%, ${experience.color}15 50%, transparent 75%)`,
-                        animation: !prefersReducedMotion
-                          ? "shimmer 1.5s ease-in-out"
-                          : "none",
-                      }}
-                    />
                   </div>
+
+                  {/* Points */}
+                  <ul className="space-y-2 text-sm text-white/80 transition-colors duration-300 group-hover:text-white/90 sm:text-base">
+                    {experience.points.map((point, pointIndex) => (
+                      <li
+                        key={`point-${point.title}`}
+                        className="flex gap-2 transition-transform duration-300 group-hover:translate-x-1"
+                        style={{ transitionDelay: `${pointIndex * 25}ms` }}
+                      >
+                        <span
+                          className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
+                          style={{ background: experience.color }}
+                        />
+                        <div>
+                          <strong>{point.title}</strong>
+                          <span>{`: ${point.subtitle}`}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </li>
-            );
-          })}
+
+                {/* Shimmer on hover */}
+                <div
+                  className="pointer-events-none absolute inset-0 bg-size-[200%_100%] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  style={{
+                    backgroundImage: `linear-gradient(110deg, transparent 25%, ${experience.color}10 50%, transparent 75%)`,
+                  }}
+                />
+              </div>
+            </li>
+          ))}
         </ul>
       </div>
     </section>

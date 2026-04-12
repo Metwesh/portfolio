@@ -1,8 +1,10 @@
 import { useGLTF } from "@react-three/drei";
 import { lazy, Suspense } from "react";
-import { Footer, Header, MainCanvas, SkipToContent } from "./components";
+import { Footer, Header, SkipToContent } from "./components";
+import { CustomCursor } from "./components/CustomCursor";
+import { UniverseCanvas } from "./components/UniverseCanvas";
 import { mainLogoPath } from "./constants";
-import { useScrollPosition } from "./hooks/useScrollPosition";
+import { useLenisScroll } from "./hooks/useLenisScroll";
 
 // Preload the model
 useGLTF.preload(mainLogoPath);
@@ -30,35 +32,32 @@ const CertificatesSection = lazy(() =>
   })),
 );
 
-// Track scroll position for 3D parallax
 export default function App() {
-  const scrollY = useScrollPosition();
+  const { scrollY } = useLenisScroll();
 
   const handleCanvasReady = () => {
-    // Hide the HTML loading screen when canvas is ready
     const loadingScreen = document.getElementById("loading-screen");
     if (!loadingScreen) return;
-    loadingScreen.classList.add("fade-out");
-    // Remove from DOM after transition completes
+    loadingScreen.classList.add("swipe-out");
     setTimeout(() => {
       loadingScreen.remove();
-    }, 300);
+      document.dispatchEvent(new CustomEvent("app:ready"));
+    }, 700);
   };
 
   return (
     <>
-      {/* Skip to content for accessibility */}
+      <CustomCursor />
       <SkipToContent />
 
-      {/* Fixed 3D Canvas */}
-      <MainCanvas scrollY={scrollY} onReady={handleCanvasReady} />
+      {/* Single unified 3D universe — fixed behind everything */}
+      <UniverseCanvas onReady={handleCanvasReady} />
 
-      {/* Sticky Header with Logo and lively text */}
       <Header scrollY={scrollY} />
 
-      <main id="main-content">
+      <main id="main-content" className="relative z-10 max-w-screen">
         <Suspense fallback={null}>
-          <HeroSection scrollY={scrollY} />
+          <HeroSection />
         </Suspense>
 
         <Suspense fallback={null}>
@@ -81,6 +80,9 @@ export default function App() {
           <Footer />
         </div>
       </main>
+
+      {/* Film grain overlay */}
+      <div className="grain-overlay" aria-hidden="true" />
     </>
   );
 }

@@ -28,13 +28,13 @@ describe("Header", () => {
   it("shows background when scrolled", () => {
     const { container, rerender } = render(<Header scrollY={0} />);
 
-    // Check initial state (not scrolled)
-    const bgDiv = container.querySelector(".absolute.inset-0");
-    expect(bgDiv).toHaveClass("opacity-0");
+    // Initial: no background
+    const header = container.querySelector("header");
+    expect(header?.className).toContain("bg-black/10");
 
-    // Rerender with scroll
+    // After scroll threshold
     rerender(<Header scrollY={100} />);
-    expect(bgDiv).toHaveClass("opacity-100");
+    expect(header?.className).toContain("bg-black/30");
   });
 
   it("opens mobile menu when hamburger is clicked", async () => {

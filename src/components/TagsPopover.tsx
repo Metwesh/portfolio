@@ -53,28 +53,26 @@ export function TagsPopover({
               }
             }}
             aria-expanded={isOpen}
-            aria-label={`Show ${hiddenTags.length} more ${
-              hiddenTags.length === 1 ? "tag" : "tags"
-            }`}
+            aria-label={`Show ${hiddenTags.length} more technologies`}
           >
-            +{hiddenTags.length} {hiddenTags.length === 1 ? "tag" : "tags"}
+            {`+${hiddenTags.length} more`}
           </button>
 
           {/* Popover */}
           <div
-            className="absolute top-full z-100 mt-2 transition-all duration-300"
+            className="absolute bottom-full z-100 mb-2 transition-all duration-300"
             style={{
               left: "50%",
               opacity: isOpen ? 1 : 0,
               pointerEvents: isOpen ? "auto" : "none",
               transform: `translateX(-50%) translateY(${
-                isOpen ? "0" : "-10px"
+                isOpen ? "0" : "10px"
               })`,
             }}
           >
             {/* Arrow */}
             <div
-              className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-t border-l backdrop-blur-xl"
+              className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-r border-b backdrop-blur-xl"
               style={{
                 background: `linear-gradient(135deg, ${projectColor}20, rgba(0,0,0,0.6))`,
                 borderTopColor: `${projectColor}30`,

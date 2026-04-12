@@ -1,18 +1,25 @@
+import { cn } from "../lib/utils";
+
 interface SectionHeadingProps {
   id: string;
   isIntersecting: boolean;
   children: React.ReactNode;
+  className?: string;
 }
 
 export function SectionHeading({
   id,
   isIntersecting,
+  className,
   children,
 }: SectionHeadingProps) {
   return (
     <h2
       id={id}
-      className="relative bg-linear-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-center font-black text-5xl text-transparent tracking-tight md:text-6xl"
+      className={cn(
+        "relative bg-linear-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-center font-black text-5xl text-transparent tracking-tight md:text-6xl",
+        className,
+      )}
       style={{
         opacity: isIntersecting ? 1 : 0,
         transform: `translateY(${isIntersecting ? 0 : 50}px) scale(${

@@ -1,75 +1,151 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollHelper } from "../components";
 import { SectionHeading } from "../components/SectionHeading";
-import { Switch } from "../components/Switch";
-import { TechCanvas } from "../components/TechCanvas";
-import { TechList } from "../components/TechList";
-import {
-  breakpoints,
-  INTERSECTION_OBSERVER_CONFIG,
-  navLinks,
-} from "../constants";
+import { navLinks } from "../constants";
+import { technologies } from "../constants/technologies";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
-import { useReducedMotion } from "../hooks/useReducedMotion";
-import { cn } from "../lib/utils";
+import { scrollStore } from "../stores/scrollStore";
 
 export function TechStacksSection() {
-  const prefersReducedMotion = useReducedMotion();
-  const [isList, setIsList] = useState(
-    () => window.innerWidth < breakpoints.mobile || prefersReducedMotion,
-  );
-
-  const { targetRef, isIntersecting } = useIntersectionObserver({
-    threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
-    rootMargin: INTERSECTION_OBSERVER_CONFIG.TECH_STACKS_ROOT_MARGIN,
+  const { targetRef: sentinelRef, isIntersecting } = useIntersectionObserver({
+    threshold: 0.2,
+    rootMargin: "0px",
   });
+
+  const [showScrollHint, setShowScrollHint] = useState(false);
+
+  // Activate trackball controls + drive 3D constellation visibility
+  // Also disable <main> pointer events so the canvas below can receive drag input
+  useEffect(() => {
+    scrollStore.techSectionActive = isIntersecting;
+    const mainEl = document.getElementById("main-content");
+    if (mainEl) mainEl.style.pointerEvents = isIntersecting ? "none" : "";
+    document.dispatchEvent(
+      new CustomEvent("universe:interactive", {
+        detail: { active: isIntersecting },
+      }),
+    );
+    return () => {
+      if (mainEl) mainEl.style.pointerEvents = "";
+    };
+  }, [isIntersecting]);
+
+  // Show two-finger scroll hint after 4 s of continuous visibility on touch devices
+  useEffect(() => {
+    if (!isIntersecting) {
+      setShowScrollHint(false);
+      return;
+    }
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+    if (!isTouchDevice) return;
+    const timer = setTimeout(() => setShowScrollHint(true), 4000);
+    return () => clearTimeout(timer);
+  }, [isIntersecting]);
 
   return (
     <section
+      ref={sentinelRef as React.RefObject<HTMLElement>}
       id="tech-stacks"
-      className="flex min-h-[60vh] flex-col items-center justify-center py-24"
       aria-labelledby="tech-stacks-heading"
+      className="pointer-events-none relative z-10 h-[300svh]"
     >
-      {/* Animated section title */}
-      <div className="relative mb-20 w-full space-y-4">
-        <SectionHeading
-          id="tech-stacks-heading"
-          isIntersecting={isIntersecting}
+      <div className="sticky top-0 flex h-svh flex-col py-20">
+        {/* Radial glow — blooms in as sphere arrives */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center"
         >
-          Tech Stacks
-        </SectionHeading>
-        {!prefersReducedMotion && (
-          <Switch
-            value={isList}
-            onChange={setIsList}
-            className="mx-auto w-fit md:ms-auto"
-            target="tech-stacks-container"
-            labels={["Canvas", "List"]}
+          <div
+            className="h-175 w-175 rounded-full transition-all duration-1000"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(0,238,255,0.07) 0%, rgba(168,85,247,0.05) 45%, transparent 70%)",
+              opacity: isIntersecting ? 1 : 0,
+              transform: isIntersecting ? "scale(1)" : "scale(0.6)",
+            }}
           />
-        )}
-      </div>
-      <div
-        ref={targetRef}
-        className={cn(
-          "scroll-mt-18",
-          !isList
-            ? "-mx-4 h-130 w-screen md:h-162.5 lg:h-187.5"
-            : "w-full max-w-6xl",
-        )}
-        id="tech-stacks-container"
-      >
-        {isList ? (
-          <TechList isInView={isIntersecting} />
-        ) : (
-          <TechCanvas isInView={isIntersecting} />
-        )}
-      </div>
-      <div className="mx-8 mt-2 flex w-full items-center gap-8 md:gap-4">
-        <ScrollHelper
-          href={navLinks[3].href}
-          ariaLabel="Scroll to projects"
-          className="mx-auto flex w-fit justify-center md:col-start-2 md:col-end-3"
-        />
+        </div>
+
+        {/* Heading — top-left, matching other sections */}
+        <div className="mb-6 w-full px-gutter sm:px-12 md:px-20">
+          <SectionHeading
+            id="tech-stacks-heading"
+            isIntersecting={isIntersecting}
+          >
+            Tech Stacks
+          </SectionHeading>
+        </div>
+
+        {/* Screen-reader fallback — the 3D sphere is purely visual */}
+        <ul className="sr-only">
+          {technologies.map((t) => (
+            <li key={t.name}>{t.name}</li>
+          ))}
+        </ul>
+
+        {/* Spacer — sphere lives here in canvas */}
+        <div className="flex-1" />
+
+        {/* Bottom content */}
+        <div className="flex flex-col items-center gap-4 pb-6">
+          {/* Count */}
+          <p
+            className="font-bold text-4xl tracking-[-0.04em] transition-all duration-700 sm:text-5xl"
+            style={{
+              color: "rgba(255,255,255,0.08)",
+              opacity: isIntersecting ? 1 : 0,
+              transform: isIntersecting ? "translateY(0)" : "translateY(20px)",
+            }}
+          >
+            {technologies.length} tools.
+          </p>
+
+          {/* Drag hint / two-finger scroll hint */}
+          <p
+            className="text-white/25 text-xs uppercase tracking-widest transition-all duration-700"
+            style={{
+              transitionDelay: "150ms",
+              opacity: isIntersecting ? 1 : 0,
+              transform: isIntersecting ? "translateY(0)" : "translateY(10px)",
+            }}
+          >
+            {showScrollHint
+              ? "Two-finger scroll to continue"
+              : "Drag the sphere to explore"}
+          </p>
+
+          {/* Category row — staggered */}
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-medium text-white/20 text-xs uppercase tracking-widest">
+            {["Frontend", "Backend", "DevOps", "Tools", "Design"].map(
+              (cat, i, arr) => (
+                <span
+                  key={cat}
+                  className="flex items-center gap-6 transition-all duration-500"
+                  style={{
+                    transitionDelay: `${200 + i * 80}ms`,
+                    opacity: isIntersecting ? 1 : 0,
+                    transform: isIntersecting
+                      ? "translateY(0)"
+                      : "translateY(8px)",
+                  }}
+                >
+                  {cat}
+                  {i < arr.length - 1 && (
+                    <span className="h-px w-4 bg-white/10" aria-hidden="true" />
+                  )}
+                </span>
+              ),
+            )}
+          </div>
+
+          <div className="pointer-events-auto mt-2">
+            <ScrollHelper
+              href={navLinks[3].href}
+              ariaLabel="Scroll to experience"
+              className="flex w-fit"
+            />
+          </div>
+        </div>
       </div>
     </section>
   );

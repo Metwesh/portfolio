@@ -1,62 +1,167 @@
-import { useState } from "react";
+import gsap from "gsap";
+import { useEffect, useRef } from "react";
 import { ScrollHelper } from "../components";
-import { ANIMATION_CONFIG, navLinks } from "../constants";
+import { navLinks } from "../constants";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
-export function HeroSection({ scrollY }: { scrollY: number }) {
+export function HeroSection() {
   const prefersReducedMotion = useReducedMotion();
-  const [initialHeight] = useState(() => window.innerHeight);
+  const line1Ref = useRef<HTMLSpanElement>(null);
+  const line2Ref = useRef<HTMLSpanElement>(null);
+  const line3Ref = useRef<HTMLSpanElement>(null);
+  const eyebrowRef = useRef<HTMLParagraphElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const scrollCueRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Entrance: wait for loader to finish sliding out, then reveal
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const lines = [line1Ref.current, line2Ref.current, line3Ref.current].filter(
+      Boolean,
+    );
+
+    const EYEBROW = "Creative Developer & 3D Enthusiast";
+    const eyebrow = eyebrowRef.current;
+
+    // Hide immediately so nothing is visible while loader is still up
+    gsap.set(lines, { y: "110%", opacity: 0 });
+    gsap.set([subtitleRef.current, scrollCueRef.current], {
+      opacity: 0,
+      y: 24,
+    });
+    if (eyebrow) eyebrow.textContent = "";
+
+    const start = () => {
+      // Typewriter: write one character at a time
+      if (eyebrow) {
+        let i = 0;
+        const interval = setInterval(() => {
+          eyebrow.textContent = EYEBROW.slice(0, ++i);
+          if (i >= EYEBROW.length) clearInterval(interval);
+        }, 38);
+      }
+
+      gsap.fromTo(
+        lines,
+        { y: "110%", opacity: 0 },
+        {
+          y: "0%",
+          opacity: 1,
+          duration: 1.2,
+          ease: "power3.out",
+          stagger: 0.1,
+          delay: 0.1,
+        },
+      );
+
+      gsap.fromTo(
+        [subtitleRef.current, scrollCueRef.current],
+        { opacity: 0, y: 24 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "power2.out",
+          stagger: 0.15,
+          delay: 0.7,
+        },
+      );
+    };
+
+    document.addEventListener("app:ready", start, { once: true });
+    return () => document.removeEventListener("app:ready", start);
+  }, [prefersReducedMotion]);
+
+  // Scroll-driven fade-out via GSAP ScrollTrigger
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    let tween: ReturnType<typeof gsap.to> | null = null;
+
+    import("gsap/ScrollTrigger").then(({ ScrollTrigger: ST }) => {
+      gsap.registerPlugin(ST);
+
+      tween = gsap.to(sectionRef.current, {
+        opacity: 0,
+        y: -80,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    });
+
+    return () => {
+      tween?.scrollTrigger?.kill();
+      tween?.kill();
+    };
+  }, [prefersReducedMotion]);
 
   return (
     <section
+      ref={sectionRef}
       id="scroll-section"
       aria-labelledby="hero-heading"
-      className="relative z-10 flex h-screen items-center justify-center"
+      className="relative z-10 flex min-h-svh flex-col justify-center px-gutter pt-32 pb-24 sm:px-12 md:px-20 lg:px-32"
     >
-      <div
-        className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500"
-        style={{
-          pointerEvents: "auto",
-          ...(!prefersReducedMotion && {
-            transform: `translateY(-${Math.min(
-              scrollY * ANIMATION_CONFIG.HERO_PARALLAX_SPEED,
-              ANIMATION_CONFIG.HERO_MAX_OFFSET,
-            )}px)`,
-            opacity:
-              1 -
-              Math.min(
-                scrollY / (initialHeight * ANIMATION_CONFIG.HERO_FADE_FACTOR),
-                1,
-              ),
-            willChange:
-              scrollY > 0 && scrollY < initialHeight
-                ? "transform, opacity"
-                : "auto",
-          }),
-        }}
-      >
-        <div className="animate-fade-in-up text-center">
-          <h1
-            id="hero-heading"
-            className="relative z-10 mb-4 px-gutter font-extrabold text-5xl tracking-tight md:text-7xl"
-          >
-            <span className="animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-cyan-300 via-blue-400 to-fuchsia-500 bg-clip-text text-transparent drop-shadow-black drop-shadow-md">
-              Mohamed H. Aly
+      <div className="max-w-6xl">
+        {/* Eyebrow — typewriter reveal */}
+        <p
+          ref={eyebrowRef}
+          className="mb-6 font-mono text-cyan-400 text-sm uppercase tracking-widest after:ml-0.5 after:inline-block after:h-3.5 after:w-0.5 after:animate-caret-blink after:bg-cyan-400 after:align-middle motion-reduce:after:hidden"
+        />
+
+        {/* Giant headline — each line in overflow:hidden clip container */}
+        <h1
+          id="hero-heading"
+          className="mb-10 font-extrabold text-[clamp(3rem,10vw,9rem)] leading-none tracking-tight"
+        >
+          <span className="block overflow-hidden">
+            <span
+              ref={line1Ref}
+              className="block animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-cyan-300 via-blue-400 to-fuchsia-500 bg-clip-text text-transparent motion-reduce:opacity-0"
+            >
+              Mohamed
             </span>
-            <span className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-header-gradient-move-pulse select-none bg-linear-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text text-5xl text-transparent blur-2xl md:whitespace-pre md:text-7xl">
-              Mohamed H. Aly
+          </span>
+          <span className="block overflow-hidden">
+            <span
+              ref={line2Ref}
+              className="block text-white motion-reduce:opacity-0"
+            >
+              H. Aly
             </span>
-          </h1>
-          <p className="mx-auto mb-10 max-w-2xl animate-header-gradient-move text-pretty bg-linear-to-r from-cyan-200 via-fuchsia-300 to-yellow-200 bg-clip-text font-bold text-transparent text-xl drop-shadow-black drop-shadow-md supports-[text-wrap:balance]:text-balance md:text-3xl">
-            Creative Developer, 3D Enthusiast &mdash;&nbsp;
-            <span className="bg-none text-white/95">
-              Crafting mind-bending digital experiences.
+          </span>
+          <span className="block overflow-hidden">
+            <span
+              ref={line3Ref}
+              className="block animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-fuchsia-400 via-blue-400 to-cyan-300 bg-clip-text pb-2 text-transparent motion-reduce:opacity-0"
+            >
+              builds things.
             </span>
-          </p>
+          </span>
+        </h1>
+
+        {/* Tagline */}
+        <p
+          ref={subtitleRef}
+          className="mb-12 max-w-lg text-pretty text-white/60 text-xl leading-relaxed motion-reduce:opacity-0"
+        >
+          Crafting mind-bending digital experiences at the intersection of code,
+          design, and the third dimension.
+        </p>
+
+        {/* Scroll cue */}
+        <div ref={scrollCueRef} className="motion-reduce:opacity-0">
           <ScrollHelper
             href={navLinks[0].href}
             ariaLabel="Scroll to projects"
-            className="mx-auto mt-2 flex w-fit justify-center"
+            className="flex w-fit"
           />
         </div>
       </div>

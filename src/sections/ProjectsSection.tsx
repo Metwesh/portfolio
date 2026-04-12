@@ -1,282 +1,163 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { ProjectScrollbar } from "../components/ProjectScrollbar";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
+import { useEffect, useRef, useState } from "react";
 import { SectionHeading } from "../components/SectionHeading";
-import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
+import { TagsPopover } from "../components/TagsPopover";
 import { projects } from "../constants/projects";
-import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
-import { useIsMobile } from "../hooks/useIsMobile";
-import { ProjectCard } from "./ProjectCard";
+import { scrollStore } from "../stores/scrollStore";
 
-const TOTAL_ITEMS = projects.length + 1; // +1 for title card
+export function ProjectsSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const counterRef = useRef<HTMLSpanElement>(null);
 
-/** Clamp a number between min and max */
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
-}
+  // Active project index for DOM overlay — updated by GSAP onUpdate
+  const [activeIndex, setActiveIndex] = useState(0);
 
-/** Write coverflow CSS transforms directly to a DOM element — no React re-renders */
-function applyCoverflowTransform(
-  el: HTMLElement | null,
-  offset: number,
-  transition: string,
-) {
-  if (!el) return;
-
-  const absOffset = Math.abs(offset);
-
-  if (absOffset > 2.5) {
-    el.style.visibility = "hidden";
-    el.style.pointerEvents = "none";
-    return;
-  }
-
-  el.style.visibility = "visible";
-  // Only the active card is interactive
-  el.style.pointerEvents = absOffset < 0.6 ? "auto" : "none";
-
-  const spreadX = clamp(offset * 52, -108, 108); // vw — how far cards fan out
-  const depthZ = -absOffset * 260; // px — push side cards back
-  const rotY = clamp(-offset * 46, -72, 72); // deg — rotate side cards away
-  const scale = Math.max(0.68, 1 - absOffset * 0.17);
-  const opacity = Math.max(0.08, 1 - absOffset * 0.62);
-
-  el.style.transition = transition;
-  el.style.transform = `translate(-50%, -50%) translateX(${spreadX}vw) translateZ(${depthZ}px) rotateY(${rotY}deg) scale(${scale})`;
-  el.style.opacity = String(opacity);
-  el.style.zIndex = String(Math.round(10 - absOffset * 3));
-}
-
-export const ProjectsSection = memo(function ProjectsSection() {
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const titleCardRef = useRef<HTMLDivElement | null>(null);
-  const cardRefs = useRef<(HTMLElement | null)[]>([]);
-  const currentIndexRef = useRef(0);
-  const isSnappingRef = useRef(false);
-
-  const isMobile = useIsMobile();
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const { targetRef: mobileTitleRef, isIntersecting } = useIntersectionObserver(
-    {
-      threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
-      rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
-      enabled: isMobile,
-    },
-  );
-
-  // Scroll to a specific coverflow index
-  const scrollToProject = useCallback(
-    (targetIndex: number, smooth = true) => {
-      const element = sectionRef.current;
-      if (!element || isMobile) return;
-
-      const totalScrollDistance = element.offsetHeight - window.innerHeight;
-      const targetScroll =
-        element.offsetTop +
-        (targetIndex / (TOTAL_ITEMS - 1)) * totalScrollDistance;
-
-      window.scrollTo({
-        top: targetScroll,
-        behavior: smooth ? "smooth" : "auto",
-      });
-    },
-    [isMobile],
-  );
-
-  // Coverflow scroll handler — writes directly to DOM, zero React re-renders per frame
   useEffect(() => {
-    if (isMobile) return;
-
     const section = sectionRef.current;
     if (!section) return;
 
-    const getActiveIndex = () => {
-      const rect = section.getBoundingClientRect();
-      const totalScrollDistance = rect.height - window.innerHeight;
-      if (totalScrollDistance <= 0) return 0;
-      return clamp(-rect.top / totalScrollDistance, 0, 1) * (TOTAL_ITEMS - 1);
+    const scrollDist = (projects.length - 1) * window.innerWidth;
+
+    const setHeight = () => {
+      section.style.height = `${(projects.length - 1) * window.innerWidth + window.innerHeight}px`;
     };
+    setHeight();
 
-    // Fires on every scroll frame — transforms only, no snap logic
-    const update = () => {
-      const activeIndex = getActiveIndex();
-      const snapped = Math.round(activeIndex);
+    const tween = gsap.to(
+      {},
+      {
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: `+=${scrollDist}`,
+          scrub: 1,
+          invalidateOnRefresh: true,
+          onRefresh: setHeight,
+          onEnter: () => {
+            scrollStore.projectSectionActive = true;
+          },
+          onLeave: () => {
+            scrollStore.projectSectionActive = false;
+          },
+          onEnterBack: () => {
+            scrollStore.projectSectionActive = true;
+          },
+          onLeaveBack: () => {
+            scrollStore.projectSectionActive = false;
+          },
+          onUpdate: (self) => {
+            scrollStore.projectProgress = self.progress;
 
-      if (snapped !== currentIndexRef.current) {
-        currentIndexRef.current = snapped;
-        setCurrentIndex(snapped);
-      }
+            const idx = Math.round(self.progress * (projects.length - 1));
+            if (counterRef.current) {
+              counterRef.current.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(projects.length).padStart(2, "0")}`;
+            }
+            setActiveIndex(idx);
+          },
+        },
+      },
+    );
 
-      const transition = isSnappingRef.current
-        ? "transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.55s ease-out"
-        : "none";
-      applyCoverflowTransform(
-        titleCardRef.current,
-        0 - activeIndex,
-        transition,
-      );
-      cardRefs.current.forEach((card, i) => {
-        applyCoverflowTransform(card, i + 1 - activeIndex, transition);
-      });
-    };
+    const handleLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", handleLoad);
 
-    // Debounced snap — fires after scrolling stops
-    let debounceTimer: ReturnType<typeof setTimeout>;
-    const debouncedSnap = () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        if (isSnappingRef.current) return;
-        const activeIndex = getActiveIndex();
-        const snapped = Math.round(activeIndex);
-        if (Math.abs(activeIndex - snapped) > 0.05) {
-          isSnappingRef.current = true;
-          scrollToProject(snapped, true);
-          setTimeout(() => {
-            isSnappingRef.current = false;
-          }, 900);
-        }
-      }, 180);
-    };
-
-    // If user starts wheeling mid-snap, cancel immediately so the transition
-    // stops fighting the manual scroll
-    const cancelSnap = () => {
-      if (!isSnappingRef.current) return;
-      isSnappingRef.current = false;
-      window.scrollTo({ top: window.scrollY }); // interrupts smooth scroll
-    };
-
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("scroll", debouncedSnap, { passive: true });
-    window.addEventListener("wheel", cancelSnap, { passive: true });
-
-    update();
     return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("scroll", debouncedSnap);
-      window.removeEventListener("wheel", cancelSnap);
-      clearTimeout(debounceTimer);
+      tween.scrollTrigger?.kill();
+      tween.kill();
+      window.removeEventListener("load", handleLoad);
+      section.style.height = "";
+      scrollStore.projectProgress = 0;
+      scrollStore.projectSectionActive = false;
     };
-  }, [isMobile, scrollToProject]);
+  }, []);
 
-  // Keyboard navigation
-  useEffect(() => {
-    if (isMobile) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const section = sectionRef.current;
-      if (!section?.contains(document.activeElement)) return;
-
-      const scrollAmount = window.innerHeight * 0.8;
-      switch (e.key) {
-        case "ArrowRight":
-        case "ArrowDown":
-          e.preventDefault();
-          window.scrollBy({ top: scrollAmount, behavior: "smooth" });
-          break;
-        case "ArrowLeft":
-        case "ArrowUp":
-          e.preventDefault();
-          window.scrollBy({ top: -scrollAmount, behavior: "smooth" });
-          break;
-        case "Home":
-          e.preventDefault();
-          section.scrollIntoView({ behavior: "smooth", block: "start" });
-          break;
-        case "End":
-          e.preventDefault();
-          window.scrollTo({
-            top: section.offsetTop + section.offsetHeight,
-            behavior: "smooth",
-          });
-          break;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isMobile]);
+  const activeProject = projects[activeIndex];
+  const isClickable = !!activeProject.link;
 
   return (
     <section
       ref={sectionRef}
       id="projects"
       aria-labelledby="projects-heading"
-      aria-describedby={!isMobile ? "projects-navigation-help" : undefined}
-      tabIndex={!isMobile ? -1 : undefined}
-      className="relative z-10 overflow-x-clip py-20 outline-none focus:ring-0 md:px-0 md:py-0"
-      style={!isMobile ? { height: `${TOTAL_ITEMS * 100}vh` } : undefined}
+      className="relative z-10"
     >
-      {!isMobile && (
-        <div id="projects-navigation-help" className="sr-only">
-          Horizontal coverflow section. Use arrow keys or scroll to navigate
-          through projects. Press Home to go to the beginning, End to go to the
-          end.
-        </div>
-      )}
-
-      <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {!isMobile && currentIndex > 0
-          ? `Viewing project ${currentIndex} of ${projects.length}: ${
-              projects[currentIndex - 1]?.name
-            }`
-          : ""}
-      </div>
-
-      {/* Mobile: vertical stack | Desktop: sticky coverflow viewport */}
-      <div className="flex flex-col gap-8 overflow-x-clip md:sticky md:top-0 md:h-screen md:overflow-hidden">
-        {/* Perspective container — all cards absolutely positioned inside */}
-        <div
-          className="relative flex flex-col gap-8 max-md:px-gutter md:h-full md:w-full"
-          style={
-            !isMobile
-              ? { perspective: "1200px", perspectiveOrigin: "50% 50%" }
-              : undefined
-          }
-        >
-          {/* Title card */}
-          <div
-            ref={isMobile ? mobileTitleRef : titleCardRef}
-            className={
-              isMobile
-                ? "mb-12 flex items-center justify-center"
-                : "absolute top-1/2 left-1/2 w-screen"
-            }
+      {/* Sticky viewport */}
+      <div className="sticky top-0 h-svh overflow-hidden">
+        {/* Section label + counter */}
+        <div className="pointer-events-none absolute top-30 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 md:top-20">
+          <SectionHeading id="projects-heading" className="pb-1" isIntersecting>
+            Projects
+          </SectionHeading>
+          <span
+            ref={counterRef}
+            className="whitespace-pre font-mono text-sm text-white/40 tabular-nums"
           >
-            <SectionHeading
-              id="projects-heading"
-              isIntersecting={isMobile ? isIntersecting : true}
+            01 / {String(projects.length).padStart(2, "0")}
+          </span>
+        </div>
+
+        {/* Active project detail overlay */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pb-14">
+          {/* Project name + underline */}
+          <div className="mb-3 text-center">
+            <h3
+              className="relative inline-block font-bold text-2xl text-white tracking-tight transition-all duration-500 sm:text-3xl"
+              style={{ letterSpacing: "-0.03em" }}
             >
-              Projects
-            </SectionHeading>
+              {activeProject.name}
+              <span
+                className="absolute -bottom-1.5 left-0 h-0.5 w-full rounded-full transition-all duration-500"
+                style={{
+                  background: `linear-gradient(90deg, ${activeProject.color}, transparent)`,
+                }}
+              />
+            </h3>
           </div>
 
-          {/* Project cards */}
-          {projects.map((proj, index) => (
-            <ProjectCard
-              key={proj.name}
-              ref={
-                !isMobile
-                  ? (el) => {
-                      cardRefs.current[index] = el;
-                    }
-                  : undefined
-              }
-              project={proj}
-              index={index}
-              isMobile={isMobile}
-            />
-          ))}
-        </div>
+          {/* Description */}
+          <p className="mb-4 max-w-sm px-6 text-center text-white/60 text-xs leading-relaxed sm:max-w-lg sm:px-0 sm:text-sm">
+            {activeProject.description}
+          </p>
 
-        {!isMobile && (
-          <ProjectScrollbar
-            projectCount={projects.length}
-            currentIndex={currentIndex}
-            onNavigate={scrollToProject}
-          />
-        )}
+          {/* Tags + visit button */}
+          <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-3">
+            {activeProject.tags && activeProject.tags.length > 0 && (
+              <TagsPopover
+                tags={activeProject.tags}
+                visibleCount={3}
+                projectColor={activeProject.color}
+              />
+            )}
+            {isClickable && (
+              <a
+                href={activeProject.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 font-semibold text-white text-xs backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/10"
+                style={{ boxShadow: `0 0 16px ${activeProject.color}40` }}
+              >
+                Visit
+                <svg
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+              </a>
+            )}
+          </div>
+        </div>
       </div>
     </section>
   );
-});
+}

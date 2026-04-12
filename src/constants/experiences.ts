@@ -5,6 +5,7 @@ export const experiences = [
   {
     title: "Frontend Engineer",
     company: "The Address Holding",
+    abbreviation: "TAH",
     link: "https://theaddressholding.com/",
     icon: tahLogo,
     date: "Nov 2024 - Present",
@@ -35,6 +36,7 @@ export const experiences = [
   {
     title: "Senior Frontend Engineer",
     company: "SIDEUP",
+    abbreviation: "SIDEUP",
     link: "https://eg.sideup.co/",
     icon: sideupWhiteLogo,
     date: "Dec 2023 - Nov 2024",
@@ -65,6 +67,7 @@ export const experiences = [
   {
     title: "Frontend Engineer",
     company: "SIDEUP",
+    abbreviation: "SIDEUP",
     link: "https://eg.sideup.co/",
     icon: sideupWhiteLogo,
     date: "Feb 2023 - Dec 2023",
@@ -95,6 +98,7 @@ export const experiences = [
   {
     title: "Interface Specialist",
     company: "Advanced Computer Technologies (ACT)",
+    abbreviation: "ACT",
     link: "https://www.act.eg/",
     icon: actLogo,
     date: "Feb 2022 - Feb 2023",

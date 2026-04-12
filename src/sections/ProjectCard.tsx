@@ -23,14 +23,12 @@ export const ProjectCard = forwardRef<HTMLElement, ProjectCardProps>(
     });
 
     const isClickable = !!project.link;
+    const CardInner = isClickable ? "a" : "div";
 
     return (
       <article
         ref={isMobile ? (targetRef as React.Ref<HTMLElement>) : ref}
-        className={cn(
-          "w-full",
-          !isMobile && "absolute top-1/2 left-1/2 w-[min(80vw,920px)]",
-        )}
+        className={cn("w-full", !isMobile && "w-[min(80vw,920px)]")}
         style={
           isMobile
             ? {
@@ -58,16 +56,16 @@ export const ProjectCard = forwardRef<HTMLElement, ProjectCardProps>(
               }}
             />
 
-            <a
-              className={cn(
-                "relative block rounded-[22px] border border-white/10 bg-white/5 transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl",
-                isClickable && "cursor-pointer",
-              )}
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={isClickable ? project.name : undefined}
-              role={!isClickable ? "none" : undefined}
+            <CardInner
+              className="relative block rounded-[22px] border border-white/10 bg-white/5 transition-all duration-500 group-hover:scale-[1.02] group-hover:border-white/20 group-hover:shadow-2xl"
+              {...(isClickable
+                ? {
+                    href: project.link,
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                    "aria-label": project.name,
+                  }
+                : {})}
             >
               {/* Animated gradient mesh background */}
               <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[22px] opacity-30">
@@ -236,7 +234,7 @@ export const ProjectCard = forwardRef<HTMLElement, ProjectCardProps>(
                   )}
                 </div>
               </div>
-            </a>
+            </CardInner>
           </div>
         </div>
       </article>

@@ -44,7 +44,7 @@ const processTexture = (
   }
 
   // iOS: Process through canvas (expensive but necessary)
-  if (!texture || !texture.image) return texture;
+  if (!texture?.image) return texture;
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");

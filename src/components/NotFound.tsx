@@ -3,7 +3,7 @@
  */
 export function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
+    <div className="flex min-h-svh flex-col items-center justify-center px-4 text-center">
       <div className="max-w-md space-y-6">
         <h1 className="bg-linear-to-r from-cyan-400 to-fuchsia-500 bg-clip-text font-extrabold text-9xl text-transparent">
           404

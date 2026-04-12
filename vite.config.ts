@@ -8,7 +8,17 @@ import viteCompression from "vite-plugin-compression";
 import { VitePWA } from "vite-plugin-pwa";
 
 // Three.js components that use direct mutations — skip React Compiler for these
-const SKIP_COMPILER = ["MLogo", "AnimatedStars", "TechBox", "TechCanvas"];
+const SKIP_COMPILER = [
+  "MLogo",
+  "AnimatedStars",
+  "TechBox",
+  "TechCanvas",
+  "CameraRig",
+  "UniverseCanvas",
+  "LenisFrameSyncer",
+  "CustomCursor",
+  "ProjectGallery",
+];
 
 const getBasePath = (mode: string) =>
   mode === "development" ? undefined : "/portfolio/";
@@ -33,6 +43,8 @@ export default defineConfig(async ({ mode }) => ({
           )
             return "three";
           if (id.includes("@react-spring/three")) return "animation";
+          if (id.includes("gsap")) return "gsap";
+          if (id.includes("lenis")) return "lenis";
           if (id.includes("react-dom") || id.includes("react/"))
             return "vendor";
         },
