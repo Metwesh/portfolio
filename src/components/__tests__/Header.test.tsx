@@ -25,16 +25,16 @@ describe("Header", () => {
     expect(screen.getAllByText("Certificates").length).toBeGreaterThan(0);
   });
 
-  it("shows background when scrolled", () => {
+  it("shows name when scrolled past threshold", () => {
     const { container, rerender } = render(<Header scrollY={0} />);
 
-    // Initial: no background
-    const header = container.querySelector("header");
-    expect(header?.className).toContain("bg-black/10");
+    // Initial: name hidden
+    const nameSpan = container.querySelector(".bg-clip-text");
+    expect(nameSpan).toHaveClass("opacity-0");
 
     // After scroll threshold
     rerender(<Header scrollY={100} />);
-    expect(header?.className).toContain("bg-black/30");
+    expect(nameSpan).toHaveClass("opacity-100");
   });
 
   it("opens mobile menu when hamburger is clicked", async () => {
