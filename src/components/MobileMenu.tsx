@@ -30,10 +30,10 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
       id="mobile-menu"
       aria-label="Mobile navigation menu"
       className={cn(
-        "fixed inset-0 z-10 m-0 flex h-svh max-h-none w-screen max-w-none flex-col items-center justify-center gap-8 border-0 bg-black/80 p-0 font-bold text-2xl text-white backdrop-blur-xl transition-[opacity,transform] duration-500 md:hidden",
+        "fixed inset-0 z-10 m-0 flex h-svh max-h-none w-screen max-w-none flex-col items-center justify-center gap-8 border-0 bg-black/80 p-0 font-bold text-2xl text-white transition-[opacity,transform,backdrop-filter] duration-500 md:hidden",
         isOpen
-          ? "pointer-events-auto opacity-100"
-          : "pointer-events-none opacity-0",
+          ? "pointer-events-auto opacity-100 backdrop-blur-xl"
+          : "pointer-events-none opacity-0 backdrop-blur-[0px]",
       )}
     >
       {/* Navigation Links */}

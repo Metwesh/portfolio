@@ -1,4 +1,5 @@
-import { useState } from "react";
+import gsap from "gsap";
+import { useEffect, useRef, useState } from "react";
 import type { ProjectTag } from "../constants/projects";
 
 interface TagsPopoverProps {
@@ -13,8 +14,43 @@ export function TagsPopover({
   projectColor,
 }: TagsPopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const visibleTags = tags.slice(0, visibleCount);
   const hiddenTags = tags.slice(visibleCount);
+
+  useEffect(() => {
+    const el = popoverRef.current;
+    if (!el) return;
+
+    gsap.killTweensOf(el);
+
+    if (isOpen) {
+      gsap.set(el, { pointerEvents: "auto" });
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 10, backdropFilter: "blur(0px)" },
+        {
+          opacity: 1,
+          y: 0,
+          backdropFilter: "blur(24px)",
+          clearProps: "backdropFilter",
+          duration: 0.2,
+          ease: "power2.out",
+        },
+      );
+    } else {
+      gsap.to(el, {
+        opacity: 0,
+        y: 10,
+        backdropFilter: "blur(0px)",
+        duration: 0.15,
+        ease: "power2.in",
+        onComplete: () => {
+          gsap.set(el, { pointerEvents: "none" });
+        },
+      });
+    }
+  }, [isOpen]);
 
   if (tags.length === 0) return null;
 
@@ -32,7 +68,12 @@ export function TagsPopover({
 
       {/* +N badge with popover */}
       {hiddenTags.length > 0 && (
-        <div className="relative z-50">
+        // biome-ignore lint/a11y/noStaticElementInteractions: Popover is triggered on hover
+        <div
+          className="relative z-50"
+          onMouseEnter={() => setIsOpen(true)}
+          onMouseLeave={() => setIsOpen(false)}
+        >
           {/* Badge trigger */}
           <button
             type="button"
@@ -43,8 +84,6 @@ export function TagsPopover({
                 : "rgba(255,255,255,0.1)",
               backgroundColor: isOpen ? `${projectColor}20` : "rgba(0,0,0,0.4)",
             }}
-            onMouseEnter={() => setIsOpen(true)}
-            onMouseLeave={() => setIsOpen(false)}
             onClick={() => setIsOpen((prev) => !prev)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
@@ -60,57 +99,31 @@ export function TagsPopover({
 
           {/* Popover */}
           <div
-            className="absolute bottom-full z-100 mb-2 transition-all duration-300"
-            style={{
-              left: "50%",
-              opacity: isOpen ? 1 : 0,
-              pointerEvents: isOpen ? "auto" : "none",
-              transform: `translateX(-50%) translateY(${
-                isOpen ? "0" : "10px"
-              })`,
-            }}
+            ref={popoverRef}
+            className="absolute bottom-full left-1/2 z-100 mb-2 -translate-x-1/2 rounded-xl opacity-0"
+            style={{ pointerEvents: "none" }}
           >
             {/* Arrow */}
-            <div
-              className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-r border-b backdrop-blur-xl"
-              style={{
-                background: `linear-gradient(135deg, ${projectColor}20, rgba(0,0,0,0.6))`,
-                borderTopColor: `${projectColor}30`,
-                borderLeftColor: `${projectColor}30`,
-              }}
-            />
+            <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-white/10 border-r border-b bg-black/60" />
 
             {/* Content */}
             <div
-              className="relative min-w-60 rounded-xl border p-3 shadow-2xl backdrop-blur-xl"
+              className="relative min-w-60 rounded-xl border border-white/10 bg-black/60 p-3"
               style={{
-                background: `linear-gradient(135deg, ${projectColor}15, rgba(0,0,0,0.8))`,
-                borderColor: `${projectColor}30`,
-                boxShadow: `0 8px 32px ${projectColor}40, 0 0 0 1px ${projectColor}20`,
+                boxShadow:
+                  "0 8px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06)",
               }}
             >
               <div className="flex flex-wrap gap-2">
                 {hiddenTags.map((tag) => (
                   <span
                     key={tag.name}
-                    className="rounded-full border px-3 py-1.5 font-semibold text-white/90 text-xs backdrop-blur-sm transition-all duration-200 hover:scale-105"
-                    style={{
-                      background: `${projectColor}20`,
-                      borderColor: `${projectColor}40`,
-                    }}
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-semibold text-white/90 text-xs transition-all duration-200 hover:scale-105 hover:border-white/20 hover:bg-white/10"
                   >
                     {tag.name}
                   </span>
                 ))}
               </div>
-
-              {/* Glow effect */}
-              <div
-                className="absolute -inset-2 -z-10 rounded-xl opacity-40 blur-xl"
-                style={{
-                  background: `radial-gradient(circle at center, ${projectColor}60, transparent 70%)`,
-                }}
-              />
             </div>
           </div>
         </div>

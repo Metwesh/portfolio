@@ -18,6 +18,8 @@ export const scrollStore = {
   techSectionActive: false,
   /** True while a TechBox is selected (written by TechConstellation, read by MLogo) */
   techBoxSelected: false,
+  /** True while any TechBox is hovered (written by TechBox, read by TechConstellation) */
+  techBoxHovered: false,
   /** M logo world-space position — written by MLogo useFrame, read by TechConstellation */
   mLogoY: 0,
   mLogoZ: 0,

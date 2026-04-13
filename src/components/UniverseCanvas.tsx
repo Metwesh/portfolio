@@ -9,17 +9,24 @@ import {
   useState,
 } from "react";
 import type * as THREE from "three";
-import { PCFShadowMap, Vector3 as ThreeVector3 } from "three";
+import { BasicShadowMap, PCFShadowMap, Vector3 as ThreeVector3 } from "three";
 import { technologies } from "../constants/technologies";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "../shaders/FogArguments";
 import { scrollStore } from "../stores/scrollStore";
+import { qualityTier } from "../utils/performance";
 import { AnimatedStars } from "./AnimatedStars";
 import { CameraRig } from "./CameraRig";
 import { MLogo } from "./MLogo";
 import { ProjectGallery } from "./ProjectGallery";
 import { TechBox } from "./TechBox";
 import { TechTooltip } from "./TechTooltip";
+
+// Quality-derived constants — stable for the session
+const SHADOW_MAP_TYPE = qualityTier === "high" ? PCFShadowMap : BasicShadowMap;
+const ENABLE_SHADOWS = qualityTier !== "low";
+// Cap DPR: high=1.5, medium/low=1 — biggest fill-rate win on Retina screens
+const MAX_DPR = qualityTier === "high" ? 1.5 : 1;
 
 const SPHERE_RADIUS = 8;
 
@@ -68,6 +75,11 @@ function TechConstellation() {
 
   useEffect(() => {
     scrollStore.techBoxSelected = selectedIndex !== null;
+    document.dispatchEvent(
+      new CustomEvent("universe:boxselected", {
+        detail: { selected: selectedIndex !== null },
+      }),
+    );
   }, [selectedIndex]);
 
   const groupRef = useRef<THREE.Group>(null);
@@ -87,6 +99,7 @@ function TechConstellation() {
 
     // Apply drag velocity (set by DOM handler, coasts here)
     const selected = scrollStore.techBoxSelected;
+    const hovered = scrollStore.techBoxHovered;
     rotYRef.current += _techDrag.velY;
     rotXRef.current += _techDrag.velX;
     // More friction when a box is selected so rotation dies out quickly
@@ -94,14 +107,14 @@ function TechConstellation() {
     _techDrag.velY *= dragFriction;
     _techDrag.velX *= dragFriction;
 
-    // Scroll-driven spin + idle auto-spin — paused while a box is selected
+    // Scroll-driven spin + idle auto-spin — paused while a box is selected or hovered
     const rawDelta = scrollStore.raw - prevRawRef.current;
     prevRawRef.current = scrollStore.raw;
-    if (inView && !selected) {
+    if (inView && !selected && !hovered) {
       scrollVelRef.current += rawDelta * 0.00008;
-      scrollVelRef.current += 0.00018; // idle auto-spin
+      scrollVelRef.current += 0.00009; // idle auto-spin
     }
-    scrollVelRef.current *= selected ? 0.93 : 0.97;
+    scrollVelRef.current *= selected || hovered ? 0.93 : 0.97;
     rotYRef.current += scrollVelRef.current;
 
     // Clamp X tilt so the sphere never flips completely upside-down
@@ -143,39 +156,47 @@ function TechConstellation() {
   };
 
   return (
-    <group ref={groupRef as React.RefObject<THREE.Group>} rotation={[0, 0, 35]}>
-      <directionalLight
-        intensity={3.75}
-        color={LIGHT_ARGUMENTS.color}
-        position={LIGHT_ARGUMENTS.position}
-      />
-      <fog
-        attach="fog"
-        args={[FOG_ARGUMENTS.color, FOG_ARGUMENTS.near, FOG_ARGUMENTS.far]}
-        color={FOG_ARGUMENTS.color}
-        near={FOG_ARGUMENTS.near}
-        far={FOG_ARGUMENTS.far}
-      />
-      {points.map((pos, index) => {
-        const targetPosition = getBoxPosition(pos, index);
-        const isSelected = selectedIndex === index;
-        return (
-          <TechBox
-            key={`${technologies[index].name}-${index}`}
-            position={targetPosition}
-            data={technologies[index]}
-            onClick={() => setSelectedIndex(index)}
-            scale={isSelected ? 6 : undefined}
-            isInView={isActive}
-            animateTo={targetPosition}
-            isSelected={isSelected}
-          />
-        );
-      })}
+    <>
+      <group
+        ref={groupRef as React.RefObject<THREE.Group>}
+        rotation={[0, 0, 35]}
+      >
+        <directionalLight
+          intensity={3.75}
+          color={LIGHT_ARGUMENTS.color}
+          position={LIGHT_ARGUMENTS.position}
+        />
+        <fog
+          attach="fog"
+          args={[FOG_ARGUMENTS.color, FOG_ARGUMENTS.near, FOG_ARGUMENTS.far]}
+          color={FOG_ARGUMENTS.color}
+          near={FOG_ARGUMENTS.near}
+          far={FOG_ARGUMENTS.far}
+        />
+        {points.map((pos, index) => {
+          const targetPosition = getBoxPosition(pos, index);
+          const isSelected = selectedIndex === index;
+          return (
+            <TechBox
+              key={`${technologies[index].name}-${index}`}
+              position={targetPosition}
+              data={technologies[index]}
+              onClick={() =>
+                setSelectedIndex(selectedIndex === index ? null : index)
+              }
+              scale={isSelected ? 6 : undefined}
+              isInView={isActive}
+              animateTo={targetPosition}
+              isSelected={isSelected}
+            />
+          );
+        })}
+      </group>
       {selectedIndex !== null && (
         <Html
           center
-          position={[0, -10, 0]}
+          position={[0, -6, 0]}
+          zIndexRange={[100, 0]}
           style={{ pointerEvents: "auto", userSelect: "none" }}
         >
           <TechTooltip
@@ -187,7 +208,7 @@ function TechConstellation() {
           />
         </Html>
       )}
-    </group>
+    </>
   );
 }
 
@@ -245,7 +266,12 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
         wrapperRef.current.style.pointerEvents = detail.active
           ? "auto"
           : "none";
-        wrapperRef.current.style.touchAction = detail.active ? "none" : "";
+        const isTouch = window.matchMedia("(pointer: coarse)").matches;
+        wrapperRef.current.style.touchAction = detail.active
+          ? isTouch
+            ? "pan-y"
+            : "none"
+          : "";
       }
     };
     document.addEventListener("universe:interactive", handler);
@@ -286,34 +312,15 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
       active = false;
     };
 
-    // Two-finger scroll: hand control back to the browser so Lenis can scroll
-    const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length >= 2) {
-        active = false;
-        el.style.touchAction = "pan-y";
-        el.style.pointerEvents = "none"; // let events reach Lenis
-      }
-    };
-    const onTouchEnd = (e: TouchEvent) => {
-      if (e.touches.length < 2 && scrollStore.techSectionActive) {
-        el.style.touchAction = "none";
-        el.style.pointerEvents = "auto";
-      }
-    };
-
     el.addEventListener("pointerdown", onDown);
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerup", onUp);
     document.addEventListener("pointercancel", onUp);
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchend", onTouchEnd, { passive: true });
     return () => {
       el.removeEventListener("pointerdown", onDown);
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
       document.removeEventListener("pointercancel", onUp);
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchend", onTouchEnd);
     };
   }, []);
 
@@ -324,8 +331,8 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
       className="fade-in pointer-events-none fixed inset-0 z-0 h-svh animate-in duration-1000"
     >
       <Canvas
-        shadows={{ type: PCFShadowMap }}
-        dpr={[1, 2]}
+        shadows={ENABLE_SHADOWS ? { type: SHADOW_MAP_TYPE } : false}
+        dpr={[1, MAX_DPR]}
         frameloop={prefersReducedMotion ? "demand" : "always"}
         performance={{ min: 0.5 }}
       >
@@ -339,7 +346,11 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
           {!prefersReducedMotion && <CameraRig mouse={mouse} />}
 
           <ambientLight intensity={0.7} />
-          <directionalLight position={[5, 10, 5]} intensity={1.2} castShadow />
+          <directionalLight
+            position={[5, 10, 5]}
+            intensity={1.2}
+            castShadow={ENABLE_SHADOWS}
+          />
           <Environment background={false} resolution={64}>
             <ambientLight intensity={0.1} />
             <pointLight

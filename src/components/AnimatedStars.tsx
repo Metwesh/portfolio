@@ -2,14 +2,17 @@ import { Stars } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type { Group as ThreeGroup } from "three";
-import { breakpoints } from "../constants";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { scrollStore } from "../stores/scrollStore";
+import { qualityTier } from "../utils/performance";
 import { ShootingStars } from "./ShootingStars";
 
-// Sampled once at module load — stable for the session, avoids reading
-// window.innerWidth on every render.
-const starCount = window.innerWidth < breakpoints.mobile ? 3000 : 7500;
+// Sampled once at module load — stable for the session.
+// Quality-aware: low-end devices get fewer stars to reduce GPU load.
+const STAR_COUNTS = { low: 500, medium: 1500, high: 3000 } as const;
+const starCount = STAR_COUNTS[qualityTier];
+const shootingStarCount =
+  qualityTier === "low" ? 0 : qualityTier === "medium" ? 6 : 12;
 
 export function AnimatedStars() {
   const reducedMotion = useReducedMotion();
@@ -32,7 +35,7 @@ export function AnimatedStars() {
         fade
         speed={reducedMotion ? 0 : 3}
       />
-      <ShootingStars count={20} />
+      {shootingStarCount > 0 && <ShootingStars count={shootingStarCount} />}
     </group>
   );
 }

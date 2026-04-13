@@ -9,7 +9,7 @@ export function ExperienceSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const glowDotRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Small observer only for the heading gradient reveal
   const { targetRef: headingRef, isIntersecting } = useIntersectionObserver({
@@ -23,57 +23,64 @@ export function ExperienceSection() {
     const dot = glowDotRef.current;
     if (!section || !line) return;
 
-    // Use clipPath instead of scaleY — the gradient spans full height so the
-    // revealed tip color naturally matches the current scroll position in the
-    // section (experience 1 color at top → last experience color at bottom).
-    const lineTween = gsap.fromTo(
-      line,
-      { clipPath: "inset(0 0 100% 0)" },
-      {
-        clipPath: "inset(0 0 0% 0)",
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top 70%",
-          end: "bottom 30%",
-          scrub: 1,
-          onUpdate: (self) => {
-            if (!dot) return;
-            const p = self.progress;
-            const idx = Math.min(
-              Math.floor(p * experiences.length),
-              experiences.length - 1,
-            );
-            const color = experiences[idx].color;
-            dot.style.top = `${p * 100}%`;
-            dot.style.background = color;
-            dot.style.boxShadow = `0 0 16px 6px ${color}90`;
+    // Set initial states synchronously — no async gap means no flash of visible content
+    const cards = cardRefs.current.filter(Boolean);
+    gsap.set(cards, { opacity: 0, y: 60, scale: 0.96 });
+
+    let lineTween: ReturnType<typeof gsap.fromTo> | null = null;
+    let cardTweens: ReturnType<typeof gsap.to>[] = [];
+
+    import("gsap/ScrollTrigger").then(({ ScrollTrigger: ST }) => {
+      gsap.registerPlugin(ST);
+
+      lineTween = gsap.fromTo(
+        line,
+        { clipPath: "inset(0 0 100% 0)" },
+        {
+          clipPath: "inset(0 0 0% 0)",
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 70%",
+            end: "bottom 30%",
+            scrub: 1,
+            onUpdate: (self) => {
+              if (!dot) return;
+              const p = self.progress;
+              const idx = Math.min(
+                Math.floor(p * experiences.length),
+                experiences.length - 1,
+              );
+              const color = experiences[idx].color;
+              dot.style.top = `${p * 100}%`;
+              dot.style.background = color;
+              dot.style.boxShadow = `0 0 16px 6px ${color}90`;
+            },
           },
         },
-      },
-    );
+      );
 
-    // Clip-path card reveals triggered individually
-    const cardTweens = cardRefs.current.filter(Boolean).map((card) =>
-      gsap.fromTo(
-        card,
-        { opacity: 0, y: 32 },
-        {
+      // Initial state already set via gsap.set above — use gsap.to
+      cardTweens = cards.map((card) =>
+        gsap.to(card, {
           opacity: 1,
           y: 0,
-          duration: 1.0,
-          ease: "power2.out",
+          scale: 1,
+          backdropFilter: "blur(24px)",
+          clearProps: "backdropFilter",
+          duration: 0.7,
+          ease: "power3.out",
           scrollTrigger: {
             trigger: card,
-            start: "top 88%",
+            start: "top 90%",
           },
-        },
-      ),
-    );
+        }),
+      );
+    });
 
     return () => {
-      lineTween.scrollTrigger?.kill();
-      lineTween.kill();
+      lineTween?.scrollTrigger?.kill();
+      lineTween?.kill();
       for (const t of cardTweens) {
         t.scrollTrigger?.kill();
         t.kill();
@@ -132,10 +139,7 @@ export function ExperienceSection() {
           {experiences.map((experience, index) => (
             <li
               key={`experience-${experience.company}-${index}`}
-              ref={(el) => {
-                cardRefs.current[index] = el;
-              }}
-              className="group relative pl-20 opacity-0 max-sm:pl-8"
+              className="group relative pl-20 max-sm:pl-8"
             >
               {/* Timeline dot */}
               <div
@@ -147,7 +151,12 @@ export function ExperienceSection() {
               />
 
               {/* Card */}
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-500 group-hover:-translate-y-1">
+              <div
+                ref={(el) => {
+                  cardRefs.current[index] = el;
+                }}
+                className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-transform duration-500 group-hover:-translate-y-1"
+              >
                 {/* Giant watermark — clipped to card bounds by overflow-hidden */}
                 <span
                   aria-hidden="true"
@@ -197,7 +206,13 @@ export function ExperienceSection() {
                       >
                         {experience.title}
                         <span className="text-white/50">
-                          &nbsp;&mdash;&nbsp;{experience.date}
+                          <span className="max-sm:hidden">
+                            &nbsp;&mdash;&nbsp;
+                          </span>
+                          <span className="sm:hidden">
+                            <br />
+                          </span>
+                          {experience.date}
                         </span>
                       </p>
                     </div>

@@ -1,15 +1,77 @@
 import { useFrame } from "@react-three/fiber";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 import {
-  CylinderGeometry as ThreeCylinderGeometry,
+  AdditiveBlending as ThreeAdditiveBlending,
+  BufferAttribute as ThreeBufferAttribute,
+  BufferGeometry as ThreeBufferGeometry,
   Group as ThreeGroup,
   MeshBasicMaterial as ThreeMeshBasicMaterial,
   Mesh as ThreeMeshType,
+  type PerspectiveCamera as ThreePerspectiveCamera,
   Quaternion as ThreeQuaternion,
+  ShaderMaterial as ThreeShaderMaterial,
   SphereGeometry as ThreeSphereGeometry,
   Vector3 as ThreeVector3,
 } from "three";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+
+// ─── Shared geometries (session singletons) ───────────────────────────────────
+const _headGeo = new ThreeSphereGeometry(0.06, 7, 7);
+const _glowGeo = new ThreeSphereGeometry(0.32, 7, 7);
+
+// Flat quad trail: head at Y=0 (bright/narrow), tail at Y=-TRAIL_L (transparent/wide).
+// Rotating Y→velocity makes the trail stream behind the head naturally.
+const TRAIL_L = 9;
+const TRAIL_W = 0.065;
+const _trailGeo = (() => {
+  const geo = new ThreeBufferGeometry();
+  const hw = TRAIL_W * 0.06; // head half-width (nearly a point)
+  const tw = TRAIL_W; // tail half-width
+  // biome-ignore format: keep vertex layout readable
+  const pos = new Float32Array([
+    -hw,
+    0,
+    0, // 0 head-left
+    hw,
+    0,
+    0, // 1 head-right
+    -tw,
+    -TRAIL_L,
+    0, // 2 tail-left
+    tw,
+    -TRAIL_L,
+    0, // 3 tail-right
+  ]);
+  const alpha = new Float32Array([1.0, 1.0, 0.0, 0.0]);
+  geo.setAttribute("position", new ThreeBufferAttribute(pos, 3));
+  geo.setAttribute("aAlpha", new ThreeBufferAttribute(alpha, 1));
+  geo.setIndex([0, 2, 1, 1, 2, 3]);
+  return geo;
+})();
+
+// Trail shader: alpha-gradient streak using per-vertex aAlpha
+const TRAIL_VERT = `
+  attribute float aAlpha;
+  varying float vAlpha;
+  void main() {
+    vAlpha = aAlpha;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+const TRAIL_FRAG = `
+  uniform float uOpacity;
+  varying float vAlpha;
+  void main() {
+    gl_FragColor = vec4(1.0, 1.0, 1.0, vAlpha * uOpacity);
+  }
+`;
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface StarMaterials {
+  head: ThreeMeshBasicMaterial;
+  trail: ThreeShaderMaterial;
+  glow: ThreeMeshBasicMaterial;
+}
 
 interface ShootingStar {
   id: number;
@@ -19,7 +81,18 @@ interface ShootingStar {
   lifetime: number;
   maxLifetime: number;
   groupRef: ThreeGroup | null;
+  materials: StarMaterials | null;
 }
+
+// ─── Reusable vectors (avoid per-frame allocation) ───────────────────────────
+const _right = new ThreeVector3();
+const _up = new ThreeVector3();
+const _fwd = new ThreeVector3();
+const _camPos = new ThreeVector3();
+
+const SPAWN_INTERVAL = 2.2;
+const BURST_INTERVAL = 0.35;
+const BURST_COUNT = 3;
 
 interface ShootingStarsProps {
   count?: number;
@@ -30,207 +103,151 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
   const starsRef = useRef<ShootingStar[]>([]);
   const nextIdRef = useRef(0);
   const groupRef = useRef<ThreeGroup>(null);
+  const spawnTimerRef = useRef(BURST_INTERVAL); // fire immediately on first frame
+  const burstRemainingRef = useRef(BURST_COUNT);
 
-  // Create a new shooting star
-  const createShootingStar = useCallback((): ShootingStar => {
-    // Random position in view
-    const x = (Math.random() - 0.5) * 100;
-    const y = (Math.random() - 0.5) * 50 + 20; // Bias towards upper area
-    const z = (Math.random() - 0.5) * 50;
-
-    // Direction: mostly diagonal downward-right
-    const velocityX = -(Math.random() * 0.5 + 0.3);
-    const velocityY = -(Math.random() * 0.3 + 0.2);
-    const velocityZ = Math.random() * 0.2 - 0.1;
-
-    return {
-      id: nextIdRef.current++,
-      position: new ThreeVector3(x, y, z),
-      velocity: new ThreeVector3(velocityX, velocityY, velocityZ),
-      opacity: 1,
-      lifetime: 0,
-      maxLifetime: Math.random() * 2 + 2, // 2-4 seconds
-      groupRef: null,
-    };
-  }, []);
-
-  // Helper to create Three.js group for a star
   const createStarGroup = useCallback((star: ShootingStar): ThreeGroup => {
     const group = new ThreeGroup();
     group.position.copy(star.position);
 
-    // Calculate trail orientation
-    const direction = star.velocity.clone().normalize();
-    const length = 3;
-
-    // Main bright point
-    const mainGeometry = new ThreeSphereGeometry(0.05, 8, 8);
-    const mainMaterial = new ThreeMeshBasicMaterial({
+    const headMat = new ThreeMeshBasicMaterial({
       color: "#ffffff",
       transparent: true,
-      opacity: star.opacity,
+      opacity: 0,
       depthWrite: false,
+      blending: ThreeAdditiveBlending,
     });
-    const mainMesh = new ThreeMeshType(mainGeometry, mainMaterial);
-    group.add(mainMesh);
+    group.add(new ThreeMeshType(_headGeo, headMat));
 
-    // Trail
-    const trailGeometry = new ThreeCylinderGeometry(0.02, 0.08, length, 8);
-    const trailMaterial = new ThreeMeshBasicMaterial({
-      color: "#ffffff",
+    const trailMat = new ThreeShaderMaterial({
+      uniforms: { uOpacity: { value: 0 } },
+      vertexShader: TRAIL_VERT,
+      fragmentShader: TRAIL_FRAG,
       transparent: true,
-      opacity: star.opacity * 0.2,
       depthWrite: false,
+      blending: ThreeAdditiveBlending,
+      side: 2, // DoubleSide
     });
-    const trailMesh = new ThreeMeshType(trailGeometry, trailMaterial);
-
-    // Orient trail
-    const trailOffset = direction.clone().multiplyScalar(-length / 2);
-    trailMesh.position.copy(trailOffset);
-    const axis = new ThreeVector3(0, 1, 0);
-    const quaternion = new ThreeQuaternion().setFromUnitVectors(
-      axis,
-      direction,
+    const trailMesh = new ThreeMeshType(_trailGeo, trailMat);
+    const q = new ThreeQuaternion().setFromUnitVectors(
+      new ThreeVector3(0, 1, 0),
+      star.velocity.clone().normalize(),
     );
-    trailMesh.quaternion.copy(quaternion);
+    trailMesh.quaternion.copy(q);
     group.add(trailMesh);
 
-    // Glow
-    const glowGeometry = new ThreeSphereGeometry(0.2, 8, 8);
-    const glowMaterial = new ThreeMeshBasicMaterial({
+    const glowMat = new ThreeMeshBasicMaterial({
       color: "#ffffff",
       transparent: true,
-      opacity: star.opacity * 0.15,
+      opacity: 0,
       depthWrite: false,
+      blending: ThreeAdditiveBlending,
     });
-    const glowMesh = new ThreeMeshType(glowGeometry, glowMaterial);
-    group.add(glowMesh);
+    group.add(new ThreeMeshType(_glowGeo, glowMat));
 
+    star.materials = { head: headMat, trail: trailMat, glow: glowMat };
     return group;
   }, []);
 
-  // Spawn shooting stars at random intervals
-  useEffect(() => {
-    if (reducedMotion) return;
+  useFrame((state, delta) => {
+    if (reducedMotion || !groupRef.current) return;
 
-    const spawnStar = () => {
-      // Defensive check: ensure groupRef is a valid THREE.Group
-      if (!groupRef.current || typeof groupRef.current.add !== "function")
-        return;
+    const camera = state.camera as ThreePerspectiveCamera;
 
-      const activeStars = starsRef.current.filter(
-        (star) => star.lifetime < star.maxLifetime,
-      );
+    // ─── Spawning ───────────────────────────────────────────────────────────
+    const active = starsRef.current.filter((s) => s.lifetime < s.maxLifetime);
+    if (active.length < count) {
+      const isBurst = burstRemainingRef.current > 0;
+      spawnTimerRef.current += delta;
+      if (
+        spawnTimerRef.current >= (isBurst ? BURST_INTERVAL : SPAWN_INTERVAL)
+      ) {
+        spawnTimerRef.current = 0;
+        if (isBurst) burstRemainingRef.current--;
 
-      if (activeStars.length < count) {
-        const newStar = createShootingStar();
-        const starGroup = createStarGroup(newStar);
-        newStar.groupRef = starGroup;
-        groupRef.current.add(starGroup);
-        starsRef.current = [...activeStars, newStar];
+        // Camera basis vectors
+        _right.setFromMatrixColumn(camera.matrixWorld, 0);
+        _up.setFromMatrixColumn(camera.matrixWorld, 1);
+        _fwd.setFromMatrixColumn(camera.matrixWorld, 2).negate();
+        _camPos.setFromMatrixPosition(camera.matrixWorld);
+
+        // Spawn on a plane 20 units in front of camera, upper portion of frustum
+        const dist = 20;
+        const halfH = Math.tan(((camera.fov ?? 60) * Math.PI) / 360) * dist;
+        const halfW = halfH * (camera.aspect ?? 1.6);
+
+        const lx = (Math.random() - 0.5) * halfW * 2.6;
+        const ly = halfH * (0.5 + Math.random() * 1.1); // top half + above screen
+
+        const pos = _camPos
+          .clone()
+          .addScaledVector(_fwd, dist)
+          .addScaledVector(_right, lx)
+          .addScaledVector(_up, ly);
+
+        // Velocity: downward in camera space with slight horizontal drift
+        const speed = 18 + Math.random() * 17; // 18–35 units/second
+        const vel = new ThreeVector3()
+          .addScaledVector(_right, (Math.random() - 0.5) * 0.65)
+          .addScaledVector(_up, -(0.8 + Math.random() * 0.4))
+          .normalize()
+          .multiplyScalar(speed);
+
+        const star: ShootingStar = {
+          id: nextIdRef.current++,
+          position: pos,
+          velocity: vel,
+          opacity: 0,
+          lifetime: 0,
+          maxLifetime: 0.4 + Math.random() * 0.5, // 0.4–0.9s streak
+          groupRef: null,
+          materials: null,
+        };
+        const sg = createStarGroup(star);
+        star.groupRef = sg;
+        groupRef.current.add(sg);
+        starsRef.current = [...active, star];
       }
-    };
-
-    // Delay initial spawn to ensure Three.js group is ready
-    const initialSpawn = setTimeout(() => {
-      for (let i = 0; i < Math.min(count, 2); i++) {
-        spawnStar();
-      }
-    }, 100);
-
-    // Spawn new stars at intervals
-    const spawnInterval = setInterval(spawnStar, 3000); // Spawn every 3 seconds
-
-    return () => {
-      clearTimeout(initialSpawn);
-      clearInterval(spawnInterval);
-    };
-  }, [count, reducedMotion, createShootingStar, createStarGroup]);
-
-  // Animate stars using direct mutation - no React re-renders
-  // This is the proper way to handle animations in React Three Fiber
-  useFrame((_, delta) => {
-    if (
-      reducedMotion ||
-      !groupRef.current ||
-      typeof groupRef.current.remove !== "function"
-    ) {
-      return;
     }
 
-    const stars = starsRef.current;
-    const newStars: ShootingStar[] = [];
-
-    for (let i = 0; i < stars.length; i++) {
-      const star = stars[i];
-
-      // Update position directly (no state updates)
-      star.position.x += star.velocity.x * delta * 60;
-      star.position.y += star.velocity.y * delta * 60;
-      star.position.z += star.velocity.z * delta * 60;
-
-      // Update lifetime
+    // ─── Animate ────────────────────────────────────────────────────────────
+    const alive: ShootingStar[] = [];
+    for (const star of starsRef.current) {
+      star.position.addScaledVector(star.velocity, delta);
       star.lifetime += delta;
 
-      // Fade out in the last 20% of lifetime
-      const fadeStart = star.maxLifetime * 0.8;
-      if (star.lifetime > fadeStart) {
-        star.opacity =
-          1 - (star.lifetime - fadeStart) / (star.maxLifetime - fadeStart);
-      }
+      const fadeIn = Math.min(1, star.lifetime / 0.05); // near-instant appear
+      const fadeStart = star.maxLifetime * 0.75;
+      const fadeOut =
+        star.lifetime > fadeStart
+          ? 1 - (star.lifetime - fadeStart) / (star.maxLifetime - fadeStart)
+          : 1;
+      star.opacity = fadeIn * fadeOut;
 
-      // Update the group position if it exists
       if (star.groupRef) {
         star.groupRef.position.copy(star.position);
-
-        // Update opacity on all materials
-        star.groupRef.traverse((child) => {
-          if ((child as ThreeMeshType).isMesh) {
-            const mesh = child as ThreeMeshType;
-            const material = mesh.material as ThreeMeshBasicMaterial;
-            if (material.transparent) {
-              // Different opacity for different elements
-              if (mesh.geometry.type === "SphereGeometry") {
-                const radius = (mesh.geometry as ThreeSphereGeometry).parameters
-                  .radius;
-                material.opacity =
-                  radius > 0.1 ? star.opacity * 0.15 : star.opacity;
-              } else if (mesh.geometry.type === "CylinderGeometry") {
-                material.opacity = star.opacity * 0.2;
-              }
-            }
-          }
-        });
+        if (star.materials) {
+          const op = star.opacity;
+          star.materials.head.opacity = op;
+          star.materials.trail.uniforms.uOpacity.value = op * 0.55;
+          star.materials.glow.opacity = op * 0.12;
+        }
       }
 
-      // Remove expired stars
       if (star.lifetime >= star.maxLifetime) {
         if (star.groupRef && groupRef.current) {
           groupRef.current.remove(star.groupRef);
-          // Dispose geometries and materials to prevent memory leaks
-          star.groupRef.traverse((child) => {
-            if ((child as ThreeMeshType).isMesh) {
-              const mesh = child as ThreeMeshType;
-              mesh.geometry?.dispose();
-              if (Array.isArray(mesh.material)) {
-                for (const mat of mesh.material) {
-                  mat.dispose();
-                }
-              } else {
-                mesh.material?.dispose();
-              }
-            }
-          });
+          star.materials?.head.dispose();
+          star.materials?.trail.dispose();
+          star.materials?.glow.dispose();
         }
       } else {
-        newStars.push(star);
+        alive.push(star);
       }
     }
-
-    starsRef.current = newStars;
+    starsRef.current = alive;
   });
 
   if (reducedMotion) return null;
-
-  return <group ref={groupRef}>{/* Stars are managed imperatively */}</group>;
+  return <group ref={groupRef} />;
 }

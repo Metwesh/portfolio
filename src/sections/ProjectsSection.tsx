@@ -9,18 +9,24 @@ import { scrollStore } from "../stores/scrollStore";
 export function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
+  const nameRef = useRef<HTMLHeadingElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
   // Active project index for DOM overlay — updated by GSAP onUpdate
   const [activeIndex, setActiveIndex] = useState(0);
+  // displayIndex trails activeIndex: updates after fade-out completes
+  const [displayIndex, setDisplayIndex] = useState(0);
+  const isMounted = useRef(false);
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
-    const scrollDist = (projects.length - 1) * window.innerWidth;
+    const scrollDist = (projects.length - 1) * window.innerWidth * 0.65;
 
     const setHeight = () => {
-      section.style.height = `${(projects.length - 1) * window.innerWidth + window.innerHeight}px`;
+      section.style.height = `${(projects.length - 1) * window.innerWidth * 0.65 + window.innerHeight}px`;
     };
     setHeight();
 
@@ -37,15 +43,35 @@ export function ProjectsSection() {
           onRefresh: setHeight,
           onEnter: () => {
             scrollStore.projectSectionActive = true;
+            gsap.to([nameRef.current, descRef.current, actionsRef.current], {
+              opacity: 1,
+              y: 0,
+              duration: 0.2,
+              ease: "power2.out",
+              stagger: 0.025,
+            });
           },
           onLeave: () => {
             scrollStore.projectSectionActive = false;
+            const els = [nameRef.current, descRef.current, actionsRef.current];
+            gsap.killTweensOf(els);
+            gsap.set(els, { opacity: 0 });
           },
           onEnterBack: () => {
             scrollStore.projectSectionActive = true;
+            gsap.to([nameRef.current, descRef.current, actionsRef.current], {
+              opacity: 1,
+              y: 0,
+              duration: 0.2,
+              ease: "power2.out",
+              stagger: 0.025,
+            });
           },
           onLeaveBack: () => {
             scrollStore.projectSectionActive = false;
+            const els = [nameRef.current, descRef.current, actionsRef.current];
+            gsap.killTweensOf(els);
+            gsap.set(els, { opacity: 0 });
           },
           onUpdate: (self) => {
             scrollStore.projectProgress = self.progress;
@@ -73,7 +99,42 @@ export function ProjectsSection() {
     };
   }, []);
 
-  const activeProject = projects[activeIndex];
+  // Animate out → swap content → animate in on index change
+  useEffect(() => {
+    const els = [nameRef.current, descRef.current, actionsRef.current].filter(
+      Boolean,
+    );
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+    gsap.killTweensOf(els);
+    gsap.to(els, {
+      opacity: 0,
+      y: -8,
+      duration: 0.12,
+      ease: "power2.in",
+      stagger: 0.025,
+      onComplete: () => {
+        setDisplayIndex(activeIndex);
+      },
+    });
+  }, [activeIndex]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: displayIndex is the trigger, refs don't need listing
+  useEffect(() => {
+    const els = [nameRef.current, descRef.current, actionsRef.current].filter(
+      Boolean,
+    );
+    gsap.killTweensOf(els);
+    gsap.fromTo(
+      els,
+      { opacity: 0, y: 8 },
+      { opacity: 1, y: 0, duration: 0.18, ease: "power2.out", stagger: 0.03 },
+    );
+  }, [displayIndex]);
+
+  const activeProject = projects[displayIndex];
   const isClickable = !!activeProject.link;
 
   return (
@@ -103,8 +164,9 @@ export function ProjectsSection() {
           {/* Project name + underline */}
           <div className="mb-3 text-center">
             <h3
-              className="relative inline-block font-bold text-2xl text-white tracking-tight transition-all duration-500 sm:text-3xl"
-              style={{ letterSpacing: "-0.03em" }}
+              ref={nameRef}
+              className="relative inline-block font-bold text-2xl text-white tracking-tight sm:text-3xl"
+              style={{ letterSpacing: "-0.03em", opacity: 0 }}
             >
               {activeProject.name}
               <span
@@ -117,12 +179,20 @@ export function ProjectsSection() {
           </div>
 
           {/* Description */}
-          <p className="mb-4 max-w-sm px-6 text-center text-white/60 text-xs leading-relaxed sm:max-w-lg sm:px-0 sm:text-sm">
+          <p
+            ref={descRef}
+            className="mb-4 max-w-sm px-6 text-center text-white/60 text-xs leading-relaxed sm:max-w-lg sm:px-0 sm:text-sm"
+            style={{ opacity: 0 }}
+          >
             {activeProject.description}
           </p>
 
           {/* Tags + visit button */}
-          <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-3">
+          <div
+            ref={actionsRef}
+            className="pointer-events-auto flex flex-wrap items-center justify-center gap-3"
+            style={{ opacity: 0 }}
+          >
             {activeProject.tags && activeProject.tags.length > 0 && (
               <TagsPopover
                 tags={activeProject.tags}

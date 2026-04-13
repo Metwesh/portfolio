@@ -42,10 +42,7 @@ export function Header({ scrollY }: { scrollY: number }) {
 
   return (
     <refractive.header
-      className={cn(
-        "pointer-events-auto fixed top-gutter right-gutter left-gutter z-40 flex items-center justify-between rounded-2xl px-4 py-3 md:px-6",
-        headerBg ? "bg-black/30" : "bg-black/10",
-      )}
+      className="pointer-events-auto fixed top-gutter right-gutter left-gutter z-40 flex items-center justify-between rounded-2xl px-4 py-3 md:px-6"
       refraction={{
         radius: 16,
         blur: 4,

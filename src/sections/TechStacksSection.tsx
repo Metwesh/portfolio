@@ -12,7 +12,14 @@ export function TechStacksSection() {
     rootMargin: "0px",
   });
 
-  const [showScrollHint, setShowScrollHint] = useState(false);
+  const [boxSelected, setBoxSelected] = useState(false);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setBoxSelected((e as CustomEvent<{ selected: boolean }>).detail.selected);
+    };
+    document.addEventListener("universe:boxselected", handler);
+    return () => document.removeEventListener("universe:boxselected", handler);
+  }, []);
 
   // Activate trackball controls + drive 3D constellation visibility
   // Also disable <main> pointer events so the canvas below can receive drag input
@@ -30,24 +37,12 @@ export function TechStacksSection() {
     };
   }, [isIntersecting]);
 
-  // Show two-finger scroll hint after 4 s of continuous visibility on touch devices
-  useEffect(() => {
-    if (!isIntersecting) {
-      setShowScrollHint(false);
-      return;
-    }
-    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
-    if (!isTouchDevice) return;
-    const timer = setTimeout(() => setShowScrollHint(true), 4000);
-    return () => clearTimeout(timer);
-  }, [isIntersecting]);
-
   return (
     <section
       ref={sentinelRef as React.RefObject<HTMLElement>}
       id="tech-stacks"
       aria-labelledby="tech-stacks-heading"
-      className="pointer-events-none relative z-10 h-[300svh]"
+      className="pointer-events-none relative z-10 h-svh md:h-[400svh]"
     >
       <div className="sticky top-0 flex h-svh flex-col py-20">
         {/* Radial glow — blooms in as sphere arrives */}
@@ -66,8 +61,11 @@ export function TechStacksSection() {
           />
         </div>
 
-        {/* Heading — top-left, matching other sections */}
-        <div className="mb-6 w-full px-gutter sm:px-12 md:px-20">
+        {/* Heading — hidden while a tech box is selected */}
+        <div
+          className="mb-6 w-full px-gutter transition-opacity duration-300 sm:px-12 md:px-20"
+          style={{ opacity: boxSelected ? 0 : 1 }}
+        >
           <SectionHeading
             id="tech-stacks-heading"
             isIntersecting={isIntersecting}
@@ -86,8 +84,13 @@ export function TechStacksSection() {
         {/* Spacer — sphere lives here in canvas */}
         <div className="flex-1" />
 
-        {/* Bottom content */}
-        <div className="flex flex-col items-center gap-4 pb-6">
+        {/* Bottom content — hidden while a tech box is selected */}
+        <div
+          className="flex flex-col items-center gap-4 pb-6 transition-opacity duration-300"
+          style={{
+            opacity: boxSelected ? 0 : 1,
+          }}
+        >
           {/* Count */}
           <p
             className="font-bold text-4xl tracking-[-0.04em] transition-all duration-700 sm:text-5xl"
@@ -100,7 +103,7 @@ export function TechStacksSection() {
             {technologies.length} tools.
           </p>
 
-          {/* Drag hint / two-finger scroll hint */}
+          {/* Drag hint */}
           <p
             className="text-white/25 text-xs uppercase tracking-widest transition-all duration-700"
             style={{
@@ -109,9 +112,7 @@ export function TechStacksSection() {
               transform: isIntersecting ? "translateY(0)" : "translateY(10px)",
             }}
           >
-            {showScrollHint
-              ? "Two-finger scroll to continue"
-              : "Drag the sphere to explore"}
+            Drag the sphere to explore
           </p>
 
           {/* Category row — staggered */}

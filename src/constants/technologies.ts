@@ -198,17 +198,14 @@ export const technologies = [
   {
     icon: AWS,
     name: "AWS",
-    wip: true,
   },
   {
     icon: Azure,
     name: "Azure",
-    wip: true,
   },
   {
     icon: GoogleCloud,
     name: "Google Cloud",
-    wip: true,
   },
   {
     icon: Heroku,

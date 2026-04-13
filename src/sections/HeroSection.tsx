@@ -22,7 +22,13 @@ export function HeroSection() {
       Boolean,
     );
 
-    const EYEBROW = "Creative Developer & 3D Enthusiast";
+    const PHRASES = [
+      "Creative Developer & 3D Enthusiast",
+      "WebGL & Three.js Craftsman",
+      "Frontend Engineer",
+      "Motion & Interaction Designer",
+      "Fullstack Developer",
+    ];
     const eyebrow = eyebrowRef.current;
 
     // Hide immediately so nothing is visible while loader is still up
@@ -33,15 +39,38 @@ export function HeroSection() {
     });
     if (eyebrow) eyebrow.textContent = "";
 
+    let loopId: ReturnType<typeof setTimeout> | null = null;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const typePhrase = (phraseIndex: number) => {
+      if (!eyebrow) return;
+      const phrase = PHRASES[phraseIndex % PHRASES.length];
+      let i = 0;
+      intervalId = setInterval(() => {
+        eyebrow.textContent = phrase.slice(0, ++i);
+        if (i >= phrase.length) {
+          if (intervalId) clearInterval(intervalId);
+          // Pause then backspace
+          loopId = setTimeout(() => erasePhrase(phrase, phraseIndex), 2200);
+        }
+      }, 38);
+    };
+
+    const erasePhrase = (phrase: string, phraseIndex: number) => {
+      if (!eyebrow) return;
+      let i = phrase.length;
+      intervalId = setInterval(() => {
+        eyebrow.textContent = phrase.slice(0, --i);
+        if (i <= 0) {
+          if (intervalId) clearInterval(intervalId);
+          // Brief pause then type next
+          loopId = setTimeout(() => typePhrase(phraseIndex + 1), 400);
+        }
+      }, 22);
+    };
+
     const start = () => {
-      // Typewriter: write one character at a time
-      if (eyebrow) {
-        let i = 0;
-        const interval = setInterval(() => {
-          eyebrow.textContent = EYEBROW.slice(0, ++i);
-          if (i >= EYEBROW.length) clearInterval(interval);
-        }, 38);
-      }
+      typePhrase(0);
 
       gsap.fromTo(
         lines,
@@ -71,7 +100,11 @@ export function HeroSection() {
     };
 
     document.addEventListener("app:ready", start, { once: true });
-    return () => document.removeEventListener("app:ready", start);
+    return () => {
+      document.removeEventListener("app:ready", start);
+      if (intervalId) clearInterval(intervalId);
+      if (loopId) clearTimeout(loopId);
+    };
   }, [prefersReducedMotion]);
 
   // Scroll-driven fade-out via GSAP ScrollTrigger

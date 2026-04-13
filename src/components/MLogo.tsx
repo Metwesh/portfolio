@@ -6,6 +6,7 @@ import {
   CanvasTexture,
   type Group as ThreeGroup,
   type Mesh as ThreeMesh,
+  type MeshBasicMaterial as ThreeMeshBasicMaterial,
   MeshMatcapMaterial as ThreeMeshMatcapMaterial,
 } from "three";
 import { mainLogoPath } from "../constants";
@@ -87,6 +88,24 @@ export function MLogo() {
     immediate: true,
   }));
 
+  const outerRef = useRef<ThreeGroup>(null);
+  const selectZRef = useRef(0);
+  const selectOpacityRef = useRef(1.0);
+  const mMaterialsRef = useRef<ThreeMeshMatcapMaterial[]>([]);
+  const smoothScrollRef = useRef({ y: 0, z: 0, rot: 0 });
+  const ring1Ref = useRef<ThreeMesh>(null);
+  const ring2Ref = useRef<ThreeMesh>(null);
+  const ring3Ref = useRef<ThreeMesh>(null);
+
+  // Ring animation state
+  const ringTiltRef = useRef(0); // 0 = all-flat (saturn rings), 1 = orb config
+  const ringReadyRef = useRef(false);
+  const ring1SpinRef = useRef(0); // accumulated z-spin
+  const ring2SpinRef = useRef(0); // accumulated x-spin
+  const ring3SpinRef = useRef(0); // accumulated y-spin
+  const ringDramaRef = useRef(0); // 0→1 when box selected
+  const ringTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Fire the entrance animation only after the loader finishes sliding out
   useEffect(() => {
     if (reducedMotion) return;
@@ -96,25 +115,61 @@ export function MLogo() {
         position: [0, 0, 0],
         config: { duration: 2200, easing: (t: number) => 1 - (1 - t) ** 3 },
       });
+      // Delay ring fan-out until M is fully scaled in — user sees flat saturn rings
+      // first, then they fan out into the orb configuration
+      ringTimerRef.current = setTimeout(() => {
+        ringReadyRef.current = true;
+      }, 2400);
     };
     document.addEventListener("app:ready", start, { once: true });
-    return () => document.removeEventListener("app:ready", start);
+    return () => {
+      document.removeEventListener("app:ready", start);
+      if (ringTimerRef.current) clearTimeout(ringTimerRef.current);
+    };
   }, [reducedMotion, springApi]);
 
-  const outerRef = useRef<ThreeGroup>(null);
-  const selectScaleRef = useRef(1.0);
-  const smoothScrollRef = useRef({ y: 0, z: 0, rot: 0 });
-  const ring1Ref = useRef<ThreeMesh>(null);
-  const ring2Ref = useRef<ThreeMesh>(null);
-  const ring3Ref = useRef<ThreeMesh>(null);
-
   useFrame((state, delta) => {
-    // Selection shrink — runs regardless of reducedMotion so it always responds
+    const isSelected = scrollStore.techBoxSelected;
+
+    // M opacity + Z drift — quadratic curve keeps M bright longer then drops fast
+    const targetOpacity = isSelected ? 0 : 1;
+    selectOpacityRef.current +=
+      (targetOpacity - selectOpacityRef.current) * 0.05;
+    const op = selectOpacityRef.current * selectOpacityRef.current;
+
     if (outerRef.current) {
-      const targetScale = scrollStore.techBoxSelected ? 0 : 1.0;
-      selectScaleRef.current += (targetScale - selectScaleRef.current) * 0.09;
-      outerRef.current.scale.setScalar(selectScaleRef.current);
+      const targetZ = isSelected ? -18 : 0;
+      selectZRef.current += (targetZ - selectZRef.current) * 0.05;
+      outerRef.current.position.z = selectZRef.current;
+
+      for (const mat of mMaterialsRef.current) {
+        const shouldBeTransparent = op < 0.99;
+        if (mat.transparent !== shouldBeTransparent) {
+          mat.transparent = shouldBeTransparent;
+          mat.needsUpdate = true;
+        }
+        mat.opacity = op;
+      }
     }
+
+    // Ring drama: spin up + expand + flatten on selection, glow then fade
+    ringDramaRef.current +=
+      ((isSelected ? 1 : 0) - ringDramaRef.current) * 0.05;
+    const drama = ringDramaRef.current;
+    const ringBases = [0.35, 0.28, 0.18];
+    [ring1Ref, ring2Ref, ring3Ref].forEach((ref, i) => {
+      const mat = ref.current?.material as ThreeMeshBasicMaterial | undefined;
+      if (!mat) return;
+      const glow = drama > 0 ? 1 + Math.sin(drama * Math.PI) * 0.8 : 1;
+      const ringFade = drama > 0 ? Math.max(0, 1 - drama * 1.2) : op;
+      const newOpacity = Math.min(1, ringBases[i] * glow * ringFade);
+      mat.opacity = newOpacity;
+      const shouldBeTransparent = newOpacity < 0.99;
+      if (mat.transparent !== shouldBeTransparent) {
+        mat.transparent = shouldBeTransparent;
+        mat.needsUpdate = true;
+      }
+    });
 
     if (reducedMotion || !group.current) return;
 
@@ -147,18 +202,46 @@ export function MLogo() {
     scrollStore.mLogoY = posY;
     scrollStore.mLogoZ = posZ;
 
-    // Rings rotate on independent axes, scroll also nudges their tilt
+    // ─── Ring animations ──────────────────────────────────────────────────────
+    // Enter: lerp tilt 0 (all-flat saturn) → 1 (orb) on app:ready
+    const tiltTarget = ringReadyRef.current ? 1 : 0;
+    ringTiltRef.current += (tiltTarget - ringTiltRef.current) * 0.028;
+
+    const spinMult = 1 + drama * 5; // spin up to 6× on selection
+    // Flatten rings back toward saturn as M retreats
+    const et = ringTiltRef.current * (1 - drama * 0.85);
+    const lr = (a: number, b: number, tt: number) => a + (b - a) * tt;
+
+    // Accumulated spins (each ring spins on its primary axis)
+    ring1SpinRef.current += delta * 0.4 * spinMult;
+    ring2SpinRef.current -= delta * 0.28 * spinMult;
+    ring3SpinRef.current += delta * 0.18 * spinMult;
+
+    // Expand outward on selection
+    const ringScale = 1 + drama * 1.5;
+
     if (ring1Ref.current) {
-      ring1Ref.current.rotation.z += delta * 0.4;
-      ring1Ref.current.rotation.x = raw * 0.0003;
+      // ring1 target tilt = [PI/2, 0, 0] = same as flat, so it just spins on z
+      ring1Ref.current.rotation.x = Math.PI / 2;
+      ring1Ref.current.rotation.y = 0;
+      ring1Ref.current.rotation.z =
+        ring1SpinRef.current + raw * 0.0003 * (1 - drama);
+      ring1Ref.current.scale.setScalar(ringScale);
     }
     if (ring2Ref.current) {
-      ring2Ref.current.rotation.x -= delta * 0.28;
-      ring2Ref.current.rotation.y = raw * 0.0002;
+      // ring2 target tilt: x→0.4, z→0.3; spins on x
+      ring2Ref.current.rotation.x =
+        lr(Math.PI / 2, 0.4, et) + ring2SpinRef.current;
+      ring2Ref.current.rotation.y = raw * 0.0002 * (1 - drama);
+      ring2Ref.current.rotation.z = lr(0, 0.3, et);
+      ring2Ref.current.scale.setScalar(ringScale);
     }
     if (ring3Ref.current) {
-      ring3Ref.current.rotation.y += delta * 0.18;
-      ring3Ref.current.rotation.z = raw * 0.00015;
+      // ring3 target tilt: x→1.1, y→0.6; spins on y
+      ring3Ref.current.rotation.x = lr(Math.PI / 2, 1.1, et);
+      ring3Ref.current.rotation.y = lr(0, 0.6, et) + ring3SpinRef.current;
+      ring3Ref.current.rotation.z = raw * 0.00015 * (1 - drama);
+      ring3Ref.current.scale.setScalar(ringScale);
     }
   });
 
@@ -183,7 +266,9 @@ export function MLogo() {
       created.push(mat);
     }
 
+    mMaterialsRef.current = created;
     return () => {
+      mMaterialsRef.current = [];
       for (const mat of created) mat.dispose();
     };
   }, [scene, matcapTexture]);
@@ -208,15 +293,15 @@ export function MLogo() {
 
         {/* Orbital rings — co-move with the M logo */}
         <mesh ref={ring1Ref} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[2.8, 0.025, 8, 120]} />
+          <torusGeometry args={[2.8, 0.025, 6, 64]} />
           <meshBasicMaterial color="#00eeff" opacity={0.35} transparent />
         </mesh>
-        <mesh ref={ring2Ref} rotation={[0.4, 0, 0.3]}>
-          <torusGeometry args={[3.2, 0.018, 8, 120]} />
+        <mesh ref={ring2Ref} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[3.2, 0.018, 6, 64]} />
           <meshBasicMaterial color="#a855f7" opacity={0.28} transparent />
         </mesh>
-        <mesh ref={ring3Ref} rotation={[1.1, 0.6, 0]}>
-          <torusGeometry args={[2.4, 0.022, 8, 120]} />
+        <mesh ref={ring3Ref} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[2.4, 0.022, 6, 64]} />
           <meshBasicMaterial color="#ffffff" opacity={0.18} transparent />
         </mesh>
       </a.group>

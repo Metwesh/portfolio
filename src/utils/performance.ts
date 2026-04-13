@@ -3,6 +3,27 @@
  */
 
 /**
+ * Device quality tier based on memory + CPU.
+ * Sampled once at module load — stable for the session.
+ *
+ * low    → mobile / ≤2 GB RAM / ≤2 cores
+ * medium → ≤4 GB RAM / ≤4 cores
+ * high   → everything else
+ */
+export type QualityTier = "low" | "medium" | "high";
+
+export const qualityTier: QualityTier = (() => {
+  const mem = (navigator as { deviceMemory?: number }).deviceMemory ?? 4;
+  const cores = navigator.hardwareConcurrency ?? 4;
+  const isMobile =
+    /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ||
+    (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
+  if (isMobile || mem <= 2 || cores <= 2) return "low";
+  if (mem <= 4 || cores <= 4) return "medium";
+  return "high";
+})();
+
+/**
  * Debounce function for performance optimization
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(

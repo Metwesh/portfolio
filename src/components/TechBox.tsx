@@ -1,5 +1,5 @@
 import { Float } from "@react-three/drei";
-import { type ThreeEvent, useFrame, useThree } from "@react-three/fiber";
+import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import {
   Euler as ThreeEuler,
@@ -7,6 +7,10 @@ import {
   Vector3 as ThreeVector3,
 } from "three";
 import BoxShader from "../shaders/BoxShader";
+import { scrollStore } from "../stores/scrollStore";
+import { qualityTier } from "../utils/performance";
+
+const ENABLE_SHADOWS = qualityTier !== "low";
 
 interface TechBoxProps {
   data: {
@@ -37,8 +41,6 @@ export function TechBox({
 
   const meshRef = useRef<ThreeMesh>(null);
   const [isHovered, setIsHovered] = useState(false);
-
-  const { camera, gl } = useThree();
 
   const prevCameraPosition = useRef(new ThreeVector3());
   const rotationSpeed = useRef(0);
@@ -96,23 +98,23 @@ export function TechBox({
 
   const handlePointerEnter = () => {
     setIsHovered(true);
-    gl.domElement.style.cursor = "pointer";
+    scrollStore.techBoxHovered = true;
+    window.dispatchEvent(new Event("techbox:pointerenter"));
   };
 
   const handlePointerLeave = () => {
     setIsHovered(false);
-    gl.domElement.style.cursor = "unset";
+    scrollStore.techBoxHovered = false;
+    window.dispatchEvent(new Event("techbox:pointerleave"));
   };
 
-  useFrame(() => {
-    if (!meshRef.current || !camera) return;
+  useFrame(({ camera }) => {
+    if (!meshRef.current) return;
 
     if (isInView) {
-      // Rotate with camera movement (the drag-to-explore feel)
-      const deltaPosition = camera.position
-        .clone()
-        .sub(prevCameraPosition.current);
-      rotationSpeed.current = deltaPosition.length() * 0.1;
+      // Rotate with camera movement — distanceTo avoids a Vector3 allocation per frame
+      rotationSpeed.current =
+        camera.position.distanceTo(prevCameraPosition.current) * 0.1;
       meshRef.current.rotation.x += rotationSpeed.current;
       meshRef.current.rotation.y += rotationSpeed.current;
 
@@ -120,14 +122,17 @@ export function TechBox({
       const targetPos = animateTo || position;
       meshRef.current.position.lerp(targetPos, 0.15);
 
-      // Scales boxes up to custom scale if provided, else default 1
-      const scaleValue = scale || 1;
+      // Scales boxes up to custom scale if provided, else hover bump, else default 1
+      const scaleValue =
+        isSelected && isHovered
+          ? (scale ?? 1) * 0.88
+          : (scale ?? (isHovered ? 1.18 : 1));
       targetScaleRef.current.set(scaleValue, scaleValue, scaleValue);
       meshRef.current.scale.lerp(targetScaleRef.current, 0.08);
 
       // Self-rotation
-      meshRef.current.rotation.x += 0.005;
-      meshRef.current.rotation.y -= 0.005;
+      meshRef.current.rotation.x += 0.002;
+      meshRef.current.rotation.y -= 0.002;
     } else {
       // Animate OUT: boxes drift outward (away from group center) and shrink.
       // On the first frame of exit, snapshot start pos and compute an outward target
@@ -168,8 +173,8 @@ export function TechBox({
       <mesh
         ref={meshRef}
         name={data.name}
-        castShadow
-        receiveShadow
+        castShadow={ENABLE_SHADOWS}
+        receiveShadow={ENABLE_SHADOWS}
         // position is now animated in useFrame
         rotation={meshRotation}
         onPointerDown={handlePointerDown}
@@ -178,7 +183,11 @@ export function TechBox({
         onPointerLeave={handlePointerLeave}
       >
         <boxGeometry args={[1, 1, 1]} />
-        <BoxShader data={data} isHovered={isHovered || isSelected} />
+        <BoxShader
+          data={data}
+          isHovered={isHovered || isSelected}
+          isDimmed={isSelected && isHovered}
+        />
       </mesh>
     </Float>
   );

@@ -32,11 +32,10 @@ export const CAMERA_WAYPOINTS: CameraWaypoint[] = [
   {
     progress: 0.45,
     // Tech constellation — sphere radius 8 centred at z=-6.
-    // Camera at z=22 keeps the full constellation in frame while the M logo
-    // is visible behind the boxes (M sits at z≈-10 at this scroll depth).
-    position: new Vector3(0, -2, 20),
+    // Desktop gets a closer camera; mobile is already well-framed at z=16.
+    position: new Vector3(0, -2, window.innerWidth >= 768 ? 13 : 16),
     lookAt: new Vector3(0, -3, -8),
-    fov: 70,
+    fov: window.innerWidth >= 768 ? 60 : 65,
   },
   {
     progress: 0.7,

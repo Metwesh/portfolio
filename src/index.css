@@ -101,20 +101,6 @@
     scroll-behavior: auto !important;
   }
 
-  /* Custom cursor — hidden everywhere; CustomCursor component renders its own */
-  html,
-  body,
-  a,
-  button,
-  [role="button"] {
-    cursor: none;
-  }
-  input,
-  textarea,
-  select {
-    cursor: auto;
-  }
-
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;
@@ -164,6 +150,19 @@
     @apply bg-background relative min-h-svh bg-linear-to-br from-gray-900 to-black font-sans text-white;
   }
 }
+
+/* Custom cursor — outside any layer so it beats Tailwind utilities (cursor-pointer etc.) in v4 */
+*,
+*::before,
+*::after {
+  cursor: none;
+}
+input,
+textarea,
+select {
+  cursor: auto;
+}
+
 @layer utilities {
   /* 3D Flip Effect Utilities */
   .perspective-1000 {
@@ -268,10 +267,12 @@
     from {
       opacity: 0;
       transform: translateY(20px);
+      backdrop-filter: blur(0px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
+      backdrop-filter: blur(12px);
     }
   }
 
