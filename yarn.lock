@@ -4991,7 +4991,7 @@ vite-plugin-pwa@^1.2.0:
   optionalDependencies:
     fsevents "~2.3.3"
 
-vite@^8.0.8:
+vite@^8.0.5:
   version "8.0.8"
   resolved "https://registry.yarnpkg.com/vite/-/vite-8.0.8.tgz#4e26a9bba77c4b27a00b6b10100a7dab48d546a3"
   integrity sha512-dbU7/iLVa8KZALJyLOBOQ88nOXtNG8vxKuOT4I2mD+Ya70KPceF4IAmDsmU0h1Qsn5bPrvsY9HJstCRh3hG6Uw==
