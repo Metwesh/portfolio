@@ -1,5 +1,6 @@
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { WIP } from "../assets";
+import { cn } from "../lib/utils";
 
 interface TechTooltipProps {
   technologyName: string;
@@ -20,28 +21,19 @@ export function TechTooltip({
     <div className="flex flex-col items-center gap-4">
       <button
         type="button"
-        className="relative animate-fade-in-up cursor-pointer overflow-hidden whitespace-pre rounded-3xl border border-white/20 px-10 py-6 text-center font-bold text-4xl text-white tracking-wide backdrop-blur-md transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02]"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(20,24,32,0.95) 0%, rgba(30,35,45,0.95) 100%)",
-          boxShadow:
-            "0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1)",
-          backgroundImage: isWip ? `url(${WIP})` : undefined,
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-        }}
+        className={cn(
+          "relative block animate-fade-in-up cursor-pointer overflow-hidden whitespace-pre",
+          "rounded-3xl border border-white/20 px-10 py-6",
+          "text-center font-bold text-4xl text-white tracking-wide",
+          "bg-[linear-gradient(135deg,rgba(20,24,32,0.95)_0%,rgba(30,35,45,0.95)_100%)]",
+          "shadow-[0_8px_40px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.1)]",
+          "backdrop-blur-md transition-all duration-300 ease-in-out",
+          "hover:-translate-y-0.5 hover:scale-[1.02]",
+          "hover:shadow-[0_12px_50px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.2)]",
+        )}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onClick={onClose}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow =
-            "0 12px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.2)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.boxShadow =
-            "0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1)";
-        }}
       >
         {technologyName}
         <div className="mt-2 flex items-center justify-center gap-2 font-normal text-base opacity-80">
@@ -49,9 +41,20 @@ export function TechTooltip({
           Click to close
         </div>
         {isWip && (
-          <div className="absolute top-2 right-2 rounded-lg bg-yellow-400/90 px-2 py-1 font-semibold text-black text-xs uppercase tracking-wider">
-            Work in Progress
-          </div>
+          <>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 opacity-20"
+              style={{
+                backgroundImage: `url(${WIP})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+            <div className="absolute top-0 right-0 rounded-es-lg bg-yellow-400/90 px-2 py-1 font-semibold text-black text-xs uppercase tracking-wider">
+              Work in Progress
+            </div>
+          </>
         )}
       </button>
     </div>

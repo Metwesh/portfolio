@@ -1,6 +1,6 @@
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import type * as THREE from "three";
 import {
   ClampToEdgeWrapping,
@@ -25,11 +25,9 @@ function coverTexture(tex: THREE.Texture, planeW: number, planeH: number) {
   let repeatX: number;
   let repeatY: number;
   if (imgAspect > planeAspect) {
-    // Image wider than plane — fit height, crop sides
     repeatY = 1;
     repeatX = planeAspect / imgAspect;
   } else {
-    // Image taller than plane — fit width, crop top/bottom
     repeatX = 1;
     repeatY = imgAspect / planeAspect;
   }
@@ -42,7 +40,6 @@ function coverTexture(tex: THREE.Texture, planeW: number, planeH: number) {
 }
 
 // Module-level exit progress (0 = fully visible, 1 = fully gone).
-// Written by GalleryCards each frame, read by ProjectCard3D for scroll-locked opacity.
 let _exitProgress = 0;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -50,12 +47,7 @@ const CARD_W = 8.2;
 const CARD_H = 6.0;
 const CARD_SPACING = 9;
 const N = projects.length;
-
-// How many world-units the gallery travels on Y before the section pins.
-// Tune this so the gallery arrives in frame at the same moment the section
-// hits top:top (i.e. when projectProgress first becomes > 0).
-// Positive = below screen, gallery rises up as user scrolls toward the section.
-const APPROACH_Y = 12; // world units above/below resting position
+const APPROACH_Y = 12;
 
 // Shared rounded-rect geometries — created once, reused by every card
 function makeRoundedRect(w: number, h: number, r: number): ShapeGeometry {
@@ -72,8 +64,6 @@ function makeRoundedRect(w: number, h: number, r: number): ShapeGeometry {
   shape.lineTo(-hw, -hh + r);
   shape.absarc(-hw + r, -hh + r, r, Math.PI, (3 * Math.PI) / 2, false);
   const geo = new ShapeGeometry(shape, 4);
-  // ShapeGeometry UVs are in shape-space (e.g. -4.1 to 4.1) — remap to 0–1
-  // so coverTexture's repeat/offset math works correctly.
   const uvs = geo.attributes.uv;
   for (let i = 0; i < uvs.count; i++) {
     uvs.setXY(i, (uvs.getX(i) + hw) / w, (uvs.getY(i) + hh) / h);
@@ -84,15 +74,24 @@ function makeRoundedRect(w: number, h: number, r: number): ShapeGeometry {
 const CARD_GEO = makeRoundedRect(CARD_W, CARD_H, 0.38);
 const BORDER_GEO = makeRoundedRect(CARD_W * 1.045, CARD_H * 1.045, 0.4);
 
-// ─── Individual card ──────────────────────────────────────────────────────────
+// ─── Card ref bundle — GalleryCards drives all animation ─────────────────────
+interface CardHandles {
+  mesh: React.RefObject<THREE.Mesh | null>;
+  border: React.RefObject<THREE.Mesh | null>;
+  mat: React.RefObject<MeshBasicMaterial | null>;
+  borderMat: React.RefObject<MeshBasicMaterial | null>;
+}
+
+// ─── Individual card — render only, no useFrame ───────────────────────────────
 interface CardProps {
   index: number;
   texture: THREE.Texture;
   color: string;
   posX: number;
+  onMount: (index: number, handles: CardHandles) => void;
 }
 
-function ProjectCard3D({ index, texture, color, posX }: CardProps) {
+function ProjectCard3D({ index, texture, color, posX, onMount }: CardProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const borderRef = useRef<THREE.Mesh>(null);
   const matRef = useRef<MeshBasicMaterial>(null);
@@ -100,60 +99,13 @@ function ProjectCard3D({ index, texture, color, posX }: CardProps) {
 
   useLayoutEffect(() => {
     coverTexture(texture, CARD_W, CARD_H);
-  }, [texture]);
-
-  useFrame(() => {
-    if (
-      !meshRef.current ||
-      !matRef.current ||
-      !borderRef.current ||
-      !borderMatRef.current
-    )
-      return;
-
-    const p = scrollStore.projectProgress;
-    const exiting = !scrollStore.projectSectionActive && p > 0.01;
-    const activeF = p * (N - 1);
-    const dist = Math.abs(activeF - index);
-
-    // Exit: opacity locked to scroll progress (mirrors entry), Y handled by group
-    if (exiting) {
-      const alpha = 1 - _exitProgress;
-      matRef.current.opacity =
-        alpha * (dist < 0.5 ? 1.0 : dist < 1.5 ? 0.65 : 0.25);
-      borderMatRef.current.opacity = alpha * (dist < 0.5 ? 0.22 : 0.04);
-      return;
-    }
-
-    // Scale: active → 1.0, adjacent → 0.88, far → 0.75
-    const targetScale = dist < 0.5 ? 1.0 : dist < 1.5 ? 0.88 : 0.75;
-    const curScale = meshRef.current.scale.x;
-    meshRef.current.scale.setScalar(curScale + (targetScale - curScale) * 0.1);
-    borderRef.current.scale.setScalar(meshRef.current.scale.x * 1.045);
-
-    // Opacity by distance only — no entry envelope
-    const targetOpacity = dist < 0.5 ? 1.0 : dist < 1.5 ? 0.65 : 0.25;
-    matRef.current.opacity += (targetOpacity - matRef.current.opacity) * 0.1;
-
-    // Border glow
-    const targetBorder = dist < 0.5 ? 0.22 : 0.04;
-    borderMatRef.current.opacity +=
-      (targetBorder - borderMatRef.current.opacity) * 0.1;
-
-    // Subtle Y bob on active card
-    const targetY = dist < 0.5 ? Math.sin(Date.now() * 0.001) * 0.08 : 0;
-    meshRef.current.position.y += (targetY - meshRef.current.position.y) * 0.05;
-    borderRef.current.position.y = meshRef.current.position.y;
-
-    // Angle toward center
-    const targetRotY = Math.max(
-      -0.25,
-      Math.min(0.25, (activeF - index) * 0.12),
-    );
-    meshRef.current.rotation.y +=
-      (targetRotY - meshRef.current.rotation.y) * 0.08;
-    borderRef.current.rotation.y = meshRef.current.rotation.y;
-  });
+    onMount(index, {
+      mesh: meshRef,
+      border: borderRef,
+      mat: matRef,
+      borderMat: borderMatRef,
+    });
+  }, [texture, index, onMount]);
 
   return (
     <>
@@ -172,28 +124,44 @@ function ProjectCard3D({ index, texture, color, posX }: CardProps) {
   );
 }
 
-// ─── Gallery group ────────────────────────────────────────────────────────────
+// ─── Gallery group — single useFrame drives all card + group animation ────────
 function GalleryCards() {
   const imageUrls = projects.map((p) => p.image);
   const textures = useTexture(imageUrls);
   const groupRef = useRef<THREE.Group>(null);
   const exitBaseRef = useRef<number>(-1);
 
+  // All card refs collected here — avoids N separate useFrame subscriptions
+  const cardHandlesRef = useRef<Array<CardHandles | null>>(Array(N).fill(null));
+  const registerCard = useCallback((index: number, handles: CardHandles) => {
+    cardHandlesRef.current[index] = handles;
+  }, []);
+
+  // Cache responsive scale — recompute only on viewport change, not every frame
+  const responsiveScaleRef = useRef(1.0);
+  const lastSizeRef = useRef({ width: 0, height: 0 });
+
   useFrame((state) => {
     if (!groupRef.current) return;
 
-    // Responsive scale: fit card width within the visible frustum width at z=3.
-    // Camera z=10, gallery z=3 → depth=7; FOV=60 → half-angle=30°; visibleWidth ≈ 8.083 * aspect
+    // Only recompute when viewport actually changes
     const { width, height } = state.size;
-    const aspect = width / height;
-    const visibleWidthAtGallery = 8.083 * aspect;
-    const responsiveScale = Math.min(
-      1.0,
-      (visibleWidthAtGallery * 1.2) / CARD_W,
-    );
+    if (
+      width !== lastSizeRef.current.width ||
+      height !== lastSizeRef.current.height
+    ) {
+      lastSizeRef.current = { width, height };
+      const visibleWidthAtGallery = 8.083 * (width / height);
+      responsiveScaleRef.current = Math.min(
+        1.0,
+        (visibleWidthAtGallery * 1.2) / CARD_W,
+      );
+    }
+    const responsiveScale = responsiveScaleRef.current;
 
     const p = scrollStore.projectProgress;
     const active = scrollStore.projectSectionActive;
+    const t = state.clock.elapsedTime;
 
     let targetY: number;
     if (active) {
@@ -201,12 +169,10 @@ function GalleryCards() {
       _exitProgress = 0;
       targetY = 0;
     } else if (p < 0.01) {
-      // Approaching — gallery rises in sync with global scroll over ~5% of page
       _exitProgress = 0;
       const approach = Math.min(scrollStore.progress / 0.05, 1);
       targetY = APPROACH_Y * (1 - approach);
     } else {
-      // Exiting — mirror of entry: move out over the same ~5% window
       if (exitBaseRef.current < 0) exitBaseRef.current = scrollStore.progress;
       const elapsed = (scrollStore.progress - exitBaseRef.current) / 0.05;
       _exitProgress = Math.min(Math.max(elapsed, 0), 1);
@@ -215,14 +181,64 @@ function GalleryCards() {
 
     groupRef.current.position.y +=
       (targetY - groupRef.current.position.y) * 0.09;
-
     groupRef.current.scale.setScalar(responsiveScale);
 
-    // Horizontal: active card stays centered on X=0; spacing scaled with group
     const activeF = p * (N - 1);
     const targetX = -activeF * CARD_SPACING * responsiveScale;
     groupRef.current.position.x +=
       (targetX - groupRef.current.position.x) * 0.1;
+
+    // Single loop drives all cards — replaces N separate useFrame subscriptions
+    const exiting = !active && p > 0.01;
+    for (let i = 0; i < N; i++) {
+      const handles = cardHandlesRef.current[i];
+      if (!handles) continue;
+      const { mesh, border, mat, borderMat } = handles;
+      if (
+        !mesh.current ||
+        !mat.current ||
+        !border.current ||
+        !borderMat.current
+      )
+        continue;
+
+      const dist = Math.abs(activeF - i);
+
+      if (exiting) {
+        const alpha = 1 - _exitProgress;
+        mat.current.opacity =
+          alpha * (dist < 0.5 ? 1.0 : dist < 1.5 ? 0.65 : 0.25);
+        borderMat.current.opacity = alpha * (dist < 0.5 ? 0.22 : 0.04);
+        continue;
+      }
+
+      // Cards beyond neighbours are already at rest — cheap lerp, skip scale/rot
+      if (dist > 2.5) {
+        mat.current.opacity += (0.25 - mat.current.opacity) * 0.1;
+        borderMat.current.opacity += (0.04 - borderMat.current.opacity) * 0.1;
+        continue;
+      }
+
+      const targetScale = dist < 0.5 ? 1.0 : dist < 1.5 ? 0.88 : 0.75;
+      const curScale = mesh.current.scale.x;
+      mesh.current.scale.setScalar(curScale + (targetScale - curScale) * 0.1);
+      border.current.scale.setScalar(mesh.current.scale.x * 1.045);
+
+      const targetOpacity = dist < 0.5 ? 1.0 : dist < 1.5 ? 0.65 : 0.25;
+      mat.current.opacity += (targetOpacity - mat.current.opacity) * 0.1;
+
+      const targetBorder = dist < 0.5 ? 0.22 : 0.04;
+      borderMat.current.opacity +=
+        (targetBorder - borderMat.current.opacity) * 0.1;
+
+      const targetPosY = dist < 0.5 ? Math.sin(t) * 0.08 : 0;
+      mesh.current.position.y += (targetPosY - mesh.current.position.y) * 0.05;
+      border.current.position.y = mesh.current.position.y;
+
+      const targetRotY = Math.max(-0.25, Math.min(0.25, (activeF - i) * 0.12));
+      mesh.current.rotation.y += (targetRotY - mesh.current.rotation.y) * 0.08;
+      border.current.rotation.y = mesh.current.rotation.y;
+    }
   });
 
   return (
@@ -234,6 +250,7 @@ function GalleryCards() {
           texture={Array.isArray(textures) ? textures[i] : textures}
           color={project.color}
           posX={i * CARD_SPACING}
+          onMount={registerCard}
         />
       ))}
     </group>
@@ -241,7 +258,6 @@ function GalleryCards() {
 }
 
 // ─── Public export ────────────────────────────────────────────────────────────
-// z=3 keeps the gallery in front of the M logo (z=0) when camera is at z≈14
 export function ProjectGallery() {
   return (
     <group position={[0, -1, 3]}>

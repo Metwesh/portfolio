@@ -20,29 +20,21 @@ export function Header({ scrollY }: { scrollY: number }) {
   }, []);
 
   useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "";
-      };
-    }
-  }, [menuOpen]);
-
-  useEffect(() => {
+    if (!menuOpen) return;
+    document.body.style.overflow = "hidden";
     const handleEscape = (e: KeyboardEvent): void => {
-      if (e.key === "Escape" && menuOpen) {
-        handleNavClick();
-      }
+      if (e.key === "Escape") handleNavClick();
     };
-    if (menuOpen) {
-      document.addEventListener("keydown", handleEscape);
-      return () => document.removeEventListener("keydown", handleEscape);
-    }
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [menuOpen, handleNavClick]);
 
   return (
     <refractive.header
-      className="pointer-events-auto fixed top-gutter right-gutter left-gutter z-40 flex items-center justify-between rounded-2xl px-4 py-3 md:px-6"
+      className="pointer-events-auto fixed top-gutter right-gutter left-gutter z-40 flex items-center justify-between rounded-2xl not-supports-[backdrop-filter:url()]:border not-supports-[backdrop-filter:url()]:border-white/10 not-supports-[backdrop-filter:url()]:bg-black/40 px-4 py-3 not-supports-[backdrop-filter:url()]:backdrop-blur-xl md:px-6"
       refraction={{
         radius: 16,
         blur: 4,

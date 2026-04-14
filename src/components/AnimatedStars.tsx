@@ -9,10 +9,11 @@ import { ShootingStars } from "./ShootingStars";
 
 // Sampled once at module load — stable for the session.
 // Quality-aware: low-end devices get fewer stars to reduce GPU load.
-const STAR_COUNTS = { low: 500, medium: 1500, high: 3000 } as const;
+const STAR_COUNTS = { low: 500, medium: 1000, high: 2500 } as const;
+const SHOOTING_STAR_COUNTS = { low: 0, medium: 6, high: 12 } as const;
+
 const starCount = STAR_COUNTS[qualityTier];
-const shootingStarCount =
-  qualityTier === "low" ? 0 : qualityTier === "medium" ? 6 : 12;
+const shootingStarCount = SHOOTING_STAR_COUNTS[qualityTier];
 
 export function AnimatedStars() {
   const reducedMotion = useReducedMotion();

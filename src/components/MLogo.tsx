@@ -130,6 +130,7 @@ export function MLogo() {
 
   useFrame((state, delta) => {
     const isSelected = scrollStore.techBoxSelected;
+    const t = state.clock.getElapsedTime();
 
     // M opacity + Z drift — quadratic curve keeps M bright longer then drops fast
     const targetOpacity = isSelected ? 0 : 1;
@@ -156,14 +157,23 @@ export function MLogo() {
     ringDramaRef.current +=
       ((isSelected ? 1 : 0) - ringDramaRef.current) * 0.05;
     const drama = ringDramaRef.current;
-    const ringBases = [0.35, 0.28, 0.18];
+    const ringBases = [0.38, 0.3, 0.22];
+    // ring hue bases: cyan ~0.53, purple ~0.78, white (s=0)
+    const ringHues = [0.53, 0.78, 0.0];
+    const ringSats = [1.0, 0.85, 0.0];
     [ring1Ref, ring2Ref, ring3Ref].forEach((ref, i) => {
       const mat = ref.current?.material as ThreeMeshBasicMaterial | undefined;
       if (!mat) return;
       const glow = drama > 0 ? 1 + Math.sin(drama * Math.PI) * 0.8 : 1;
       const ringFade = drama > 0 ? Math.max(0, 1 - drama * 1.2) : op;
-      const newOpacity = Math.min(1, ringBases[i] * glow * ringFade);
+      // Per-ring opacity pulse at different frequencies + phases
+      const pulse = 0.72 + Math.sin(t * (1.0 + i * 0.35) + i * 2.09) * 0.28;
+      const newOpacity = Math.min(1, ringBases[i] * glow * ringFade * pulse);
       mat.opacity = newOpacity;
+      // Slow hue drift
+      const hShift = Math.sin(t * 0.25 + i * 1.57) * 0.04;
+      const lum = 0.65 + Math.sin(t * 0.6 + i * 1.0) * 0.1;
+      mat.color.setHSL(ringHues[i] + hShift, ringSats[i], lum);
       const shouldBeTransparent = newOpacity < 0.99;
       if (mat.transparent !== shouldBeTransparent) {
         mat.transparent = shouldBeTransparent;
@@ -173,7 +183,6 @@ export function MLogo() {
 
     if (reducedMotion || !group.current) return;
 
-    const t = state.clock.getElapsedTime();
     const raw = scrollStore.raw;
 
     const damping = 0.08;
@@ -226,7 +235,8 @@ export function MLogo() {
       ring1Ref.current.rotation.y = 0;
       ring1Ref.current.rotation.z =
         ring1SpinRef.current + raw * 0.0003 * (1 - drama);
-      ring1Ref.current.scale.setScalar(ringScale);
+      const breathe1 = 1 + Math.sin(t * 0.9 + 0.0) * 0.04;
+      ring1Ref.current.scale.setScalar(ringScale * breathe1);
     }
     if (ring2Ref.current) {
       // ring2 target tilt: x→0.4, z→0.3; spins on x
@@ -234,14 +244,16 @@ export function MLogo() {
         lr(Math.PI / 2, 0.4, et) + ring2SpinRef.current;
       ring2Ref.current.rotation.y = raw * 0.0002 * (1 - drama);
       ring2Ref.current.rotation.z = lr(0, 0.3, et);
-      ring2Ref.current.scale.setScalar(ringScale);
+      const breathe2 = 1 + Math.sin(t * 0.7 + 2.1) * 0.04;
+      ring2Ref.current.scale.setScalar(ringScale * breathe2);
     }
     if (ring3Ref.current) {
       // ring3 target tilt: x→1.1, y→0.6; spins on y
       ring3Ref.current.rotation.x = lr(Math.PI / 2, 1.1, et);
       ring3Ref.current.rotation.y = lr(0, 0.6, et) + ring3SpinRef.current;
       ring3Ref.current.rotation.z = raw * 0.00015 * (1 - drama);
-      ring3Ref.current.scale.setScalar(ringScale);
+      const breathe3 = 1 + Math.sin(t * 1.1 + 4.2) * 0.04;
+      ring3Ref.current.scale.setScalar(ringScale * breathe3);
     }
   });
 
@@ -293,16 +305,16 @@ export function MLogo() {
 
         {/* Orbital rings — co-move with the M logo */}
         <mesh ref={ring1Ref} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[2.8, 0.025, 6, 64]} />
-          <meshBasicMaterial color="#00eeff" opacity={0.35} transparent />
+          <torusGeometry args={[2.8, 0.042, 16, 80]} />
+          <meshBasicMaterial color="#00eeff" opacity={0.38} transparent />
         </mesh>
         <mesh ref={ring2Ref} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[3.2, 0.018, 6, 64]} />
-          <meshBasicMaterial color="#a855f7" opacity={0.28} transparent />
+          <torusGeometry args={[3.2, 0.034, 16, 80]} />
+          <meshBasicMaterial color="#a855f7" opacity={0.3} transparent />
         </mesh>
         <mesh ref={ring3Ref} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[2.4, 0.022, 6, 64]} />
-          <meshBasicMaterial color="#ffffff" opacity={0.18} transparent />
+          <torusGeometry args={[2.4, 0.038, 16, 80]} />
+          <meshBasicMaterial color="#ffffff" opacity={0.22} transparent />
         </mesh>
       </a.group>
     </group>

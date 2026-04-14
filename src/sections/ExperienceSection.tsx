@@ -23,12 +23,10 @@ export function ExperienceSection() {
     const dot = glowDotRef.current;
     if (!section || !line) return;
 
-    // Set initial states synchronously — no async gap means no flash of visible content
     const cards = cardRefs.current.filter(Boolean);
-    gsap.set(cards, { opacity: 0, y: 60, scale: 0.96 });
 
     let lineTween: ReturnType<typeof gsap.fromTo> | null = null;
-    let cardTweens: ReturnType<typeof gsap.to>[] = [];
+    let cardTweens: ReturnType<typeof gsap.fromTo>[] = [];
 
     import("gsap/ScrollTrigger").then(({ ScrollTrigger: ST }) => {
       gsap.registerPlugin(ST);
@@ -60,21 +58,25 @@ export function ExperienceSection() {
         },
       );
 
-      // Initial state already set via gsap.set above — use gsap.to
       cardTweens = cards.map((card) =>
-        gsap.to(card, {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          backdropFilter: "blur(24px)",
-          clearProps: "backdropFilter",
-          duration: 0.7,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: card,
-            start: "top 90%",
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 60, scale: 0.96, immediateRender: true },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            backdropFilter: "blur(24px)",
+            clearProps: "backdropFilter",
+            duration: 1.2,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 90%",
+              once: true,
+            },
           },
-        }),
+        ),
       );
     });
 
@@ -156,6 +158,7 @@ export function ExperienceSection() {
                   cardRefs.current[index] = el;
                 }}
                 className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-transform duration-500 group-hover:-translate-y-1"
+                style={{ opacity: 0 }}
               >
                 {/* Giant watermark — clipped to card bounds by overflow-hidden */}
                 <span

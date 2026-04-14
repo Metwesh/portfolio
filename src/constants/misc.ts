@@ -7,11 +7,6 @@ const navLinks = [
 
 const socialLinks = [
   {
-    href: "/public/documents/Mohamed%20H.%20Aly.pdf",
-    label: "Resume",
-    external: true,
-  },
-  {
     href: "https://www.linkedin.com/in/mohamed-h-aly/",
     label: "LinkedIn",
     external: true,
@@ -19,6 +14,21 @@ const socialLinks = [
   {
     href: "https://github.com/metwesh",
     label: "Github",
+    external: true,
+  },
+  {
+    href: "/public/documents/Mohamed%20H.%20Aly.pdf",
+    label: "Resume",
+    external: true,
+  },
+  {
+    href: "mailto:mohamedh.aly@hotmail.com",
+    label: "Email",
+    external: true,
+  },
+  {
+    href: "tel:+201278189999",
+    label: "Phone",
     external: true,
   },
 ];

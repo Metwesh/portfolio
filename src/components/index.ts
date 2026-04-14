@@ -10,7 +10,6 @@ export { NotFound } from "./NotFound";
 export { ScrollHelper } from "./ScrollHelper";
 export { SectionHeading } from "./SectionHeading";
 export { ShootingStars } from "./ShootingStars";
-export { SkipToContent } from "./SkipToContent";
 export { TagsPopover } from "./TagsPopover";
 export { TechBox } from "./TechBox";
 export { TechTooltip } from "./TechTooltip";

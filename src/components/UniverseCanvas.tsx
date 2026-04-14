@@ -288,6 +288,7 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
     let lastX = 0;
     let lastY = 0;
     let active = false;
+    let hasRotated = false;
 
     const onDown = (e: PointerEvent) => {
       if (!scrollStore.techSectionActive) return;
@@ -306,6 +307,10 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
       _techDrag.velX = dy * 0.006;
       lastX = e.clientX;
       lastY = e.clientY;
+      if (!hasRotated) {
+        hasRotated = true;
+        document.dispatchEvent(new CustomEvent("universe:sphererotated"));
+      }
     };
 
     const onUp = () => {

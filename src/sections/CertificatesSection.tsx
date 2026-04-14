@@ -1,14 +1,9 @@
-import gsap from "gsap";
-import ScrollTrigger from "gsap/ScrollTrigger";
-import { useEffect, useRef } from "react";
 import { SectionHeading } from "../components/SectionHeading";
 import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { certificates } from "../constants/certificates";
+import { useCardHolographicTilt } from "../hooks/useCardHolographicTilt";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
-import { useReducedMotion } from "../hooks/useReducedMotion";
 import { cn } from "../lib/utils";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const logoFanIds = Array.from({ length: 5 }, (_, i) => `logo-fan-${i}`);
 const tunnelRings = Array.from({ length: 8 }, (_, i) => ({
@@ -26,63 +21,7 @@ const LOGO_PATH =
   "M39 39C69 109 69 319 39 399C79.6667 397 164.5 399 119 439C137 439 159 406 159 359C159 279 150.5 275 99 275C109 255 109 219 99 199C119 209 159 209 179 199L239 419L299 199C319 209 359 209 379 199C369 219 369 255 379 275C327.5 275 319 279 319 359C319 406 341 439 359 439C313.5 399 398.333 397 439 399C409 319 409 109 439 39C418.5 52.5 311.4 71.4 279 39L239 199L199 39C166.6 71.4 59.5 52.5 39 39Z";
 
 function MLLogoCard() {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const shimmerRef = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card || reducedMotion) return;
-
-    // GSAP entrance
-    gsap.fromTo(
-      card,
-      { opacity: 0, scale: 0.88, y: 30 },
-      {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        duration: 0.7,
-        ease: "power3.out",
-        scrollTrigger: { trigger: card, start: "top 88%" },
-      },
-    );
-
-    // Holographic tilt
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      card.style.transform = `perspective(600px) rotateX(${-y * 14}deg) rotateY(${x * 14}deg) scale(1.03)`;
-      if (shimmerRef.current) {
-        shimmerRef.current.style.backgroundPosition = `${50 + x * 60}% ${50 + y * 60}%`;
-        shimmerRef.current.style.opacity = "1";
-      }
-    };
-    const handleMouseLeave = () => {
-      card.style.transform =
-        "perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)";
-      card.style.transition = "transform 0.5s cubic-bezier(0.23,1,0.32,1)";
-      if (shimmerRef.current) shimmerRef.current.style.opacity = "0";
-    };
-    const handleMouseEnter = () => {
-      card.style.transition = "transform 0.1s linear";
-    };
-
-    card.addEventListener("mousemove", handleMouseMove);
-    card.addEventListener("mouseleave", handleMouseLeave);
-    card.addEventListener("mouseenter", handleMouseEnter);
-
-    return () => {
-      card.removeEventListener("mousemove", handleMouseMove);
-      card.removeEventListener("mouseleave", handleMouseLeave);
-      card.removeEventListener("mouseenter", handleMouseEnter);
-      for (const t of ScrollTrigger.getAll().filter(
-        (t) => t.vars.trigger === card,
-      ))
-        t.kill();
-    };
-  }, [reducedMotion]);
+  const { cardRef, shimmerRef } = useCardHolographicTilt<HTMLDivElement>();
 
   return (
     <article className="group relative md:col-span-1">
@@ -202,6 +141,7 @@ function MLLogoCard() {
 
         {/* Shimmer */}
         <div
+          ref={shimmerRef}
           className="pointer-events-none absolute inset-0 bg-size-[200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100"
           style={{
             backgroundImage:
@@ -225,75 +165,7 @@ function CertCard({
   cert: (typeof certificates)[number];
   isFeatured: boolean;
 }) {
-  const cardRef = useRef<HTMLAnchorElement>(null);
-  const shimmerRef = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card || reducedMotion) return;
-
-    // GSAP entrance
-    gsap.fromTo(
-      card,
-      { opacity: 0, scale: 0.88, y: 30 },
-      {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        duration: 0.7,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: card,
-          start: "top 88%",
-        },
-      },
-    );
-
-    // Holographic tilt on mousemove
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      const rx = -y * 14; // rotate around X axis
-      const ry = x * 14;
-
-      card.style.transform = `perspective(600px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.03)`;
-
-      // Move shimmer with cursor
-      if (shimmerRef.current) {
-        shimmerRef.current.style.backgroundPosition = `${50 + x * 60}% ${50 + y * 60}%`;
-        shimmerRef.current.style.opacity = "1";
-      }
-    };
-
-    const handleMouseLeave = () => {
-      card.style.transform =
-        "perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)";
-      card.style.transition =
-        "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s";
-      if (shimmerRef.current) shimmerRef.current.style.opacity = "0";
-    };
-
-    const handleMouseEnter = () => {
-      card.style.transition = "transform 0.1s linear, box-shadow 0.1s";
-    };
-
-    card.addEventListener("mousemove", handleMouseMove);
-    card.addEventListener("mouseleave", handleMouseLeave);
-    card.addEventListener("mouseenter", handleMouseEnter);
-
-    return () => {
-      card.removeEventListener("mousemove", handleMouseMove);
-      card.removeEventListener("mouseleave", handleMouseLeave);
-      card.removeEventListener("mouseenter", handleMouseEnter);
-      for (const t of ScrollTrigger.getAll().filter(
-        (t) => t.vars.trigger === card,
-      )) {
-        t.kill();
-      }
-    };
-  }, [reducedMotion]);
+  const { cardRef, shimmerRef } = useCardHolographicTilt<HTMLAnchorElement>();
 
   return (
     <a

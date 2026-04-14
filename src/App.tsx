@@ -1,7 +1,7 @@
 import { useGLTF } from "@react-three/drei";
 import gsap from "gsap";
 import { lazy, Suspense } from "react";
-import { Footer, Header, SkipToContent } from "./components";
+import { Footer, Header } from "./components";
 import { CustomCursor } from "./components/CustomCursor";
 import { UniverseCanvas } from "./components/UniverseCanvas";
 import { mainLogoPath } from "./constants";
@@ -105,14 +105,17 @@ export default function App() {
   return (
     <>
       <CustomCursor />
-      <SkipToContent />
 
       {/* Single unified 3D universe — fixed behind everything */}
       <UniverseCanvas onReady={handleCanvasReady} />
 
       <Header scrollY={scrollY} />
 
-      <main id="main-content" className="relative z-10 max-w-screen">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="relative z-10 max-w-screen outline-none"
+      >
         <Suspense fallback={null}>
           <HeroSection />
         </Suspense>

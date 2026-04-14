@@ -4,7 +4,10 @@ import { SectionHeading } from "../components/SectionHeading";
 import { navLinks } from "../constants";
 import { technologies } from "../constants/technologies";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
+import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
+
+const SKILL_CATEGORIES = ["Frontend", "Backend", "DevOps", "Tools", "Design"];
 
 export function TechStacksSection() {
   const { targetRef: sentinelRef, isIntersecting } = useIntersectionObserver({
@@ -13,12 +16,25 @@ export function TechStacksSection() {
   });
 
   const [boxSelected, setBoxSelected] = useState(false);
+  const [boxEverSelected, setBoxEverSelected] = useState(false);
+  const [sphereRotated, setSphereRotated] = useState(false);
+
   useEffect(() => {
     const handler = (e: Event) => {
-      setBoxSelected((e as CustomEvent<{ selected: boolean }>).detail.selected);
+      const selected = (e as CustomEvent<{ selected: boolean }>).detail
+        .selected;
+      setBoxSelected(selected);
+      if (selected) setBoxEverSelected(true);
     };
     document.addEventListener("universe:boxselected", handler);
     return () => document.removeEventListener("universe:boxselected", handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setSphereRotated(true);
+    document.addEventListener("universe:sphererotated", handler);
+    return () =>
+      document.removeEventListener("universe:sphererotated", handler);
   }, []);
 
   // Activate trackball controls + drive 3D constellation visibility
@@ -104,42 +120,64 @@ export function TechStacksSection() {
           </p>
 
           {/* Drag hint */}
-          <p
-            className="text-white/25 text-xs uppercase tracking-widest transition-all duration-700"
-            style={{
-              transitionDelay: "150ms",
-              opacity: isIntersecting ? 1 : 0,
-              transform: isIntersecting ? "translateY(0)" : "translateY(10px)",
-            }}
-          >
-            Drag the sphere to explore
-          </p>
+          <div className="relative h-6 w-full">
+            <p
+              className="absolute inset-0 text-center text-white/25 text-xs uppercase tracking-widest transition-all duration-700"
+              style={{
+                transitionDelay: "150ms",
+                opacity: isIntersecting && !sphereRotated ? 1 : 0,
+                transform:
+                  isIntersecting && !sphereRotated
+                    ? "translateY(0)"
+                    : "translateY(10px)",
+              }}
+            >
+              Drag the sphere to explore
+            </p>
+            <p
+              className="absolute inset-0 text-center text-white/25 text-xs uppercase tracking-widest transition-all duration-700"
+              style={{
+                transitionDelay: "150ms",
+                opacity:
+                  isIntersecting && sphereRotated && !boxEverSelected ? 1 : 0,
+                transform:
+                  isIntersecting && sphereRotated && !boxEverSelected
+                    ? "translateY(0)"
+                    : "translateY(10px)",
+              }}
+            >
+              Click box to explore
+            </p>
+          </div>
 
           {/* Category row — staggered */}
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-medium text-white/20 text-xs uppercase tracking-widest">
-            {["Frontend", "Backend", "DevOps", "Tools", "Design"].map(
-              (cat, i, arr) => (
-                <span
-                  key={cat}
-                  className="flex items-center gap-6 transition-all duration-500"
-                  style={{
-                    transitionDelay: `${200 + i * 80}ms`,
-                    opacity: isIntersecting ? 1 : 0,
-                    transform: isIntersecting
-                      ? "translateY(0)"
-                      : "translateY(8px)",
-                  }}
-                >
-                  {cat}
-                  {i < arr.length - 1 && (
-                    <span className="h-px w-4 bg-white/10" aria-hidden="true" />
-                  )}
-                </span>
-              ),
-            )}
+            {SKILL_CATEGORIES.map((cat, i, arr) => (
+              <span
+                key={cat}
+                className="flex items-center gap-6 transition-all duration-500"
+                style={{
+                  transitionDelay: `${200 + i * 80}ms`,
+                  opacity: isIntersecting ? 1 : 0,
+                  transform: isIntersecting
+                    ? "translateY(0)"
+                    : "translateY(8px)",
+                }}
+              >
+                {cat}
+                {i < arr.length - 1 && (
+                  <span className="h-px w-4 bg-white/10" aria-hidden="true" />
+                )}
+              </span>
+            ))}
           </div>
 
-          <div className="pointer-events-auto mt-2">
+          <div
+            className={cn(
+              "pointer-events-auto mt-2",
+              boxSelected && "pointer-events-none",
+            )}
+          >
             <ScrollHelper
               href={navLinks[3].href}
               ariaLabel="Scroll to experience"

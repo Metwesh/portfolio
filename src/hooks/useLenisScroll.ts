@@ -66,7 +66,11 @@ export function useLenisScroll() {
       const target = document.querySelector(href);
       if (!target) return;
       e.preventDefault();
-      lenis.scrollTo(target as HTMLElement, { offset: 0 });
+      lenis.scrollTo(target as HTMLElement, {
+        offset: 0,
+        onComplete: () =>
+          (target as HTMLElement).focus({ preventScroll: true }),
+      });
     }
     document.addEventListener("click", handleAnchorClick);
 

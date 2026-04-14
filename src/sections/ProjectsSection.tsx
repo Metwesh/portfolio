@@ -18,6 +18,7 @@ export function ProjectsSection() {
   // displayIndex trails activeIndex: updates after fade-out completes
   const [displayIndex, setDisplayIndex] = useState(0);
   const isMounted = useRef(false);
+  const prevIndexRef = useRef(-1);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -55,7 +56,13 @@ export function ProjectsSection() {
             scrollStore.projectSectionActive = false;
             const els = [nameRef.current, descRef.current, actionsRef.current];
             gsap.killTweensOf(els);
-            gsap.set(els, { opacity: 0 });
+            gsap.to(els, {
+              opacity: 0,
+              y: -8,
+              duration: 0.15,
+              ease: "power2.in",
+              stagger: 0.02,
+            });
           },
           onEnterBack: () => {
             scrollStore.projectSectionActive = true;
@@ -71,7 +78,13 @@ export function ProjectsSection() {
             scrollStore.projectSectionActive = false;
             const els = [nameRef.current, descRef.current, actionsRef.current];
             gsap.killTweensOf(els);
-            gsap.set(els, { opacity: 0 });
+            gsap.to(els, {
+              opacity: 0,
+              y: -8,
+              duration: 0.15,
+              ease: "power2.in",
+              stagger: 0.02,
+            });
           },
           onUpdate: (self) => {
             scrollStore.projectProgress = self.progress;
@@ -80,7 +93,10 @@ export function ProjectsSection() {
             if (counterRef.current) {
               counterRef.current.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(projects.length).padStart(2, "0")}`;
             }
-            setActiveIndex(idx);
+            if (idx !== prevIndexRef.current) {
+              prevIndexRef.current = idx;
+              setActiveIndex(idx);
+            }
           },
         },
       },

@@ -1,6 +1,7 @@
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import type { ProjectTag } from "../constants/projects";
+import { cn } from "../lib/utils";
 
 interface TagsPopoverProps {
   tags: ProjectTag[];
@@ -15,6 +16,9 @@ export function TagsPopover({
 }: TagsPopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const tagClass = cn(
+    "rounded-full border border-white/10 bg-black/40 px-3 py-1 font-semibold text-white/90 text-xs backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-white/20 hover:bg-white/10",
+  );
   const visibleTags = tags.slice(0, visibleCount);
   const hiddenTags = tags.slice(visibleCount);
 
@@ -28,21 +32,13 @@ export function TagsPopover({
       gsap.set(el, { pointerEvents: "auto" });
       gsap.fromTo(
         el,
-        { opacity: 0, y: 10, backdropFilter: "blur(0px)" },
-        {
-          opacity: 1,
-          y: 0,
-          backdropFilter: "blur(24px)",
-          clearProps: "backdropFilter",
-          duration: 0.2,
-          ease: "power2.out",
-        },
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: -4, duration: 0.2, ease: "power2.out" },
       );
     } else {
       gsap.to(el, {
         opacity: 0,
         y: 10,
-        backdropFilter: "blur(0px)",
         duration: 0.15,
         ease: "power2.in",
         onComplete: () => {
@@ -58,10 +54,7 @@ export function TagsPopover({
     <div className="flex flex-wrap gap-2">
       {/* Visible tags */}
       {visibleTags.map((tag) => (
-        <span
-          key={tag.name}
-          className="rounded-full border border-white/10 bg-black/40 px-3 py-1 font-semibold text-white/90 text-xs backdrop-blur-md transition-all duration-300 hover:scale-110"
-        >
+        <span key={tag.name} className={tagClass}>
           {tag.name}
         </span>
       ))}
@@ -100,7 +93,7 @@ export function TagsPopover({
           {/* Popover */}
           <div
             ref={popoverRef}
-            className="absolute bottom-full left-1/2 z-100 mb-2 -translate-x-1/2 rounded-xl opacity-0"
+            className="absolute bottom-full left-1/2 z-100 -translate-x-1/2 rounded-xl opacity-0"
             style={{ pointerEvents: "none" }}
           >
             {/* Arrow */}
@@ -108,18 +101,15 @@ export function TagsPopover({
 
             {/* Content */}
             <div
-              className="relative min-w-60 rounded-xl border border-white/10 bg-black/60 p-3"
+              className="relative min-w-60 rounded-xl border border-white/10 bg-black/96 p-3"
               style={{
                 boxShadow:
                   "0 8px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06)",
               }}
             >
-              <div className="flex flex-wrap gap-2">
+              <div className="relative flex flex-wrap gap-2">
                 {hiddenTags.map((tag) => (
-                  <span
-                    key={tag.name}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-semibold text-white/90 text-xs transition-all duration-200 hover:scale-105 hover:border-white/20 hover:bg-white/10"
-                  >
+                  <span key={tag.name} className={tagClass}>
                     {tag.name}
                   </span>
                 ))}

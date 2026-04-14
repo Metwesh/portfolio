@@ -9,25 +9,54 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
-  const firstLinkRef = useRef<HTMLAnchorElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  // Manage dialog open/close with proper showModal/close
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
     if (isOpen && !dialog.open) {
       dialog.show();
-      // Focus first link when menu opens
-      setTimeout(() => firstLinkRef.current?.focus(), 100);
-    } else if (!isOpen && dialog.open) dialog.close();
+      dialog.focus();
+    } else if (!isOpen && dialog.open) {
+      dialog.close();
+    }
+
+    if (!isOpen) return;
+
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const focusables = [
+        ...dialog.querySelectorAll<HTMLElement>(
+          'a[href], button, [tabindex]:not([tabindex="-1"])',
+        ),
+      ];
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey) {
+        if (active === first || !dialog.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (active === last || !dialog.contains(active)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeydown);
+    return () => document.removeEventListener("keydown", handleKeydown);
   }, [isOpen]);
 
   return createPortal(
     <dialog
       ref={dialogRef}
       id="mobile-menu"
+      tabIndex={-1}
       aria-label="Mobile navigation menu"
       className={cn(
         "fixed inset-0 z-10 m-0 flex h-svh max-h-none w-screen max-w-none flex-col items-center justify-center gap-8 border-0 bg-black/80 p-0 font-bold text-2xl text-white transition-[opacity,transform,backdrop-filter] duration-500 md:hidden",
@@ -40,7 +69,6 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
       {navLinks.map((link, index) => (
         <a
           key={link.href}
-          ref={index === 0 ? firstLinkRef : undefined}
           href={link.href}
           onClick={onNavClick}
           className={cn(
@@ -71,10 +99,10 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
         }}
       />
 
-      {/* Social Links */}
+      {/* Footer links — Socials / Resume / Contact */}
       <div
         className={cn(
-          "flex gap-6 font-semibold text-lg transition-all duration-500",
+          "flex items-start gap-10 font-semibold text-sm transition-all duration-500",
           isOpen
             ? "translate-y-0 opacity-100"
             : "pointer-events-none translate-y-8 opacity-0",
@@ -85,19 +113,62 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
             : "0ms",
         }}
       >
-        {socialLinks.map((link) => (
+        {/* Socials */}
+        <div className="flex flex-col items-center gap-2">
+          <span className="mb-1 text-white/30 text-xs uppercase tracking-widest">
+            Socials
+          </span>
+          {socialLinks.slice(0, 2).map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onNavClick}
+              className="text-white/70 transition-colors hover:text-cyan-400 focus-visible:outline-offset-2"
+              tabIndex={isOpen ? 0 : -1}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        {/* Resume */}
+        <div className="flex flex-col items-center gap-2">
+          <span className="mb-1 text-white/30 text-xs uppercase tracking-widest">
+            Resume
+          </span>
           <a
-            key={link.href}
-            href={link.href}
+            href={socialLinks[2].href}
             target="_blank"
             rel="noopener noreferrer"
             onClick={onNavClick}
-            className="transition-colors hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2"
+            className="text-white/70 transition-colors hover:text-cyan-400 focus-visible:outline-offset-2"
             tabIndex={isOpen ? 0 : -1}
           >
-            {link.label}
+            {socialLinks[2].label}
           </a>
-        ))}
+        </div>
+
+        {/* Contact */}
+        <div className="flex flex-col items-center gap-2">
+          <span className="mb-1 text-white/30 text-xs uppercase tracking-widest">
+            Contact
+          </span>
+          {socialLinks.slice(3).map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onNavClick}
+              className="text-white/70 transition-colors hover:text-cyan-400 focus-visible:outline-offset-2"
+              tabIndex={isOpen ? 0 : -1}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
       </div>
     </dialog>,
     document.body,
