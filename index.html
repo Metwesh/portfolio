@@ -154,168 +154,168 @@
     </script>
     <style>
       body:has(#loading-screen) {
-                    overflow: hidden;
-                  }
+                          overflow: hidden;
+                        }
 
-                  #loading-screen {
-                    position: fixed;
-                    inset: 0;
-                    z-index: 9999;
-                    background: #04040d;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-                  }
-                  /* ── Star field ── */
-                  .ls-stars {
-                    position: absolute;
-                    inset: 0;
-                    overflow: hidden;
-                  }
-                  .ls-star {
-                    position: absolute;
-                    border-radius: 50%;
-                    background: #fff;
-                    animation: ls-twinkle var(--d) ease-in-out infinite var(--delay);
-                  }
-                  @keyframes ls-twinkle {
-                    0%,
-                    100% {
-                      opacity: var(--min-op);
-                      transform: scale(1);
-                    }
-                    50% {
-                      opacity: 1;
-                      transform: scale(1.6);
-                    }
-                  }
+                        #loading-screen {
+                          position: fixed;
+                          inset: 0;
+                          z-index: 9999;
+                          background: #04040d;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                        }
+                        /* ── Star field ── */
+                        .ls-stars {
+                          position: absolute;
+                          inset: 0;
+                          overflow: hidden;
+                        }
+                        .ls-star {
+                          position: absolute;
+                          border-radius: 50%;
+                          background: #fff;
+                          animation: ls-twinkle var(--d) ease-in-out infinite var(--delay);
+                        }
+                        @keyframes ls-twinkle {
+                          0%,
+                          100% {
+                            opacity: var(--min-op);
+                            transform: scale(1);
+                          }
+                          50% {
+                            opacity: 1;
+                            transform: scale(1.6);
+                          }
+                        }
 
-                  /* ── Orbital rings ── */
-                  .ls-rings {
-                    position: relative;
-                    width: 180px;
-                    height: 180px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                  }
-                  .ls-ring {
-                    position: absolute;
-                    border-radius: 50%;
-                    border: 1px solid transparent;
-                    animation: ls-orbit var(--spd) linear infinite;
-                  }
-                  .ls-ring-1 {
-                    width: 180px;
-                    height: 180px;
-                    border-color: rgba(0, 238, 255, 0.25);
-                    border-top-color: #00eeff;
-                    --spd: 2.4s;
-                  }
-                  .ls-ring-2 {
-                    width: 140px;
-                    height: 140px;
-                    border-color: rgba(168, 85, 247, 0.2);
-                    border-right-color: #a855f7;
-                    --spd: 1.8s;
-                    animation-direction: reverse;
-                  }
-                  .ls-ring-3 {
-                    width: 100px;
-                    height: 100px;
-                    border-color: rgba(255, 255, 255, 0.1);
-                    border-bottom-color: rgba(255, 255, 255, 0.6);
-                    --spd: 3.2s;
-                  }
-                  @keyframes ls-orbit {
-                    to {
-                      transform: rotate(360deg);
-                    }
-                  }
+                        /* ── Orbital rings ── */
+                        .ls-rings {
+                          position: relative;
+                          width: 180px;
+                          height: 180px;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                        }
+                        .ls-ring {
+                          position: absolute;
+                          border-radius: 50%;
+                          border: 1px solid transparent;
+                          animation: ls-orbit var(--spd) linear infinite;
+                        }
+                        .ls-ring-1 {
+                          width: 180px;
+                          height: 180px;
+                          border-color: rgba(0, 238, 255, 0.25);
+                          border-top-color: #00eeff;
+                          --spd: 2.4s;
+                        }
+                        .ls-ring-2 {
+                          width: 140px;
+                          height: 140px;
+                          border-color: rgba(168, 85, 247, 0.2);
+                          border-right-color: #a855f7;
+                          --spd: 1.8s;
+                          animation-direction: reverse;
+                        }
+                        .ls-ring-3 {
+                          width: 100px;
+                          height: 100px;
+                          border-color: rgba(255, 255, 255, 0.1);
+                          border-bottom-color: rgba(255, 255, 255, 0.6);
+                          --spd: 3.2s;
+                        }
+                        @keyframes ls-orbit {
+                          to {
+                            transform: rotate(360deg);
+                          }
+                        }
 
-                  /* ── M svg ── */
-                  .ls-m {
-                    position: relative;
-                    z-index: 1;
-                    width: 64px;
-                    height: 64px;
-                    animation: ls-breathe 2.4s ease-in-out infinite;
-                  }
-                  @keyframes ls-breathe {
-                    0%,
-                    100% {
-                      opacity: 0.7;
-                      filter: drop-shadow(0 0 8px rgba(0, 238, 255, 0.3));
-                    }
-                    50% {
-                      opacity: 1;
-                      filter: drop-shadow(0 0 18px rgba(0, 238, 255, 0.7));
-                    }
-                  }
+                        /* ── M svg ── */
+                        .ls-m {
+                          position: relative;
+                          z-index: 1;
+                          width: 64px;
+                          height: 64px;
+                          animation: ls-breathe 2.4s ease-in-out infinite;
+                        }
+                        @keyframes ls-breathe {
+                          0%,
+                          100% {
+                            opacity: 0.7;
+                            filter: drop-shadow(0 0 8px rgba(0, 238, 255, 0.3));
+                          }
+                          50% {
+                            opacity: 1;
+                            filter: drop-shadow(0 0 18px rgba(0, 238, 255, 0.7));
+                          }
+                        }
 
-                  /* ── Glow beneath ── */
-                  .ls-glow {
-                    position: absolute;
-                    width: 220px;
-                    height: 220px;
-                    border-radius: 50%;
-                    background: radial-gradient(
-                      circle,
-                      rgba(0, 238, 255, 0.08) 0%,
-                      rgba(168, 85, 247, 0.06) 50%,
-                      transparent 70%
-                    );
-                    animation: ls-pulse-glow 2.4s ease-in-out infinite;
-                  }
-                  @keyframes ls-pulse-glow {
-                    0%,
-                    100% {
-                      transform: scale(0.9);
-                      opacity: 0.6;
-                    }
-                    50% {
-                      transform: scale(1.1);
-                      opacity: 1;
-                    }
-                  }
+                        /* ── Glow beneath ── */
+                        .ls-glow {
+                          position: absolute;
+                          width: 220px;
+                          height: 220px;
+                          border-radius: 50%;
+                          background: radial-gradient(
+                            circle,
+                            rgba(0, 238, 255, 0.08) 0%,
+                            rgba(168, 85, 247, 0.06) 50%,
+                            transparent 70%
+                          );
+                          animation: ls-pulse-glow 2.4s ease-in-out infinite;
+                        }
+                        @keyframes ls-pulse-glow {
+                          0%,
+                          100% {
+                            transform: scale(0.9);
+                            opacity: 0.6;
+                          }
+                          50% {
+                            transform: scale(1.1);
+                            opacity: 1;
+                          }
+                        }
 
-                  /* ── Label ── */
-                  .ls-label {
-                    margin-top: 2.5rem;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    font-family: "Google Sans Flex", system-ui, sans-serif;
-                    font-size: 0.7rem;
-                    font-weight: 600;
-                    letter-spacing: 0.22em;
-                    text-transform: uppercase;
-                    color: rgba(255, 255, 255, 0.3);
-                  }
-                  .ls-dot {
-                    width: 5px;
-                    height: 5px;
-                    border-radius: 50%;
-                    background: #00eeff;
-                    animation: ls-dot-pulse 1.2s ease-in-out infinite;
-                  }
-                  @keyframes ls-dot-pulse {
-                    0%,
-                    100% {
-                      opacity: 0.3;
-                      transform: scale(0.8);
-                    }
-                    50% {
-                      opacity: 1;
-                      transform: scale(1.2);
-                    }
-                  }
+                        /* ── Label ── */
+                        .ls-label {
+                          margin-top: 2.5rem;
+                          display: flex;
+                          align-items: center;
+                          gap: 0.5rem;
+                          font-family: "Google Sans Flex", system-ui, sans-serif;
+                          font-size: 0.7rem;
+                          font-weight: 600;
+                          letter-spacing: 0.22em;
+                          text-transform: uppercase;
+                          color: rgba(255, 255, 255, 0.3);
+                        }
+                        .ls-dot {
+                          width: 5px;
+                          height: 5px;
+                          border-radius: 50%;
+                          background: #00eeff;
+                          animation: ls-dot-pulse 1.2s ease-in-out infinite;
+                        }
+                        @keyframes ls-dot-pulse {
+                          0%,
+                          100% {
+                            opacity: 0.3;
+                            transform: scale(0.8);
+                          }
+                          50% {
+                            opacity: 1;
+                            transform: scale(1.2);
+                          }
+                        }
     </style>
-    <script type="module" crossorigin src="/portfolio/assets/index-ByLBaZDv.js"></script>
-    <link rel="modulepreload" crossorigin href="/portfolio/assets/components-BUse2qlE.js">
-    <link rel="modulepreload" crossorigin href="/portfolio/assets/ScrollTrigger-CcGoujIz.js">
-    <link rel="stylesheet" crossorigin href="/portfolio/assets/index-BczK3l7w.css">
+    <script type="module" crossorigin src="/portfolio/assets/index-BMrV1qos.js"></script>
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/components-Bz4pf6em.js">
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/ScrollTrigger-BRjDvLe-.js">
+    <link rel="stylesheet" crossorigin href="/portfolio/assets/index-BU-YZ2IG.css">
   <link rel="manifest" href="/portfolio/manifest.webmanifest"></head>
   <body>
     <!-- Loading screen -->
@@ -357,22 +357,22 @@
 
     <script>
       // Scatter stars across the loading screen
-                  const container = document.getElementById("ls-stars");
-                  for (let i = 0; i < 120; i++) {
-                    const s = document.createElement("div");
-                    const size = Math.random() * 1.8 + 0.4;
-                    s.className = "ls-star";
-                    s.style.cssText = [
-                      `width:${size}px`,
-                      `height:${size}px`,
-                      `top:${Math.random() * 100}%`,
-                      `left:${Math.random() * 100}%`,
-                      `--d:${2 + Math.random() * 4}s`,
-                      `--delay:${-Math.random() * 4}s`,
-                      `--min-op:${0.05 + Math.random() * 0.25}`,
-                    ].join(";");
-                    container.appendChild(s);
-                  }
+                        const container = document.getElementById("ls-stars");
+                        for (let i = 0; i < 120; i++) {
+                          const s = document.createElement("div");
+                          const size = Math.random() * 1.8 + 0.4;
+                          s.className = "ls-star";
+                          s.style.cssText = [
+                            `width:${size}px`,
+                            `height:${size}px`,
+                            `top:${Math.random() * 100}%`,
+                            `left:${Math.random() * 100}%`,
+                            `--d:${2 + Math.random() * 4}s`,
+                            `--delay:${-Math.random() * 4}s`,
+                            `--min-op:${0.05 + Math.random() * 0.25}`,
+                          ].join(";");
+                          container.appendChild(s);
+                        }
     </script>
 
     <div id="root"></div>
