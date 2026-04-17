@@ -34,7 +34,7 @@ export function Header({ scrollY }: { scrollY: number }) {
 
   return (
     <refractive.header
-      className="pointer-events-auto fixed top-gutter right-gutter left-gutter z-40 flex items-center justify-between rounded-2xl not-supports-[backdrop-filter:url()]:border not-supports-[backdrop-filter:url()]:border-white/10 not-supports-[backdrop-filter:url()]:bg-black/40 px-4 py-3 not-supports-[backdrop-filter:url()]:backdrop-blur-xl md:px-6"
+      className="pointer-events-auto fixed top-gutter right-gutter left-gutter z-40 flex items-center justify-between rounded-2xl px-4 py-3 backdrop-blur-xl md:px-6"
       refraction={{
         radius: 16,
         blur: 4,

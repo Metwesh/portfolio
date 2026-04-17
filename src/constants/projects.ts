@@ -327,7 +327,7 @@ export const projects: readonly Project[] = [
     ],
     logo: amanLogo,
     image: amanDashboard,
-    color: accentColors.darkBlue,
+    color: accentColors.skyBlue,
     // link: "https://www.amanaccept.com/",
   },
   {
@@ -395,7 +395,7 @@ export const projects: readonly Project[] = [
     link: "https://portal.sideup.co/login",
   },
   {
-    name: "BELTONE Holding Company Site",
+    name: "BELTONE Holding Site",
     description:
       "A multilingual, dynamic corporate site built with Next.js that integrates with an internal dashboard and supports SEO.",
     tags: [

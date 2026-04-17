@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { SectionHeading } from "../components/SectionHeading";
 import { TagsPopover } from "../components/TagsPopover";
 import { projects } from "../constants/projects";
+import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
 
 export function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
-  const nameRef = useRef<HTMLHeadingElement>(null);
+  const nameRef = useRef<HTMLDivElement>(null);
   const descRef = useRef<HTMLParagraphElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
 
@@ -176,29 +177,45 @@ export function ProjectsSection() {
         </div>
 
         {/* Active project detail overlay */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pb-14">
-          {/* Project name + underline */}
-          <div className="mb-3 text-center">
-            <h3
-              ref={nameRef}
-              className="relative inline-block font-bold text-2xl text-white tracking-tight sm:text-3xl"
-              style={{ letterSpacing: "-0.03em", opacity: 0 }}
-            >
-              {activeProject.name}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pb-7 md:pb-14">
+          {/* Logo + Project name */}
+          <div
+            ref={nameRef}
+            className="mb-3 flex flex-col items-center gap-2 opacity-0"
+          >
+            <div className="relative flex items-end gap-2">
+              {activeProject.logo && (
+                <div
+                  className={cn(
+                    "flex h-9 w-9 items-center justify-center rounded-lg border p-1",
+                    activeProject.darkLogo
+                      ? "border-white/30 bg-white/90"
+                      : "border-white/20 bg-white/10 backdrop-blur-sm",
+                  )}
+                >
+                  <img
+                    src={activeProject.logo}
+                    alt={`${activeProject.name} logo`}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              )}
+              <h3 className="relative inline-block text-balance font-bold text-2xl text-white tracking-tight sm:text-3xl">
+                {activeProject.name}
+              </h3>
               <span
                 className="absolute -bottom-1.5 left-0 h-0.5 w-full rounded-full transition-all duration-500"
                 style={{
                   background: `linear-gradient(90deg, ${activeProject.color}, transparent)`,
                 }}
               />
-            </h3>
+            </div>
           </div>
 
           {/* Description */}
           <p
             ref={descRef}
-            className="mb-4 max-w-sm px-6 text-center text-white/60 text-xs leading-relaxed sm:max-w-lg sm:px-0 sm:text-sm"
-            style={{ opacity: 0 }}
+            className="mb-4 max-w-sm px-6 text-center text-white/60 text-xs leading-relaxed opacity-0 sm:max-w-lg sm:px-0 sm:text-sm"
           >
             {activeProject.description}
           </p>
@@ -206,8 +223,7 @@ export function ProjectsSection() {
           {/* Tags + visit button */}
           <div
             ref={actionsRef}
-            className="pointer-events-auto flex flex-wrap items-center justify-center gap-3"
-            style={{ opacity: 0 }}
+            className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 opacity-0"
           >
             {activeProject.tags && activeProject.tags.length > 0 && (
               <TagsPopover
