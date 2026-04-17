@@ -15,5 +15,8 @@
   "cSpell.words": ["Coverflow"],
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "biomejs.biome"
   }
 }
