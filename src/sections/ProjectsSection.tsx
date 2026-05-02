@@ -4,8 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { SectionHeading } from "../components/SectionHeading";
 import { TagsPopover } from "../components/TagsPopover";
 import { projects } from "../constants/projects";
+import { lenisInstance } from "../lib/lenisInstance";
 import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
+
+let _touchStartX = 0;
+let _touchStartY = 0;
+let _touchLastX = 0;
+let _touchLock: "x" | "y" | null = null;
 
 export function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -106,10 +112,66 @@ export function ProjectsSection() {
     const handleLoad = () => ScrollTrigger.refresh();
     window.addEventListener("load", handleLoad);
 
+    function handleWheel(e: WheelEvent) {
+      if (!scrollStore.projectSectionActive) return;
+      const absX = Math.abs(e.deltaX);
+      const absY = Math.abs(e.deltaY);
+      if (absX > absY && absX > 3) {
+        e.preventDefault();
+        const lenis = lenisInstance.current;
+        if (!lenis) return;
+        lenis.scrollTo(
+          Math.max(0, Math.min(lenis.limit, lenis.scroll + e.deltaX * 1.5)),
+          { immediate: true },
+        );
+      }
+    }
+
+    function handleTouchStart(e: TouchEvent) {
+      if (!scrollStore.projectSectionActive) return;
+      _touchStartX = _touchLastX = e.touches[0].clientX;
+      _touchStartY = e.touches[0].clientY;
+      _touchLock = null;
+    }
+
+    function handleTouchMove(e: TouchEvent) {
+      if (!scrollStore.projectSectionActive) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - _touchStartX;
+      const dy = touch.clientY - _touchStartY;
+      if (_touchLock === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+        _touchLock = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      }
+      if (_touchLock === "x") {
+        e.preventDefault();
+        const lenis = lenisInstance.current;
+        if (!lenis) return;
+        const delta = _touchLastX - touch.clientX;
+        lenis.scrollTo(
+          Math.max(0, Math.min(lenis.limit, lenis.scroll + delta)),
+          { immediate: true },
+        );
+        _touchLastX = touch.clientX;
+      }
+    }
+
+    function handleTouchEnd() {
+      _touchLock = null;
+    }
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
     return () => {
       tween.scrollTrigger?.kill();
       tween.kill();
       window.removeEventListener("load", handleLoad);
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
       section.style.height = "";
       scrollStore.projectProgress = 0;
       scrollStore.projectSectionActive = false;

@@ -1,25 +1,24 @@
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Lenis from "lenis";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { lenisInstance } from "../lib/lenisInstance";
 import { scrollStore } from "../stores/scrollStore";
 
 /**
  * Initializes Lenis smooth scroll with its own RAF loop and keeps
  * scrollStore + GSAP ScrollTrigger in sync.
  *
- * Returns scrollY (throttled state for Header re-renders) and lenisRef
- * (for any component that needs direct Lenis access).
+ * Returns scrollY (throttled state for Header re-renders).
  */
 export function useLenisScroll() {
   const [scrollY, setScrollY] = useState(0);
-  const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - 2 ** (-10 * t)),
     });
-    lenisRef.current = lenis;
+    lenisInstance.current = lenis;
 
     // Keep GSAP ScrollTrigger in sync with Lenis's virtual scroll position
     lenis.on("scroll", () => ScrollTrigger.update());
@@ -81,11 +80,11 @@ export function useLenisScroll() {
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
-      lenisRef.current = null;
+      lenisInstance.current = null;
       document.removeEventListener("click", handleAnchorClick);
       window.removeEventListener("load", handleLoad);
     };
   }, []);
 
-  return { scrollY, lenisRef };
+  return { scrollY };
 }
