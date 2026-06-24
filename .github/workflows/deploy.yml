@@ -24,8 +24,7 @@ jobs:
           check-latest: true
 
       - name: Install dependencies 📦
-        # run: yarn install --frozen-lockfile
-        run: yarn install
+        run: yarn install --frozen-lockfile
 
       - name: Lint & compile 🧹
         run: yarn lint && yarn compile
