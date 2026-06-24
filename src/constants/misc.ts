@@ -52,6 +52,7 @@ const accentColors = {
   skyBlue: "#0ea5e9",
   rose: "#e11d48",
   deepRose: "#be123c",
+  maroon: "#7f1d1d",
   lightAmber: "#fbbf24",
 } as const;
 

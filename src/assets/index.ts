@@ -15,10 +15,12 @@ import aradyMisrLogo from "./companies/Arady-Misr.svg";
 import beltoneLogo from "./companies/Beltone.svg";
 import brgrLogo from "./companies/BRGR.webp";
 import dartSpaceLogo from "./companies/DArt-Space.webp";
+import eAndLogo from "./companies/E-And.svg";
 import marqLogo from "./companies/MARQ.svg";
 import sideupLogo from "./companies/SIDEUP.svg";
 import sideupWhiteLogo from "./companies/SIDEUP-white.svg";
 import tahLogo from "./companies/TAH.svg";
+import willysLogo from "./companies/willys.svg";
 // Footer
 import githubSquare from "./footer/github.svg";
 import linkedIn from "./footer/linkedin.svg";
@@ -33,6 +35,7 @@ import BRGRSpinTheWheel from "./projects/BRGR-spin-the-wheel.webp";
 import budgetApp from "./projects/Budget app.webp";
 import clinicWebsite from "./projects/Clinic website.webp";
 import dartSpace from "./projects/D'Art-Space.webp";
+import eAndConfidential from "./projects/E-and-confidential.webp";
 import faceDetectApp from "./projects/Face-detect.webp";
 // Projects
 import bookRentalProject from "./projects/Graduation Website.webp";
@@ -40,6 +43,8 @@ import marqCrm from "./projects/MARQ-CRM.webp";
 import sideupDashboardV2 from "./projects/SIDEUP-dashboard-V2.webp";
 import sideupDashboardV3 from "./projects/SIDEUP-dashboard-V3.webp";
 import taskHandlerApp from "./projects/Task-handler.webp";
+import willysAdmin from "./projects/Willys-Admin.webp";
+import willysWebsite from "./projects/Willys-Website.webp";
 import Algorithms from "./technologies/Algorithms.svg";
 import Angular from "./technologies/Angular.svg";
 import ArtificialIntelligence from "./technologies/Artificial-Intelligence.svg";
@@ -126,6 +131,8 @@ export {
   dartSpace,
   dartSpaceLogo,
   Express,
+  eAndConfidential,
+  eAndLogo,
   Figma,
   Firebase,
   faceDetectApp,
@@ -172,4 +179,7 @@ export {
   taskHandlerApp,
   Vue,
   WIP,
+  willysAdmin,
+  willysLogo,
+  willysWebsite,
 };

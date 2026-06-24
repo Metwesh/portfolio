@@ -31,10 +31,10 @@ export function ProjectsSection() {
     const section = sectionRef.current;
     if (!section) return;
 
-    const scrollDist = (projects.length - 1) * window.innerWidth * 0.65;
+    const scrollDist = (projects.length - 0.5) * window.innerWidth * 0.65;
 
     const setHeight = () => {
-      section.style.height = `${(projects.length - 1) * window.innerWidth * 0.65 + window.innerHeight}px`;
+      section.style.height = `${(projects.length - 0.5) * window.innerWidth * 0.65 + window.innerHeight}px`;
     };
     setHeight();
 
@@ -94,9 +94,13 @@ export function ProjectsSection() {
             });
           },
           onUpdate: (self) => {
-            scrollStore.projectProgress = self.progress;
+            const progress = Math.min(
+              self.progress * ((projects.length - 0.5) / (projects.length - 1)),
+              1,
+            );
+            scrollStore.projectProgress = progress;
 
-            const idx = Math.round(self.progress * (projects.length - 1));
+            const idx = Math.round(progress * (projects.length - 1));
             if (counterRef.current) {
               counterRef.current.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(projects.length).padStart(2, "0")}`;
             }

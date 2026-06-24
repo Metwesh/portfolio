@@ -4,6 +4,35 @@ import { ANIMATION_CONFIG, navLinks } from "../constants";
 import { cn } from "../lib/utils";
 import { MobileMenu } from "./MobileMenu";
 
+// Safari (desktop + all iOS browsers via WebKit) accepts backdrop-filter:url()
+// as valid CSS but doesn't render SVG filters — @supports is an unreliable false positive.
+// navigator.vendor === "Apple Computer, Inc." reliably identifies all WebKit engines.
+const supportsRefractive =
+  typeof window !== "undefined" &&
+  typeof CSS !== "undefined" &&
+  CSS.supports("backdrop-filter", "url(#x)") &&
+  navigator.vendor !== "Apple Computer, Inc.";
+
+function HeaderShell({
+  className,
+  children,
+}: {
+  className: string;
+  children: React.ReactNode;
+}) {
+  if (supportsRefractive) {
+    return (
+      <refractive.header
+        className={className}
+        refraction={{ radius: 16, blur: 4, bezelWidth: 16 }}
+      >
+        {children}
+      </refractive.header>
+    );
+  }
+  return <header className={className}>{children}</header>;
+}
+
 export function Header({ scrollY }: { scrollY: number }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -33,13 +62,12 @@ export function Header({ scrollY }: { scrollY: number }) {
   }, [menuOpen, handleNavClick]);
 
   return (
-    <refractive.header
-      className="pointer-events-auto fixed top-gutter right-gutter left-gutter z-40 flex items-center justify-between rounded-2xl px-4 py-3 backdrop-blur-xl md:px-6"
-      refraction={{
-        radius: 16,
-        blur: 4,
-        bezelWidth: 16,
-      }}
+    <HeaderShell
+      className={cn(
+        "pointer-events-auto fixed top-gutter right-gutter left-gutter z-40 flex items-center justify-between rounded-2xl px-4 py-3 md:px-6",
+        !supportsRefractive &&
+          "border border-white/10 bg-black/10 backdrop-blur-sm",
+      )}
     >
       <div className="relative z-40 flex items-center justify-between max-md:w-full">
         {/* Logo + name */}
@@ -131,6 +159,6 @@ export function Header({ scrollY }: { scrollY: number }) {
       </div>
 
       <MobileMenu isOpen={menuOpen} onNavClick={handleNavClick} />
-    </refractive.header>
+    </HeaderShell>
   );
 }

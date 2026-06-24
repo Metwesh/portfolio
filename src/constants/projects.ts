@@ -15,6 +15,8 @@ import {
   // clinicWebsite,
   dartSpace,
   dartSpaceLogo,
+  eAndConfidential,
+  eAndLogo,
   // faceDetectApp,
   marqCrm,
   marqLogo,
@@ -23,6 +25,9 @@ import {
   sideupLogo,
   tahLogo,
   // taskHandlerApp,
+  willysAdmin,
+  willysLogo,
+  willysWebsite,
 } from "../assets";
 import { accentColors } from "./misc";
 
@@ -751,5 +756,176 @@ export const projects: readonly Project[] = [
     darkLogo: true,
     image: aradyMisrCms,
     color: accentColors.cyan,
+  },
+  {
+    name: "Willy's Website",
+    description:
+      "Customer-facing Next.js storefront for browsing menus, placing orders, and tracking deliveries, featuring interactive delivery maps, i18n support, and a modern component library.",
+    tags: [
+      {
+        name: "Next.js",
+        color: "gray-white",
+      },
+      {
+        name: "TypeScript",
+        color: "blue",
+      },
+      {
+        name: "TailwindCSS",
+        color: "light-blue",
+      },
+      {
+        name: "Shadcn UI",
+        color: "purple",
+      },
+      {
+        name: "React Query",
+        color: "light-purple",
+      },
+      {
+        name: "i18n",
+        color: "dull-blue",
+      },
+      {
+        name: "Mapbox GL",
+        color: "green",
+      },
+      {
+        name: "Zustand",
+        color: "orange",
+      },
+      {
+        name: "React Hook Form",
+        color: "yellow",
+      },
+      {
+        name: "Zod",
+        color: "red",
+      },
+    ],
+    logo: willysLogo,
+    image: willysWebsite,
+    color: accentColors.red,
+    link: "https://willys-kitchen.com/",
+  },
+  {
+    name: "Willy's Admin",
+    description:
+      "Employee portal for tracking and monitoring customer orders, deliveries, and delivery zones, featuring drag-and-drop zone management, rich text editing, real-time charts, and Firebase integration.",
+    tags: [
+      {
+        name: "Next.js",
+        color: "gray-white",
+      },
+      {
+        name: "TypeScript",
+        color: "blue",
+      },
+      {
+        name: "TailwindCSS",
+        color: "light-blue",
+      },
+      {
+        name: "Shadcn UI",
+        color: "purple",
+      },
+      {
+        name: "React Query",
+        color: "light-purple",
+      },
+      {
+        name: "TanStack Table",
+        color: "dull-blue",
+      },
+      {
+        name: "Recharts",
+        color: "orange",
+      },
+      {
+        name: "React Hook Form",
+        color: "yellow",
+      },
+      {
+        name: "Zod",
+        color: "red",
+      },
+      {
+        name: "Firebase",
+        color: "pink",
+      },
+      {
+        name: "Mapbox GL",
+        color: "green",
+      },
+      {
+        name: "DnD Kit",
+        color: "cyan",
+      },
+      {
+        name: "Tiptap",
+        color: "light-green",
+      },
+    ],
+    logo: willysLogo,
+    image: willysAdmin,
+    color: accentColors.indigo,
+  },
+  {
+    name: "E& CIM Portal v2",
+    description:
+      "Modernization of a legacy Java Server Faces enterprise portal to a React micro-frontend architecture, featuring a Backend For Frontend pattern, microservices integration, and advanced data visualization.",
+    tags: [
+      {
+        name: "React",
+        color: "gray-white",
+      },
+      {
+        name: "TypeScript",
+        color: "blue",
+      },
+      {
+        name: "TailwindCSS",
+        color: "light-blue",
+      },
+      {
+        name: "Shadcn UI",
+        color: "purple",
+      },
+      {
+        name: "React Query",
+        color: "light-purple",
+      },
+      {
+        name: "TanStack Table",
+        color: "dull-blue",
+      },
+      {
+        name: "Recharts",
+        color: "orange",
+      },
+      {
+        name: "React Hook Form",
+        color: "yellow",
+      },
+      {
+        name: "Zod",
+        color: "red",
+      },
+      {
+        name: "Micro-frontends",
+        color: "pink",
+      },
+      {
+        name: "Microservices",
+        color: "green",
+      },
+      {
+        name: "BFF",
+        color: "dark-purple",
+      },
+    ],
+    logo: eAndLogo,
+    image: eAndConfidential,
+    color: accentColors.maroon,
   },
 ];
