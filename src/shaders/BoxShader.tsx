@@ -50,9 +50,10 @@ const processTexture = (
   const ctx = canvas.getContext("2d");
   if (!ctx) return texture;
 
-  canvas.width = texture.image.width || 250;
-  canvas.height = texture.image.height || 250;
-  ctx.drawImage(texture.image, 0, 0, canvas.width, canvas.height);
+  const img = texture.image as HTMLImageElement;
+  canvas.width = img.width || 250;
+  canvas.height = img.height || 250;
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
   const newTexture = new ThreeCanvasTexture(canvas);
   newTexture.wrapS = ThreeClampToEdgeWrapping;
