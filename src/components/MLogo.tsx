@@ -14,6 +14,12 @@ import { useIsMobile } from "../hooks/useIsMobile";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { scrollStore } from "../stores/scrollStore";
 
+// Module-level constants — no allocation inside useFrame
+const _lerpVal = (a: number, b: number, t: number) => a + (b - a) * t;
+const RING_BASES = [0.38, 0.3, 0.22] as const;
+const RING_HUES = [0.53, 0.78, 0.0] as const;
+const RING_SATS = [1.0, 0.85, 0.0] as const;
+
 function createMatcapTexture(): CanvasTexture {
   const size = 256;
   const canvas = document.createElement("canvas");
@@ -96,6 +102,8 @@ export function MLogo() {
   const ring1Ref = useRef<ThreeMesh>(null);
   const ring2Ref = useRef<ThreeMesh>(null);
   const ring3Ref = useRef<ThreeMesh>(null);
+  // Stable array — avoids allocating [ring1Ref, ring2Ref, ring3Ref] every frame
+  const ringRefsArrRef = useRef([ring1Ref, ring2Ref, ring3Ref]);
 
   // Ring animation state
   const ringTiltRef = useRef(0); // 0 = all-flat (saturn rings), 1 = orb config
@@ -157,29 +165,27 @@ export function MLogo() {
     ringDramaRef.current +=
       ((isSelected ? 1 : 0) - ringDramaRef.current) * 0.05;
     const drama = ringDramaRef.current;
-    const ringBases = [0.38, 0.3, 0.22];
     // ring hue bases: cyan ~0.53, purple ~0.78, white (s=0)
-    const ringHues = [0.53, 0.78, 0.0];
-    const ringSats = [1.0, 0.85, 0.0];
-    [ring1Ref, ring2Ref, ring3Ref].forEach((ref, i) => {
+    const glow = drama > 0 ? 1 + Math.sin(drama * Math.PI) * 0.8 : 1;
+    const ringFade = drama > 0 ? Math.max(0, 1 - drama * 1.2) : op;
+    for (let i = 0; i < 3; i++) {
+      const ref = ringRefsArrRef.current[i];
       const mat = ref.current?.material as ThreeMeshBasicMaterial | undefined;
-      if (!mat) return;
-      const glow = drama > 0 ? 1 + Math.sin(drama * Math.PI) * 0.8 : 1;
-      const ringFade = drama > 0 ? Math.max(0, 1 - drama * 1.2) : op;
+      if (!mat) continue;
       // Per-ring opacity pulse at different frequencies + phases
       const pulse = 0.72 + Math.sin(t * (1.0 + i * 0.35) + i * 2.09) * 0.28;
-      const newOpacity = Math.min(1, ringBases[i] * glow * ringFade * pulse);
+      const newOpacity = Math.min(1, RING_BASES[i] * glow * ringFade * pulse);
       mat.opacity = newOpacity;
       // Slow hue drift
       const hShift = Math.sin(t * 0.25 + i * 1.57) * 0.04;
       const lum = 0.65 + Math.sin(t * 0.6 + i * 1.0) * 0.1;
-      mat.color.setHSL(ringHues[i] + hShift, ringSats[i], lum);
+      mat.color.setHSL(RING_HUES[i] + hShift, RING_SATS[i], lum);
       const shouldBeTransparent = newOpacity < 0.99;
       if (mat.transparent !== shouldBeTransparent) {
         mat.transparent = shouldBeTransparent;
         mat.needsUpdate = true;
       }
-    });
+    }
 
     if (reducedMotion || !group.current) return;
 
@@ -219,7 +225,6 @@ export function MLogo() {
     const spinMult = 1 + drama * 5; // spin up to 6× on selection
     // Flatten rings back toward saturn as M retreats
     const et = ringTiltRef.current * (1 - drama * 0.85);
-    const lr = (a: number, b: number, tt: number) => a + (b - a) * tt;
 
     // Accumulated spins (each ring spins on its primary axis)
     ring1SpinRef.current += delta * 0.4 * spinMult;
@@ -241,16 +246,16 @@ export function MLogo() {
     if (ring2Ref.current) {
       // ring2 target tilt: x→0.4, z→0.3; spins on x
       ring2Ref.current.rotation.x =
-        lr(Math.PI / 2, 0.4, et) + ring2SpinRef.current;
+        _lerpVal(Math.PI / 2, 0.4, et) + ring2SpinRef.current;
       ring2Ref.current.rotation.y = raw * 0.0002 * (1 - drama);
-      ring2Ref.current.rotation.z = lr(0, 0.3, et);
+      ring2Ref.current.rotation.z = _lerpVal(0, 0.3, et);
       const breathe2 = 1 + Math.sin(t * 0.7 + 2.1) * 0.04;
       ring2Ref.current.scale.setScalar(ringScale * breathe2);
     }
     if (ring3Ref.current) {
       // ring3 target tilt: x→1.1, y→0.6; spins on y
-      ring3Ref.current.rotation.x = lr(Math.PI / 2, 1.1, et);
-      ring3Ref.current.rotation.y = lr(0, 0.6, et) + ring3SpinRef.current;
+      ring3Ref.current.rotation.x = _lerpVal(Math.PI / 2, 1.1, et);
+      ring3Ref.current.rotation.y = _lerpVal(0, 0.6, et) + ring3SpinRef.current;
       ring3Ref.current.rotation.z = raw * 0.00015 * (1 - drama);
       const breathe3 = 1 + Math.sin(t * 1.1 + 4.2) * 0.04;
       ring3Ref.current.scale.setScalar(ringScale * breathe3);

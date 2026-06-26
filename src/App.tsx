@@ -140,9 +140,6 @@ export default function App() {
           <Footer />
         </div>
       </main>
-
-      {/* Film grain overlay */}
-      <div className="grain-overlay" aria-hidden="true" />
     </>
   );
 }

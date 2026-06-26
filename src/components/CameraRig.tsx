@@ -84,9 +84,12 @@ export function CameraRig({ mouse }: CameraRigProps) {
     _currentLookAt.lerp(_targetLookAt, 0.06);
     cam.lookAt(_currentLookAt);
 
-    // FOV lerp
-    cam.fov += (targetFov - cam.fov) * 0.05;
-    cam.updateProjectionMatrix();
+    // FOV lerp — skip matrix rebuild when converged
+    const fovDelta = (targetFov - cam.fov) * 0.05;
+    if (Math.abs(fovDelta) > 0.001) {
+      cam.fov += fovDelta;
+      cam.updateProjectionMatrix();
+    }
   });
 
   return null;

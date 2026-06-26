@@ -12,6 +12,8 @@ let _touchStartX = 0;
 let _touchStartY = 0;
 let _touchLastX = 0;
 let _touchLock: "x" | "y" | null = null;
+let _wheelRafId = 0;
+let _wheelDeltaAccum = 0;
 
 export function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -122,12 +124,23 @@ export function ProjectsSection() {
       const absY = Math.abs(e.deltaY);
       if (absX > absY && absX > 3) {
         e.preventDefault();
-        const lenis = lenisInstance.current;
-        if (!lenis) return;
-        lenis.scrollTo(
-          Math.max(0, Math.min(lenis.limit, lenis.scroll + e.deltaX * 1.5)),
-          { immediate: true },
-        );
+        _wheelDeltaAccum += e.deltaX;
+        if (!_wheelRafId) {
+          _wheelRafId = requestAnimationFrame(() => {
+            const lenis = lenisInstance.current;
+            if (lenis) {
+              lenis.scrollTo(
+                Math.max(
+                  0,
+                  Math.min(lenis.limit, lenis.scroll + _wheelDeltaAccum * 1.5),
+                ),
+                { immediate: true },
+              );
+            }
+            _wheelDeltaAccum = 0;
+            _wheelRafId = 0;
+          });
+        }
       }
     }
 

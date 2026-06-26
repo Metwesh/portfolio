@@ -155,8 +155,8 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
     const camera = state.camera as ThreePerspectiveCamera;
 
     // ─── Spawning ───────────────────────────────────────────────────────────
-    const active = starsRef.current.filter((s) => s.lifetime < s.maxLifetime);
-    if (active.length < count) {
+    // starsRef.current is compacted to alive-only at end of each frame
+    if (starsRef.current.length < count) {
       const isBurst = burstRemainingRef.current > 0;
       spawnTimerRef.current += delta;
       if (
@@ -206,7 +206,7 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
         const sg = createStarGroup(star);
         star.groupRef = sg;
         groupRef.current.add(sg);
-        starsRef.current = [...active, star];
+        starsRef.current.push(star);
       }
     }
 

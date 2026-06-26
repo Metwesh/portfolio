@@ -146,7 +146,7 @@ export function HeroSection() {
         {/* Eyebrow — typewriter reveal */}
         <p
           ref={eyebrowRef}
-          className="mb-6 font-mono text-cyan-400 text-sm uppercase tracking-widest after:ml-0.5 after:inline-block after:h-3.5 after:w-0.5 after:animate-caret-blink after:bg-cyan-400 after:align-middle motion-reduce:after:hidden"
+          className="mb-6 min-h-5 font-mono text-cyan-400 text-sm uppercase tracking-widest after:ml-0.5 after:inline-block after:h-3.5 after:w-0.5 after:animate-caret-blink after:bg-cyan-400 after:align-middle motion-reduce:after:hidden"
         />
 
         {/* Giant headline — each line in overflow:hidden clip container */}

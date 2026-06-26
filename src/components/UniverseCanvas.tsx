@@ -12,7 +12,7 @@ import type * as THREE from "three";
 import { BasicShadowMap, PCFShadowMap, Vector3 as ThreeVector3 } from "three";
 import { technologies } from "../constants/technologies";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import { FOG_ARGUMENTS, LIGHT_ARGUMENTS } from "../shaders/FogArguments";
+import { LIGHT_ARGUMENTS } from "../shaders/FogArguments";
 import { scrollStore } from "../stores/scrollStore";
 import { qualityTier } from "../utils/performance";
 import { AnimatedStars } from "./AnimatedStars";
@@ -165,13 +165,6 @@ function TechConstellation() {
           intensity={3.75}
           color={LIGHT_ARGUMENTS.color}
           position={LIGHT_ARGUMENTS.position}
-        />
-        <fog
-          attach="fog"
-          args={[FOG_ARGUMENTS.color, FOG_ARGUMENTS.near, FOG_ARGUMENTS.far]}
-          color={FOG_ARGUMENTS.color}
-          near={FOG_ARGUMENTS.near}
-          far={FOG_ARGUMENTS.far}
         />
         {points.map((pos, index) => {
           const targetPosition = getBoxPosition(pos, index);
@@ -336,6 +329,7 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
       className="fade-in pointer-events-none fixed inset-0 z-0 h-svh animate-in duration-1000"
     >
       <Canvas
+        gl={{ antialias: qualityTier === "high" }}
         shadows={ENABLE_SHADOWS ? { type: SHADOW_MAP_TYPE } : false}
         dpr={[1, MAX_DPR]}
         frameloop={prefersReducedMotion ? "demand" : "always"}

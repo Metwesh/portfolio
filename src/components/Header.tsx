@@ -1,5 +1,5 @@
 import { refractive } from "@hashintel/refractive";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ANIMATION_CONFIG, navLinks } from "../constants";
 import { cn } from "../lib/utils";
 import { MobileMenu } from "./MobileMenu";
@@ -33,7 +33,7 @@ function HeaderShell({
   return <header className={className}>{children}</header>;
 }
 
-export function Header({ scrollY }: { scrollY: number }) {
+export const Header = memo(({ scrollY }: { scrollY: number }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -161,4 +161,4 @@ export function Header({ scrollY }: { scrollY: number }) {
       <MobileMenu isOpen={menuOpen} onNavClick={handleNavClick} />
     </HeaderShell>
   );
-}
+});

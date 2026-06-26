@@ -43,9 +43,14 @@ if (mixpanelToken && mixpanelHost) {
         mixpanel.identify(userId);
 
         // Fetch IP address and set user properties
-        fetch("https://api.ipify.org?format=json")
+        const ipController = new AbortController();
+        const ipTimeout = setTimeout(() => ipController.abort(), 2000);
+        fetch("https://api.ipify.org?format=json", {
+          signal: ipController.signal,
+        })
           .then((response) => response.json())
           .then((data) => {
+            clearTimeout(ipTimeout);
             mixpanel.people.set({
               $first_visit: new Date().toISOString(),
               user_agent: navigator.userAgent,
@@ -55,7 +60,7 @@ if (mixpanelToken && mixpanelHost) {
             });
           })
           .catch(() => {
-            // Fallback if IP fetch fails
+            clearTimeout(ipTimeout);
             mixpanel.people.set({
               $first_visit: new Date().toISOString(),
               user_agent: navigator.userAgent,
