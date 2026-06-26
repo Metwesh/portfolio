@@ -22,9 +22,10 @@ jobs:
         with:
           node-version: "24"
           check-latest: true
+          corepack: true
 
       - name: Install dependencies 📦
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
 
       - name: Lint & compile 🧹
         run: yarn lint && yarn compile
