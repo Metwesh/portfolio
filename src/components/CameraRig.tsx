@@ -20,10 +20,7 @@ function smoothstep(t: number) {
   return t * t * (3 - 2 * t);
 }
 
-/**
- * Scroll-driven camera that moves through the universe as the user scrolls.
- * Reads scrollStore.progress directly (no props, no re-renders).
- */
+// No props — reads scrollStore.progress directly to avoid React re-renders
 export function CameraRig({ mouse }: CameraRigProps) {
   const { camera } = useThree();
   const cam = camera as ThreePerspectiveCamera;
@@ -34,7 +31,6 @@ export function CameraRig({ mouse }: CameraRigProps) {
   useFrame(() => {
     const progress = scrollStore.progress;
 
-    // Find surrounding waypoints
     const waypoints = CAMERA_WAYPOINTS;
     let prev = waypoints[0];
     let next = waypoints[waypoints.length - 1];
@@ -55,7 +51,6 @@ export function CameraRig({ mouse }: CameraRigProps) {
     const localT = span > 0 ? (progress - prev.progress) / span : 0;
     const t = smoothstep(Math.max(0, Math.min(1, localT)));
 
-    // Target position and lookAt interpolated between waypoints
     _targetPos.lerpVectors(prev.position, next.position, t);
     _targetLookAt.lerpVectors(prev.lookAt, next.lookAt, t);
 
@@ -69,7 +64,6 @@ export function CameraRig({ mouse }: CameraRigProps) {
       _targetLookAt.y = _targetLookAt.y * (1 - lw) + -1 * lw;
     }
 
-    // Add mouse parallax on top of the waypoint position
     _targetPos.x += mouse.current.x * 1.5;
     _targetPos.y += mouse.current.y * 0.7;
 

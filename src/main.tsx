@@ -28,7 +28,6 @@ if (mixpanelToken && mixpanelHost) {
           let userId = localStorage.getItem(storageKey);
 
           if (!userId) {
-            // Generate a unique ID based on timestamp and random string
             userId = `user_${Date.now()}_${Math.random()
               .toString(36)
               .substring(2, 15)}`;
@@ -38,11 +37,9 @@ if (mixpanelToken && mixpanelHost) {
           return userId;
         };
 
-        // Identify the user with Mixpanel
         const userId = getUserId();
         mixpanel.identify(userId);
 
-        // Fetch IP address and set user properties
         const ipController = new AbortController();
         const ipTimeout = setTimeout(() => ipController.abort(), 2000);
         fetch("https://api.ipify.org?format=json", {

@@ -2,12 +2,10 @@ import "@testing-library/jest-dom";
 import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
 
-// Cleanup after each test
 afterEach(() => {
   cleanup();
 });
 
-// Mock window.matchMedia
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
@@ -22,7 +20,6 @@ Object.defineProperty(window, "matchMedia", {
   })),
 });
 
-// Mock IntersectionObserver
 // biome-ignore lint/suspicious/noExplicitAny: Testing purposes
 (globalThis as any).IntersectionObserver = class IntersectionObserver {
   root = null;
@@ -36,7 +33,6 @@ Object.defineProperty(window, "matchMedia", {
   unobserve() {}
 };
 
-// Mock ResizeObserver
 // biome-ignore lint/suspicious/noExplicitAny: Testing purposes
 (globalThis as any).ResizeObserver = class ResizeObserver {
   disconnect() {}

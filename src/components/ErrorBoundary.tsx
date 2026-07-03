@@ -11,9 +11,6 @@ interface State {
   error?: Error;
 }
 
-/**
- * ErrorBoundary component to catch React errors and display fallback UI
- */
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -25,11 +22,9 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to console in development
     if (import.meta.env.DEV) {
       console.error("ErrorBoundary caught an error:", error, errorInfo);
     }
-    // In production, you could send to an error tracking service like Sentry
   }
 
   render() {

@@ -168,7 +168,7 @@ export function TechBox({
       rotationIntensity={1}
       floatIntensity={1}
       position={[0, 0, 0.05]}
-      floatingRange={[0.25, 0.25]}
+      floatingRange={[-0.1, 0.1]}
     >
       <mesh
         ref={meshRef}

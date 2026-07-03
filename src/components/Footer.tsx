@@ -21,8 +21,8 @@ export function Footer() {
       <p>
         <span>&copy;&nbsp;{new Date().getFullYear()}&nbsp;</span>
         <a
-          href="#"
-          aria-label="scroll-to-top"
+          href="#scroll-section"
+          aria-label="Scroll to top"
           className="inline-block font-semibold text-cyan-400 transition-colors hover:text-cyan-300 hover:underline focus-visible:text-cyan-300 focus-visible:underline focus-visible:outline-offset-2"
         >
           Mohamed H. Aly

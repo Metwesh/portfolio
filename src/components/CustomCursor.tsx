@@ -43,7 +43,7 @@ export function CustomCursor() {
     const setPointerState = (next: boolean) => {
       if (next === isPointer) return;
       isPointer = next;
-      dot.style.opacity = isPointer ? "0" : "1";
+      dot.style.opacity = `${isPointer ? 0 : 1}`;
       ring.style.borderColor = isPointer
         ? "rgba(255,255,255,0.95)"
         : "rgba(255,255,255,0.4)";

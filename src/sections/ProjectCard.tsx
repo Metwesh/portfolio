@@ -63,7 +63,7 @@ export const ProjectCard = forwardRef<HTMLElement, ProjectCardProps>(
                     href: project.link,
                     target: "_blank",
                     rel: "noopener noreferrer",
-                    "aria-label": project.name,
+                    "aria-label": `${project.name} — opens in new tab`,
                   }
                 : {})}
             >

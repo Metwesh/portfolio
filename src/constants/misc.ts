@@ -40,6 +40,7 @@ const accentColors = {
   cyan: "#00eaff",
   violet: "#7c3aed",
   red: "#ef4444",
+  lightRed: "#f87171",
   yellow: "#fde047",
   teal: "#14b8a6",
   indigo: "#6366f1",

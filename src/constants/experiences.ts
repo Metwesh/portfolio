@@ -1,14 +1,45 @@
-import { actLogo, sideupWhiteLogo, tahLogo } from "../assets";
+import { actLogo, eAndLogo, sideupWhiteLogo, tahLogo } from "../assets";
 import { accentColors } from "./misc";
 
 export const experiences = [
+  {
+    title: "Senior Software Developer",
+    company: "E& (Etisalat UAE)",
+    abbreviation: "E&",
+    link: "https://www.eand.com/",
+    icon: eAndLogo,
+    date: "Dec 2025 - Present",
+    color: accentColors.red,
+    points: [
+      {
+        title: "Portal modernization",
+        subtitle:
+          "Led migration of a 15-year-old Java Server Faces CIM portal to React with micro-frontend architecture, each module backed by a dedicated BFF microservice.",
+      },
+      {
+        title: "Component library overhaul",
+        subtitle:
+          "Shrunk a bloated internal component library from 50 MB to under 5 MB by eliminating redundancy and dead code, preserving 100% of original functionality.",
+      },
+      {
+        title: "Algorithm optimization",
+        subtitle:
+          "Optimized cell selection logic from O(n) to O(1), replacing linear scans with direct index lookups in interactive data grids.",
+      },
+      {
+        title: "Technical leadership",
+        subtitle:
+          "Drove React adoption within a team transitioning from a legacy JSF codebase, establishing patterns and standards that accelerated delivery across all micro-frontend modules.",
+      },
+    ],
+  },
   {
     title: "Frontend Engineer",
     company: "The Address Holding",
     abbreviation: "TAH",
     link: "https://theaddressholding.com/",
     icon: tahLogo,
-    date: "Nov 2024 - Present",
+    date: "Nov 2024 - Dec 2025",
     color: accentColors.yellow,
     points: [
       {

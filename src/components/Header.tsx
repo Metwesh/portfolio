@@ -104,7 +104,7 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
           </svg>
           <span
             className={cn(
-              "bg-linear-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text font-extrabold text-2xl text-transparent tracking-tight drop-shadow-lg transition-opacity delay-500 duration-700 group-focus-visible:opacity-100 group-focus-visible:delay-0 group-focus-visible:duration-300 max-md:hidden md:text-3xl",
+              "bg-linear-to-r from-cyan-400 via-blue-400 to-fuchsia-500 bg-clip-text font-extrabold text-2xl text-transparent tracking-tight drop-shadow-lg transition-opacity delay-500 duration-700 group-hover:opacity-100 group-hover:delay-0 group-hover:duration-300 group-focus-visible:opacity-100 group-focus-visible:delay-0 group-focus-visible:duration-300 max-md:hidden md:text-3xl",
               headerBg ? "opacity-100" : "opacity-0",
             )}
           >
@@ -116,9 +116,10 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
         <button
           type="button"
           ref={menuButtonRef}
-          className="flex size-10 flex-col items-center justify-center md:hidden"
+          className="flex size-11 flex-col items-center justify-center md:hidden"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
           onClick={handleMenuOpen}
         >
           <span

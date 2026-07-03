@@ -4,8 +4,10 @@ import { SectionHeading } from "../components/SectionHeading";
 import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { experiences } from "../constants/experiences";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 
 export function ExperienceSection() {
+  const prefersReducedMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const glowDotRef = useRef<HTMLDivElement>(null);
@@ -24,6 +26,14 @@ export function ExperienceSection() {
     if (!section || !line) return;
 
     const cards = cardRefs.current.filter(Boolean);
+
+    if (prefersReducedMotion) {
+      line.style.clipPath = "inset(0 0 0% 0)";
+      for (const card of cards) {
+        if (card) card.style.opacity = "1";
+      }
+      return;
+    }
 
     let lineTween: ReturnType<typeof gsap.fromTo> | null = null;
     let cardTweens: ReturnType<typeof gsap.fromTo>[] = [];
@@ -88,7 +98,7 @@ export function ExperienceSection() {
         t.kill();
       }
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   return (
     <section

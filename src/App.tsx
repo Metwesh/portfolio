@@ -40,6 +40,12 @@ export default function App() {
     const loadingScreen = document.getElementById("loading-screen");
     if (!loadingScreen) return;
 
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      loadingScreen.remove();
+      document.dispatchEvent(new CustomEvent("app:ready"));
+      return;
+    }
+
     const tl = gsap.timeline({
       onComplete: () => {
         loadingScreen.remove();
@@ -104,6 +110,14 @@ export default function App() {
 
   return (
     <>
+      {/* Skip-to-content: visible only on keyboard focus */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-semibold focus:text-black focus:shadow-lg focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
       <CustomCursor />
 
       {/* Single unified 3D universe — fixed behind everything */}

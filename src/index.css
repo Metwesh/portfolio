@@ -87,13 +87,10 @@
 
   /* Global focus styles */
   *:focus-visible {
-    @apply rounded-md ring-2 ring-white outline-none;
-    box-shadow:
-      0 0 0 3px rgba(255, 255, 255, 0.8),
-      0 0 20px rgba(255, 255, 255, 0.6);
-    transition:
-      box-shadow 0.2s ease-in-out,
-      outline 0.2s ease-in-out;
+    outline: 2px solid rgb(34 211 238); /* cyan-400 */
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+    box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2);
   }
 
   /* Lenis requires native smooth scroll to be off */

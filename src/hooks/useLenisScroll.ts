@@ -4,12 +4,6 @@ import { useEffect, useState } from "react";
 import { lenisInstance } from "../lib/lenisInstance";
 import { scrollStore } from "../stores/scrollStore";
 
-/**
- * Initializes Lenis smooth scroll with its own RAF loop and keeps
- * scrollStore + GSAP ScrollTrigger in sync.
- *
- * Returns scrollY (throttled state for Header re-renders).
- */
 export function useLenisScroll() {
   const [scrollY, setScrollY] = useState(0);
 

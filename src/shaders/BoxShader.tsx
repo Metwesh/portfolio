@@ -26,7 +26,6 @@ const processTexture = (
   texture: ThreeTexture,
   cacheKey: string,
 ): ThreeTexture => {
-  // Return cached texture if available
   if (textureCache.has(cacheKey)) {
     return textureCache.get(cacheKey) ?? texture;
   }
@@ -77,12 +76,10 @@ export default function BoxShader(props: {
   isHovered?: boolean;
   isDimmed?: boolean;
 }) {
-  // Load the decals & backgrounds
   const rawDecalTexture = useLoader(ThreeTextureLoader, props.data.icon);
   const rawBackgroundTexture = useLoader(ThreeTextureLoader, boxBg);
   const rawWipTexture = useLoader(ThreeTextureLoader, WIP);
 
-  // Process textures with global caching and iOS detection
   const decalTexture = useMemo(
     () => processTexture(rawDecalTexture, props.data.icon),
     [rawDecalTexture, props.data.icon],
@@ -96,10 +93,6 @@ export default function BoxShader(props: {
     [rawWipTexture],
   );
 
-  // Define the options for the fog effect in the shader.
-  // The color is determined by the first argument in FOG_ARGUMENTS. If it's a string, it's assumed to be a color and is converted to an RGB array. If it's not a string, a default color of "#202025" is used.
-  // The near and far distances for the fog are determined by the second and third arguments in FOG_ARGUMENTS, respectively.
-  // Memoize fog options to avoid recreating on every render
   const fogOptions = useMemo(
     () => ({
       color:
@@ -112,13 +105,7 @@ export default function BoxShader(props: {
     [],
   );
 
-  // Define the uniforms for the shader. These are the variables that can be accessed from both the vertex and fragment shaders.
-  // decalTexture, backgroundTexture, and wipTexture are the textures used in the shader.
-  // useWipTexture is a boolean indicating whether to use the wipTexture.
-  // lightPosition and lightColor define the position and color of the light in the shader.
-  // fogColor, fogNear, and fogFar are used for fog calculations in the shader.
-  // Memoize shader material to avoid recreating on every render (CRITICAL for preventing memory leaks)
-  // Note: React Compiler warning is a false positive - we need ALL these dependencies for WebGL
+  // Recreating material each frame leaks WebGL memory
   // biome-ignore lint/correctness/useExhaustiveDependencies: The uniform is updated via useEffect below for better performance
   const decalMaterial = useMemo(() => {
     // Define the uniforms for the shader - initialize with actual textures for iOS compatibility
@@ -135,7 +122,6 @@ export default function BoxShader(props: {
       glowIntensity: { value: props.isHovered ? 1.5 : 1.0 },
     };
 
-    // Define the decal shader
     const decalShader: ThreeShaderMaterialParameters = {
       uniforms: decalShaderUniforms,
       vertexShader: `
@@ -183,7 +169,7 @@ export default function BoxShader(props: {
           vec4 texColor = texture2D(decalTexture, clampedUv);
           vec4 bgColor = texture2D(backgroundTexture, clampedUv);
           float lambertian = max(dot(normalize(vNormal), normalize(vLightDirection)), 0.0);
-          vec3 lightEffect = lightColor * lambertian;
+          vec3 lightEffect = lightColor * max(lambertian, 0.12);
           vec3 color = mix(bgColor.rgb, texColor.rgb, texColor.a);
           if (useWipTexture) {
             vec4 wipColor = texture2D(wipTexture, clampedUv);
@@ -196,7 +182,6 @@ export default function BoxShader(props: {
       `,
     };
 
-    // Create and return the shader material
     return new ThreeShaderMaterial({
       uniforms: decalShader.uniforms,
       vertexShader: decalShader.vertexShader,
@@ -204,18 +189,15 @@ export default function BoxShader(props: {
       transparent: false,
     });
   }, [
-    // Include textures in dependencies so material recreates with correct textures
-    // This ensures iOS gets the right textures from the start
+    // Textures in deps: material must recreate with correct textures on iOS
     decalTexture,
     backgroundTexture,
     wipTexture,
     props.data?.wip,
     fogOptions,
-    // Note: props.isHovered is intentionally excluded to avoid recreating material on hover
-    // The uniform is updated via useEffect below for better performance
+    // isHovered excluded — updated via useEffect to avoid material recreation
   ]);
 
-  // Update glow intensity when hover/dim state changes
   useEffect(() => {
     if (decalMaterial.uniforms.glowIntensity)
       decalMaterial.uniforms.glowIntensity.value = props.isDimmed
@@ -225,7 +207,7 @@ export default function BoxShader(props: {
           : 1.0;
   }, [props.isHovered, props.isDimmed, decalMaterial]);
 
-  // Dispose of material on unmount to prevent memory leaks
+  // Prevent WebGL memory leak on unmount
   useEffect(() => {
     return () => {
       decalMaterial.dispose();

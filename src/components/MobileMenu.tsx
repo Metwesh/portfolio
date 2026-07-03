@@ -57,6 +57,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
       ref={dialogRef}
       id="mobile-menu"
       tabIndex={-1}
+      aria-modal="true"
       aria-label="Mobile navigation menu"
       className={cn(
         "fixed inset-0 z-10 m-0 flex h-svh max-h-none w-screen max-w-none flex-col items-center justify-center gap-8 border-0 bg-black/80 p-0 font-bold text-2xl text-white transition-[opacity,transform,backdrop-filter] duration-500 md:hidden",

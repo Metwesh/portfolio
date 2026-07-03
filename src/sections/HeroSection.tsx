@@ -157,7 +157,7 @@ export function HeroSection() {
           <span className="block overflow-hidden">
             <span
               ref={line1Ref}
-              className="block animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-cyan-300 via-blue-400 to-fuchsia-500 bg-clip-text text-transparent motion-reduce:opacity-0"
+              className="block animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-cyan-300 via-blue-400 to-fuchsia-500 bg-clip-text text-transparent opacity-0 motion-reduce:animate-none motion-reduce:opacity-100"
             >
               Mohamed
             </span>
@@ -165,7 +165,7 @@ export function HeroSection() {
           <span className="block overflow-hidden">
             <span
               ref={line2Ref}
-              className="block text-white motion-reduce:opacity-0"
+              className="block text-white opacity-0 motion-reduce:opacity-100"
             >
               H. Aly
             </span>
@@ -173,7 +173,7 @@ export function HeroSection() {
           <span className="block overflow-hidden">
             <span
               ref={line3Ref}
-              className="block animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-fuchsia-400 via-blue-400 to-cyan-300 bg-clip-text pb-2 text-transparent motion-reduce:opacity-0"
+              className="block animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-fuchsia-400 via-blue-400 to-cyan-300 bg-clip-text pb-2 text-transparent opacity-0 motion-reduce:animate-none motion-reduce:opacity-100"
             >
               builds things.
             </span>
@@ -183,14 +183,14 @@ export function HeroSection() {
         {/* Tagline */}
         <p
           ref={subtitleRef}
-          className="mb-12 max-w-lg text-pretty text-white/60 text-xl leading-relaxed motion-reduce:opacity-0"
+          className="mb-12 max-w-lg text-pretty text-white/60 text-xl leading-relaxed opacity-0 motion-reduce:opacity-100"
         >
           Crafting mind-bending digital experiences at the intersection of code,
           design, and the third dimension.
         </p>
 
         {/* Scroll cue */}
-        <div ref={scrollCueRef} className="motion-reduce:opacity-0">
+        <div ref={scrollCueRef} className="opacity-0 motion-reduce:opacity-100">
           <ScrollHelper
             href={navLinks[0].href}
             ariaLabel="Scroll to projects"

@@ -48,6 +48,16 @@ export function TagsPopover({
     }
   }, [isOpen]);
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLButtonElement>) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setIsOpen((prev) => !prev);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setIsOpen(false);
+    }
+  }
+
   if (tags.length === 0) return null;
 
   return (
@@ -78,12 +88,9 @@ export function TagsPopover({
               backgroundColor: isOpen ? `${projectColor}20` : "rgba(0,0,0,0.4)",
             }}
             onClick={() => setIsOpen((prev) => !prev)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
-                e.preventDefault();
-                setIsOpen((prev) => !prev);
-              }
-            }}
+            onFocus={() => setIsOpen(true)}
+            onBlur={() => setIsOpen(false)}
+            onKeyDown={handleKeyDown}
             aria-expanded={isOpen}
             aria-label={`Show ${hiddenTags.length} more technologies`}
           >
@@ -93,6 +100,7 @@ export function TagsPopover({
           {/* Popover */}
           <div
             ref={popoverRef}
+            role="tooltip"
             className="absolute bottom-full left-1/2 z-100 -translate-x-1/2 rounded-xl opacity-0"
             style={{ pointerEvents: "none" }}
           >

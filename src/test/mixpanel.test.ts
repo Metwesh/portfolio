@@ -1,7 +1,6 @@
 import mixpanel from "mixpanel-browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock mixpanel
 vi.mock("mixpanel-browser", () => ({
   default: {
     init: vi.fn(),
@@ -16,7 +15,6 @@ describe("Mixpanel Initialization", () => {
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    // Mock localStorage
     const localStorageMock = {
       getItem: vi.fn().mockReturnValue(null),
       setItem: vi.fn(),
@@ -31,7 +29,6 @@ describe("Mixpanel Initialization", () => {
       configurable: true,
     });
 
-    // Mock console.warn
     consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
@@ -44,13 +41,11 @@ describe("Mixpanel Initialization", () => {
     const mockToken = "test-token";
     const mockHost = "https://test-host.com";
 
-    // Mock environment variables
     vi.stubEnv("VITE_MIXPANEL_TOKEN", mockToken);
     vi.stubEnv("VITE_MIXPANEL_HOST", mockHost);
 
     const mockInit = vi.spyOn(mixpanel, "init");
 
-    // Simulate initialization logic
     const mixpanelToken = import.meta.env.VITE_MIXPANEL_TOKEN;
     const mixpanelHost = import.meta.env.VITE_MIXPANEL_HOST;
 
@@ -72,13 +67,11 @@ describe("Mixpanel Initialization", () => {
   });
 
   it("should not initialize Mixpanel when environment variables are missing", () => {
-    // Mock missing environment variables
     vi.stubEnv("VITE_MIXPANEL_TOKEN", undefined);
     vi.stubEnv("VITE_MIXPANEL_HOST", undefined);
 
     const mockInit = vi.spyOn(mixpanel, "init");
 
-    // Simulate initialization logic
     const mixpanelToken = import.meta.env.VITE_MIXPANEL_TOKEN;
     const mixpanelHost = import.meta.env.VITE_MIXPANEL_HOST;
 
@@ -103,7 +96,6 @@ describe("Mixpanel Initialization", () => {
   it("should generate a new user ID when not in localStorage", () => {
     const storageKey = "portfolio-user-id";
 
-    // Simulate getUserId logic
     const getUserId = (): string => {
       let userId = localStorage.getItem(storageKey);
 
@@ -125,12 +117,10 @@ describe("Mixpanel Initialization", () => {
     const storageKey = "portfolio-user-id";
     const existingUserId = "user_1234567890_abcdefg";
 
-    // Pre-populate localStorage
     (localStorage.getItem as ReturnType<typeof vi.fn>).mockReturnValue(
       existingUserId,
     );
 
-    // Simulate getUserId logic
     const getUserId = (): string => {
       let userId = localStorage.getItem(storageKey);
 
