@@ -318,13 +318,13 @@
         }
       }
     </style>
-    <script type="module" crossorigin src="/portfolio/assets/index-ByKdQro2.js"></script>
+    <script type="module" crossorigin src="/portfolio/assets/index-BTzLyMKT.js"></script>
     <link rel="modulepreload" crossorigin href="/portfolio/assets/rolldown-runtime-Dw2cE7zH.js">
     <link rel="modulepreload" crossorigin href="/portfolio/assets/three-a_7eaCHR.js">
     <link rel="modulepreload" crossorigin href="/portfolio/assets/gsap-y8fE1u24.js">
     <link rel="modulepreload" crossorigin href="/portfolio/assets/lenis-DVhxxnjP.js">
     <link rel="modulepreload" crossorigin href="/portfolio/assets/vendor-D5D9VB3n.js">
-    <link rel="stylesheet" crossorigin href="/portfolio/assets/index-BMCEqMs0.css">
+    <link rel="stylesheet" crossorigin href="/portfolio/assets/index-5bibbMTO.css">
   </head>
   <body>
     <!-- Loading screen -->
@@ -391,7 +391,13 @@
 
     <div id="root"></div>
     <script>
-      if ("serviceWorker" in navigator) {
+      // Skip registration in local dev — the SW now actively caches
+      // responses, which would fight the dev server's HMR/fresh bundles.
+      if (
+        "serviceWorker" in navigator &&
+        location.hostname !== "localhost" &&
+        location.hostname !== "127.0.0.1"
+      ) {
         navigator.serviceWorker.register("/portfolio/sw.js");
       }
     </script>
