@@ -268,7 +268,11 @@ export function ProjectsSection() {
       <div className="sticky top-0 h-svh overflow-hidden">
         {/* Section label + counter */}
         <div className="pointer-events-none absolute top-30 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 md:top-20">
-          <SectionHeading id="projects-heading" className="pb-1" isIntersecting>
+          <SectionHeading
+            id="projects-heading"
+            className="pe-1 pb-1"
+            isIntersecting
+          >
             Projects
           </SectionHeading>
           <span className="flex items-center whitespace-pre font-mono text-sm text-white/60 tabular-nums">

@@ -12,6 +12,17 @@ import { qualityTier } from "../utils/performance";
 
 const ENABLE_SHADOWS = qualityTier !== "low";
 
+// Entrance/exit: boxes fly in from (or out to) wherever they last were,
+// staggered by index so the sphere visibly assembles/disperses instead of
+// fading as a rigid blob. Same timing shape both directions.
+const TRANSITION_TRAVEL_FRAMES = 26;
+const TRANSITION_STAGGER_FRAMES = 3;
+const TRANSITION_STAGGER_MOD = 14;
+const MIN_SCALE = 0.05;
+// Exit target = current sphere position pushed further out along the same
+// radial direction — away from the centerpiece, into open space.
+const EXIT_DISTANCE_MULTIPLIER = 3;
+
 interface TechBoxProps {
   data: {
     icon: string;
@@ -24,6 +35,8 @@ interface TechBoxProps {
   animateTo: ThreeVector3;
   isInView: boolean;
   isSelected?: boolean;
+  index: number;
+  reducedMotion?: boolean;
 }
 
 export function TechBox({
@@ -34,6 +47,8 @@ export function TechBox({
   animateTo,
   isInView,
   isSelected,
+  index,
+  reducedMotion,
 }: TechBoxProps) {
   const [meshRotation] = useState(
     () => new ThreeEuler(Math.random(), Math.random(), Math.random()),
@@ -46,10 +61,15 @@ export function TechBox({
   const rotationSpeed = useRef(0);
   // Reuse Vector3 object instead of creating new one every frame
   const targetScaleRef = useRef(new ThreeVector3());
-  // Exit animation: progress 0→1, boxes drift outward from their sphere position
-  const exitProgressRef = useRef(0);
+  // Exit animation: staggered fly-out, boxes drift away from their sphere position
+  const exitFrameRef = useRef(0);
   const exitStartPosRef = useRef(new ThreeVector3());
   const exitTargetPosRef = useRef(new ThreeVector3());
+  const exitStartScaleRef = useRef(1);
+
+  // Entry animation: staggered fly-in from wherever the box last was, eased in.
+  const entryFrameRef = useRef(0);
+  const entryStartPosRef = useRef(new ThreeVector3());
 
   // Track touch/pointer events to distinguish between tap and drag
   const pointerDown = useRef<{ x: number; y: number; time: number } | null>(
@@ -118,46 +138,107 @@ export function TechBox({
       meshRef.current.rotation.x += rotationSpeed.current;
       meshRef.current.rotation.y += rotationSpeed.current;
 
-      // Animate position to target
       const targetPos = animateTo || position;
-      meshRef.current.position.lerp(targetPos, 0.15);
 
       // Scales boxes up to custom scale if provided, else hover bump, else default 1
       const scaleValue =
         isSelected && isHovered
           ? (scale ?? 1) * 0.88
           : (scale ?? (isHovered ? 1.18 : 1));
-      targetScaleRef.current.set(scaleValue, scaleValue, scaleValue);
-      meshRef.current.scale.lerp(targetScaleRef.current, 0.08);
+
+      const entryDelayFrames = reducedMotion
+        ? 0
+        : (index % TRANSITION_STAGGER_MOD) * TRANSITION_STAGGER_FRAMES;
+      const entryDone =
+        reducedMotion ||
+        entryFrameRef.current - entryDelayFrames >= TRANSITION_TRAVEL_FRAMES;
+
+      if (!entryDone) {
+        // On the first frame in view, snapshot wherever the box currently sits
+        // as the fly-in start point (origin on first mount, exit position on re-entry).
+        if (entryFrameRef.current === 0) {
+          entryStartPosRef.current.copy(meshRef.current.position);
+        }
+        entryFrameRef.current += 1;
+
+        const t = Math.max(
+          0,
+          Math.min(
+            1,
+            (entryFrameRef.current - entryDelayFrames) /
+              TRANSITION_TRAVEL_FRAMES,
+          ),
+        );
+        // Ease-out cubic — fast start, gentle settle into place
+        const eased = 1 - (1 - t) ** 3;
+
+        meshRef.current.position.lerpVectors(
+          entryStartPosRef.current,
+          targetPos,
+          eased,
+        );
+        const currentScale = MIN_SCALE + (scaleValue - MIN_SCALE) * eased;
+        meshRef.current.scale.setScalar(currentScale);
+      } else {
+        // Exit cascade replays fresh on the next out-of-view stretch.
+        exitFrameRef.current = 0;
+
+        // Steady state: smooth follow for target-position/scale changes (e.g. selection).
+        meshRef.current.position.lerp(targetPos, 0.15);
+        targetScaleRef.current.set(scaleValue, scaleValue, scaleValue);
+        meshRef.current.scale.lerp(targetScaleRef.current, 0.08);
+      }
 
       // Self-rotation
       meshRef.current.rotation.x += 0.002;
       meshRef.current.rotation.y -= 0.002;
     } else {
-      // Animate OUT: boxes drift outward (away from group center) and shrink.
-      // On the first frame of exit, snapshot start pos and compute an outward target
-      // (2× the current sphere position — same direction, further out).
-      if (exitProgressRef.current === 0) {
-        exitStartPosRef.current.copy(meshRef.current.position);
-        exitTargetPosRef.current
-          .copy(meshRef.current.position)
-          .multiplyScalar(2.5);
-      }
-      exitProgressRef.current = Math.min(exitProgressRef.current + 0.003, 1);
-      // Cubic ease-in so motion starts imperceptibly slow then sweeps outward
-      const t = exitProgressRef.current;
-      const eased = t * t * t;
-      meshRef.current.position.lerpVectors(
-        exitStartPosRef.current,
-        exitTargetPosRef.current,
-        eased,
-      );
-      targetScaleRef.current.set(0.05, 0.05, 0.05);
-      meshRef.current.scale.lerp(targetScaleRef.current, 0.004 + eased * 0.1);
-    }
+      // Reset entry cascade so the next time this box comes into view it replays.
+      entryFrameRef.current = 0;
 
-    // Reset exit progress when back in view so next entry/exit cycle starts fresh
-    if (isInView) exitProgressRef.current = 0;
+      const exitDelayFrames = reducedMotion
+        ? 0
+        : (index % TRANSITION_STAGGER_MOD) * TRANSITION_STAGGER_FRAMES;
+      const exitDone =
+        reducedMotion ||
+        exitFrameRef.current - exitDelayFrames >= TRANSITION_TRAVEL_FRAMES;
+
+      if (!exitDone) {
+        // On the first frame of exit, snapshot start pos/scale and push the
+        // target further out along the same radial direction — away from
+        // the centerpiece into open space, not back toward it.
+        if (exitFrameRef.current === 0) {
+          exitStartPosRef.current.copy(meshRef.current.position);
+          exitTargetPosRef.current
+            .copy(meshRef.current.position)
+            .multiplyScalar(EXIT_DISTANCE_MULTIPLIER);
+          exitStartScaleRef.current = meshRef.current.scale.x;
+        }
+        exitFrameRef.current += 1;
+
+        const t = Math.max(
+          0,
+          Math.min(
+            1,
+            (exitFrameRef.current - exitDelayFrames) / TRANSITION_TRAVEL_FRAMES,
+          ),
+        );
+        // Ease-out cubic — same snappy feel as the entrance, mirrored outward
+        const eased = 1 - (1 - t) ** 3;
+
+        meshRef.current.position.lerpVectors(
+          exitStartPosRef.current,
+          exitTargetPosRef.current,
+          eased,
+        );
+        const currentScale =
+          exitStartScaleRef.current +
+          (MIN_SCALE - exitStartScaleRef.current) * eased;
+        meshRef.current.scale.setScalar(currentScale);
+      }
+      // Once done, the box sits parked offscreen — no further work needed
+      // until it re-enters view.
+    }
 
     prevCameraPosition.current.copy(camera.position);
   });

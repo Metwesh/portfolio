@@ -39,7 +39,11 @@ const _techDrag = {
 };
 
 // ─── Tech Constellation ──────────────────────────────────────────────────────
-function TechConstellation() {
+function TechConstellation({
+  prefersReducedMotion,
+}: {
+  prefersReducedMotion: boolean;
+}) {
   // React state mirror — forces re-render so TechBox.isInView animates in.
   const [isActive, setIsActive] = useState(false);
   useEffect(() => {
@@ -92,7 +96,8 @@ function TechConstellation() {
   useFrame(() => {
     if (!groupRef.current) return;
     const inView = scrollStore.techSectionActive;
-    visibilityRef.current += ((inView ? 1 : 0) - visibilityRef.current) * 0.012;
+    // Fast both ways — matches the staggered box entry/exit cascade timing.
+    visibilityRef.current += ((inView ? 1 : 0) - visibilityRef.current) * 0.05;
     groupRef.current.scale.setScalar(visibilityRef.current);
     groupRef.current.position.y = scrollStore.mLogoY;
     groupRef.current.position.z = scrollStore.mLogoZ;
@@ -172,6 +177,7 @@ function TechConstellation() {
           return (
             <TechBox
               key={`${technologies[index].name}-${index}`}
+              index={index}
               position={targetPosition}
               data={technologies[index]}
               onClick={() =>
@@ -181,6 +187,7 @@ function TechConstellation() {
               isInView={isActive}
               animateTo={targetPosition}
               isSelected={isSelected}
+              reducedMotion={prefersReducedMotion}
             />
           );
         })}
@@ -366,7 +373,7 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
 
           <AnimatedStars />
           <MLogo />
-          <TechConstellation />
+          <TechConstellation prefersReducedMotion={prefersReducedMotion} />
           <SceneReadySignal onReady={onReady} />
         </Suspense>
 
