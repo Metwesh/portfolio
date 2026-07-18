@@ -122,7 +122,7 @@ export function TechStacksSection() {
           {/* Drag hint */}
           <div className="relative h-6 w-full">
             <p
-              className="absolute inset-0 text-center text-white/25 text-xs uppercase tracking-widest transition-all duration-700"
+              className="absolute inset-0 text-center text-white/60 text-xs uppercase tracking-widest transition-all duration-700"
               style={{
                 transitionDelay: "150ms",
                 opacity: isIntersecting && !sphereRotated ? 1 : 0,
@@ -135,7 +135,7 @@ export function TechStacksSection() {
               Drag the sphere to explore
             </p>
             <p
-              className="absolute inset-0 text-center text-white/25 text-xs uppercase tracking-widest transition-all duration-700"
+              className="absolute inset-0 text-center text-white/60 text-xs uppercase tracking-widest transition-all duration-700"
               style={{
                 transitionDelay: "150ms",
                 opacity:
@@ -151,7 +151,7 @@ export function TechStacksSection() {
           </div>
 
           {/* Category row — staggered */}
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-medium text-white/20 text-xs uppercase tracking-widest">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-medium text-white/60 text-xs uppercase tracking-widest">
             {SKILL_CATEGORIES.map((cat, i, arr) => (
               <span
                 key={cat}

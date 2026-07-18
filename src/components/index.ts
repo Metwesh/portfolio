@@ -6,7 +6,7 @@ export { Footer } from "./Footer";
 export { Header } from "./Header";
 export { MLogo } from "./MLogo";
 export { MobileMenu } from "./MobileMenu";
-export { NotFound } from "./NotFound";
+export { Odometer } from "./Odometer";
 export { ScrollHelper } from "./ScrollHelper";
 export { SectionHeading } from "./SectionHeading";
 export { ShootingStars } from "./ShootingStars";

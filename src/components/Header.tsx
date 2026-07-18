@@ -61,6 +61,17 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
     };
   }, [menuOpen, handleNavClick]);
 
+  // MobileMenu's <dialog> uses show() (not showModal()), so the browser
+  // doesn't make background content inert on its own — do it manually so
+  // aria-modal="true" holds up for screen-reader swipe/virtual-cursor nav,
+  // not just Tab. Header itself (this component) stays untouched so the
+  // hamburger/X toggle remains reachable to close the menu.
+  useEffect(() => {
+    const mainEl = document.getElementById("main-content");
+    mainEl?.toggleAttribute("inert", menuOpen);
+    return () => mainEl?.removeAttribute("inert");
+  }, [menuOpen]);
+
   return (
     <HeaderShell
       className={cn(

@@ -385,7 +385,13 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      if ("serviceWorker" in navigator) {
+      // Skip registration in local dev — the SW now actively caches
+      // responses, which would fight the dev server's HMR/fresh bundles.
+      if (
+        "serviceWorker" in navigator &&
+        location.hostname !== "localhost" &&
+        location.hostname !== "127.0.0.1"
+      ) {
         navigator.serviceWorker.register("%BASE_URL%sw.js");
       }
     </script>

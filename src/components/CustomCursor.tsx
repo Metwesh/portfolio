@@ -26,11 +26,28 @@ export function CustomCursor() {
   const ringRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isMobile || prefersReducedMotion) return;
+    if (isMobile) return;
 
     const dot = dotRef.current;
+    if (!dot) return;
+
+    // Reduced motion: keep a minimal position-tracking dot only — no ring, no
+    // elementFromPoint hit-testing, no hover affordance. The alternative
+    // (rendering nothing here) leaves these users with zero visible cursor,
+    // since native cursor is also suppressed by the global cursor:none rule.
+    if (prefersReducedMotion) {
+      const handleMouseMoveStatic = (e: MouseEvent) => {
+        dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      };
+      window.addEventListener("mousemove", handleMouseMoveStatic, {
+        passive: true,
+      });
+      return () =>
+        window.removeEventListener("mousemove", handleMouseMoveStatic);
+    }
+
     const ring = ringRef.current;
-    if (!dot || !ring) return;
+    if (!ring) return;
 
     let mouseX = 0;
     let mouseY = 0;
@@ -39,6 +56,7 @@ export function CustomCursor() {
     let rafId: number;
     let isPointer = false;
     let canvas3dHovered = false;
+    let ticking = false;
 
     const setPointerState = (next: boolean) => {
       if (next === isPointer) return;
@@ -70,9 +88,17 @@ export function CustomCursor() {
       mouseY = e.clientY;
       dot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
 
-      if (!canvas3dHovered) {
-        const el = document.elementFromPoint(mouseX, mouseY);
-        setPointerState(isInteractiveTarget(el));
+      // elementFromPoint forces a layout hit-test — cap it to once per frame
+      // instead of once per raw mousemove event.
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          if (!canvas3dHovered) {
+            const el = document.elementFromPoint(mouseX, mouseY);
+            setPointerState(isInteractiveTarget(el));
+          }
+        });
       }
     };
 
@@ -94,7 +120,7 @@ export function CustomCursor() {
     };
   }, [isMobile, prefersReducedMotion]);
 
-  if (isMobile || prefersReducedMotion) return null;
+  if (isMobile) return null;
 
   return (
     <>
@@ -104,21 +130,23 @@ export function CustomCursor() {
         style={{ transition: "opacity 150ms ease" }}
         className="pointer-events-none fixed top-0 left-0 z-9999 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
       />
-      <refractive.div
-        ref={ringRef}
-        aria-hidden="true"
-        style={{
-          transition: "border-color 200ms ease, box-shadow 200ms ease",
-        }}
-        refraction={{
-          blur: 0.5,
-          radius: 16,
-          glassThickness: 16,
-          bezelWidth: 32,
-          refractiveIndex: 3,
-        }}
-        className="pointer-events-none fixed top-0 left-0 z-9998 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40"
-      />
+      {!prefersReducedMotion && (
+        <refractive.div
+          ref={ringRef}
+          aria-hidden="true"
+          style={{
+            transition: "border-color 200ms ease, box-shadow 200ms ease",
+          }}
+          refraction={{
+            blur: 0.5,
+            radius: 16,
+            glassThickness: 16,
+            bezelWidth: 32,
+            refractiveIndex: 3,
+          }}
+          className="pointer-events-none fixed top-0 left-0 z-9998 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40"
+        />
+      )}
     </>
   );
 }

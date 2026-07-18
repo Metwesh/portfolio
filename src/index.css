@@ -148,16 +148,21 @@
   }
 }
 
-/* Custom cursor — outside any layer so it beats Tailwind utilities (cursor-pointer etc.) in v4 */
-*,
-*::before,
-*::after {
-  cursor: none;
-}
-input,
-textarea,
-select {
-  cursor: auto;
+/* Custom cursor — outside any layer so it beats Tailwind utilities (cursor-pointer etc.) in v4.
+   Scoped to fine-pointer/hover-capable devices only: touch devices and narrow
+   viewports (real mouse, window < 768px) must keep the native cursor, since
+   CustomCursor.tsx doesn't render anything for them. */
+@media (hover: hover) and (pointer: fine) {
+  *,
+  *::before,
+  *::after {
+    cursor: none;
+  }
+  input,
+  textarea,
+  select {
+    cursor: auto;
+  }
 }
 
 @layer utilities {

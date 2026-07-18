@@ -1,6 +1,7 @@
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { useEffect, useRef, useState } from "react";
+import { Odometer, type OdometerHandle } from "../components/Odometer";
 import { SectionHeading } from "../components/SectionHeading";
 import { TagsPopover } from "../components/TagsPopover";
 import { projects } from "../constants/projects";
@@ -17,7 +18,7 @@ let _wheelDeltaAccum = 0;
 
 export function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const counterRef = useRef<HTMLSpanElement>(null);
+  const odometerRef = useRef<OdometerHandle>(null);
   const nameRef = useRef<HTMLDivElement>(null);
   const descRef = useRef<HTMLParagraphElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -52,6 +53,7 @@ export function ProjectsSection() {
           invalidateOnRefresh: true,
           onRefresh: setHeight,
           onEnter: () => {
+            attachActiveListeners();
             scrollStore.projectSectionActive = true;
             gsap.to([nameRef.current, descRef.current, actionsRef.current], {
               opacity: 1,
@@ -62,6 +64,7 @@ export function ProjectsSection() {
             });
           },
           onLeave: () => {
+            detachActiveListeners();
             scrollStore.projectSectionActive = false;
             const els = [nameRef.current, descRef.current, actionsRef.current];
             gsap.killTweensOf(els);
@@ -74,6 +77,7 @@ export function ProjectsSection() {
             });
           },
           onEnterBack: () => {
+            attachActiveListeners();
             scrollStore.projectSectionActive = true;
             gsap.to([nameRef.current, descRef.current, actionsRef.current], {
               opacity: 1,
@@ -84,6 +88,7 @@ export function ProjectsSection() {
             });
           },
           onLeaveBack: () => {
+            detachActiveListeners();
             scrollStore.projectSectionActive = false;
             const els = [nameRef.current, descRef.current, actionsRef.current];
             gsap.killTweensOf(els);
@@ -103,11 +108,9 @@ export function ProjectsSection() {
             scrollStore.projectProgress = progress;
 
             const idx = Math.round(progress * (projects.length - 1));
-            if (counterRef.current) {
-              counterRef.current.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(projects.length).padStart(2, "0")}`;
-            }
             if (idx !== prevIndexRef.current) {
               prevIndexRef.current = idx;
+              odometerRef.current?.setValue(idx + 1);
               setActiveIndex(idx);
             }
           },
@@ -176,9 +179,30 @@ export function ProjectsSection() {
       _touchLock = null;
     }
 
-    window.addEventListener("wheel", handleWheel, { passive: false });
+    // wheel/touchmove are non-passive (they call preventDefault) — keeping
+    // them attached at the window level for the component's whole lifetime
+    // would block the browser's scroll fast-path site-wide, not just while
+    // this section is pinned. Only attach them for the window the section is
+    // actually active, driven by the ScrollTrigger enter/leave callbacks
+    // above. touchstart/touchend are passive and cheap (early-return only),
+    // so they stay attached for the session.
+    let activeListenersAttached = false;
+    function attachActiveListeners() {
+      if (activeListenersAttached) return;
+      activeListenersAttached = true;
+      window.addEventListener("wheel", handleWheel, { passive: false });
+      window.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+    }
+    function detachActiveListeners() {
+      if (!activeListenersAttached) return;
+      activeListenersAttached = false;
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchmove", handleTouchMove);
+    }
+
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
     window.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     return () => {
@@ -247,11 +271,9 @@ export function ProjectsSection() {
           <SectionHeading id="projects-heading" className="pb-1" isIntersecting>
             Projects
           </SectionHeading>
-          <span
-            ref={counterRef}
-            className="whitespace-pre font-mono text-sm text-white/40 tabular-nums"
-          >
-            01 / {String(projects.length).padStart(2, "0")}
+          <span className="flex items-center whitespace-pre font-mono text-sm text-white/60 tabular-nums">
+            <Odometer ref={odometerRef} digits={2} initialValue={1} />
+            <span>&nbsp;/&nbsp;{String(projects.length).padStart(2, "0")}</span>
           </span>
         </div>
 

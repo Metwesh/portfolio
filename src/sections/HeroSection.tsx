@@ -1,7 +1,8 @@
 import gsap from "gsap";
 import { useEffect, useRef } from "react";
 import { ScrollHelper } from "../components";
-import { navLinks } from "../constants";
+import { INTERSECTION_OBSERVER_CONFIG, navLinks } from "../constants";
+import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
 export function HeroSection() {
@@ -12,7 +13,17 @@ export function HeroSection() {
   const eyebrowRef = useRef<HTMLParagraphElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const scrollCueRef = useRef<HTMLDivElement>(null);
-  const sectionRef = useRef<HTMLElement>(null);
+  // Gates the eyebrow typewriter loop below — paused while Hero is scrolled
+  // out of view instead of ticking forever in the background.
+  const { targetRef: sectionRef, isIntersecting } = useIntersectionObserver({
+    threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
+    rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
+  });
+  const eyebrowIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
+  const eyebrowLoopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const restartTypewriterRef = useRef<(() => void) | null>(null);
 
   // Entrance: wait for loader to finish sliding out, then reveal
   useEffect(() => {
@@ -39,19 +50,20 @@ export function HeroSection() {
     });
     if (eyebrow) eyebrow.textContent = "";
 
-    let loopId: ReturnType<typeof setTimeout> | null = null;
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-
     const typePhrase = (phraseIndex: number) => {
       if (!eyebrow) return;
       const phrase = PHRASES[phraseIndex % PHRASES.length];
       let i = 0;
-      intervalId = setInterval(() => {
+      eyebrowIntervalRef.current = setInterval(() => {
         eyebrow.textContent = phrase.slice(0, ++i);
         if (i >= phrase.length) {
-          if (intervalId) clearInterval(intervalId);
+          if (eyebrowIntervalRef.current)
+            clearInterval(eyebrowIntervalRef.current);
           // Pause then backspace
-          loopId = setTimeout(() => erasePhrase(phrase, phraseIndex), 2200);
+          eyebrowLoopRef.current = setTimeout(
+            () => erasePhrase(phrase, phraseIndex),
+            2200,
+          );
         }
       }, 38);
     };
@@ -59,17 +71,22 @@ export function HeroSection() {
     const erasePhrase = (phrase: string, phraseIndex: number) => {
       if (!eyebrow) return;
       let i = phrase.length;
-      intervalId = setInterval(() => {
+      eyebrowIntervalRef.current = setInterval(() => {
         eyebrow.textContent = phrase.slice(0, --i);
         if (i <= 0) {
-          if (intervalId) clearInterval(intervalId);
+          if (eyebrowIntervalRef.current)
+            clearInterval(eyebrowIntervalRef.current);
           // Brief pause then type next
-          loopId = setTimeout(() => typePhrase(phraseIndex + 1), 400);
+          eyebrowLoopRef.current = setTimeout(
+            () => typePhrase(phraseIndex + 1),
+            400,
+          );
         }
       }, 22);
     };
 
     const start = () => {
+      restartTypewriterRef.current = () => typePhrase(0);
       typePhrase(0);
 
       gsap.fromTo(
@@ -102,12 +119,28 @@ export function HeroSection() {
     document.addEventListener("app:ready", start, { once: true });
     return () => {
       document.removeEventListener("app:ready", start);
-      if (intervalId) clearInterval(intervalId);
-      if (loopId) clearTimeout(loopId);
+      if (eyebrowIntervalRef.current) clearInterval(eyebrowIntervalRef.current);
+      if (eyebrowLoopRef.current) clearTimeout(eyebrowLoopRef.current);
     };
   }, [prefersReducedMotion]);
 
+  // Pause the eyebrow typewriter while Hero is scrolled out of view; resume
+  // from the top of the phrase cycle when it re-enters. No-ops until the
+  // initial app:ready boot has started the loop at least once. The one-shot
+  // headline/subtitle entrance reveal above is untouched — only the eyebrow
+  // interval/timeout chain is gated here.
+  useEffect(() => {
+    if (!restartTypewriterRef.current) return;
+    if (isIntersecting) {
+      restartTypewriterRef.current();
+    } else {
+      if (eyebrowIntervalRef.current) clearInterval(eyebrowIntervalRef.current);
+      if (eyebrowLoopRef.current) clearTimeout(eyebrowLoopRef.current);
+    }
+  }, [isIntersecting]);
+
   // Scroll-driven fade-out via GSAP ScrollTrigger
+  // biome-ignore lint/correctness/useExhaustiveDependencies: sectionRef is a stable ref object, only prefersReducedMotion should retrigger this effect
   useEffect(() => {
     if (prefersReducedMotion) return;
 
@@ -137,7 +170,7 @@ export function HeroSection() {
 
   return (
     <section
-      ref={sectionRef}
+      ref={sectionRef as React.RefObject<HTMLElement>}
       id="scroll-section"
       aria-labelledby="hero-heading"
       className="relative z-10 flex min-h-svh flex-col justify-center px-gutter pt-32 pb-24 sm:px-12 md:px-20 lg:px-32"
