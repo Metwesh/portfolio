@@ -59,8 +59,6 @@ const accentColors = {
 
 const mainLogoPath = "./m-logo/main-logo.gltf";
 
-const storageKey = "portfolio_user_id";
-
 const breakpoints = {
   smallMobile: 640,
   mobile: 768,
@@ -68,11 +66,4 @@ const breakpoints = {
   desktop: 1280,
 } as const;
 
-export {
-  accentColors,
-  breakpoints,
-  mainLogoPath,
-  navLinks,
-  socialLinks,
-  storageKey,
-};
+export { accentColors, breakpoints, mainLogoPath, navLinks, socialLinks };

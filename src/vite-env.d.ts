@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/** biome-ignore-all lint/correctness/noUnusedVariables: Global interface for Vite environment variables */
 
 interface ViteTypeOptions {
   // By adding this line, you can make the type of ImportMetaEnv strict
@@ -8,8 +9,6 @@ interface ViteTypeOptions {
 
 interface ImportMetaEnv {
   readonly VITE_APP_TITLE: string;
-  readonly VITE_MIXPANEL_TOKEN: string;
-  readonly VITE_MIXPANEL_HOST: string;
 }
 
 interface ImportMeta {
