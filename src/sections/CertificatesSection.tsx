@@ -1,9 +1,9 @@
 import { SectionHeading } from "../components/SectionHeading";
-import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
+import { INTERSECTION_OBSERVER_CONFIG, logoGradientStops } from "../constants";
 import { certificates } from "../constants/certificates";
 import { useCardHolographicTilt } from "../hooks/useCardHolographicTilt";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
-import { cn } from "../lib/utils";
+import { cn, GLASS_CARD_CLASS } from "../lib/utils";
 
 const logoFanIds = Array.from({ length: 5 }, (_, i) => `logo-fan-${i}`);
 const tunnelRings = Array.from({ length: 8 }, (_, i) => ({
@@ -30,13 +30,16 @@ function MLLogoCard() {
 
       <div
         ref={cardRef}
-        className="relative flex h-full min-h-52 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-[border-color,box-shadow] duration-500 will-change-transform group-hover:border-white/20 group-hover:shadow-2xl"
+        className={cn(
+          GLASS_CARD_CLASS,
+          "relative flex h-full min-h-52 flex-col items-center justify-center overflow-hidden transition-[border-color,box-shadow] duration-500 will-change-transform group-hover:border-white/20 group-hover:shadow-2xl",
+        )}
         style={{ opacity: 0 }}
       >
         {/* Ambient gradient blobs */}
         <div className="pointer-events-none absolute inset-0 opacity-40">
-          <div className="absolute top-0 right-0 h-64 w-64 translate-x-[20%] -translate-y-[20%] rounded-full bg-linear-to-br from-cyan-400/70 via-blue-500/70 to-purple-600/70 blur-3xl transition-all duration-1000 group-hover:scale-125" />
-          <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-[20%] translate-y-[20%] rounded-full bg-linear-to-tl from-purple-600/50 via-blue-500/50 to-cyan-400/50 blur-3xl transition-all duration-1000 group-hover:scale-125" />
+          <div className="absolute top-0 right-0 h-64 w-64 translate-x-[20%] translate-y-[-20%] rounded-full bg-linear-to-br from-cyan-400/70 via-blue-500/70 to-purple-600/70 blur-3xl transition-all duration-1000 group-hover:scale-125" />
+          <div className="absolute bottom-0 left-0 h-56 w-56 translate-x-[-20%] translate-y-[20%] rounded-full bg-linear-to-tl from-purple-600/50 via-blue-500/50 to-cyan-400/50 blur-3xl transition-all duration-1000 group-hover:scale-125" />
         </div>
 
         {/* Animated border flow */}
@@ -104,9 +107,13 @@ function MLLogoCard() {
                   y2="439"
                   gradientUnits="userSpaceOnUse"
                 >
-                  <stop stopColor="#22D3EE" />
-                  <stop offset="0.5" stopColor="#3B82F6" />
-                  <stop offset="1" stopColor="#A855F7" />
+                  {logoGradientStops.map((stop) => (
+                    <stop
+                      key={stop.color}
+                      offset={stop.offset}
+                      stopColor={stop.color}
+                    />
+                  ))}
                 </linearGradient>
               </defs>
             </svg>
@@ -131,9 +138,13 @@ function MLLogoCard() {
                 y2="439"
                 gradientUnits="userSpaceOnUse"
               >
-                <stop stopColor="#22D3EE" />
-                <stop offset="0.5" stopColor="#3B82F6" />
-                <stop offset="1" stopColor="#A855F7" />
+                {logoGradientStops.map((stop) => (
+                  <stop
+                    key={stop.color}
+                    offset={stop.offset}
+                    stopColor={stop.color}
+                  />
+                ))}
               </linearGradient>
             </defs>
           </svg>
@@ -175,7 +186,8 @@ function CertCard({
       rel="noopener noreferrer"
       data-magnetic
       className={cn(
-        "group relative flex min-h-52 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl will-change-transform md:p-8",
+        GLASS_CARD_CLASS,
+        "group relative flex min-h-52 flex-col overflow-hidden p-6 will-change-transform md:p-8",
         isFeatured ? "md:col-span-2" : "md:col-span-1",
       )}
       style={{
@@ -298,7 +310,7 @@ export function CertificatesSection() {
     <section
       ref={targetRef}
       id="certificates"
-      className="relative z-10 flex min-h-svh flex-col items-center px-gutter py-32"
+      className="relative z-10 flex min-h-svh flex-col items-center px-gutter py-32 sm:px-12 md:px-20 lg:px-32"
       aria-labelledby="certificates-heading"
     >
       <div className="mb-20">

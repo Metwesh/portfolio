@@ -10,25 +10,31 @@ import { useLenisScroll } from "./hooks/useLenisScroll";
 // Preload the model
 useGLTF.preload(mainLogoPath);
 
-// Lazy load sections for better performance
+// Lazy load sections for better performance — import each section's own
+// file directly (not the barrel) so Rollup can actually split them into
+// separate chunks instead of bundling all five together.
 const HeroSection = lazy(() =>
-  import("./sections").then((module) => ({ default: module.HeroSection })),
+  import("./sections/HeroSection").then((module) => ({
+    default: module.HeroSection,
+  })),
 );
 const ProjectsSection = lazy(() =>
-  import("./sections").then((module) => ({ default: module.ProjectsSection })),
+  import("./sections/ProjectsSection").then((module) => ({
+    default: module.ProjectsSection,
+  })),
 );
 const ExperienceSection = lazy(() =>
-  import("./sections").then((module) => ({
+  import("./sections/ExperienceSection").then((module) => ({
     default: module.ExperienceSection,
   })),
 );
 const TechStacksSection = lazy(() =>
-  import("./sections").then((module) => ({
+  import("./sections/TechStacksSection").then((module) => ({
     default: module.TechStacksSection,
   })),
 );
 const CertificatesSection = lazy(() =>
-  import("./sections").then((module) => ({
+  import("./sections/CertificatesSection").then((module) => ({
     default: module.CertificatesSection,
   })),
 );
@@ -128,7 +134,7 @@ export default function App() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="relative z-10 max-w-screen outline-none"
+        className="relative z-10 max-w-screen"
       >
         <Suspense fallback={null}>
           <HeroSection />

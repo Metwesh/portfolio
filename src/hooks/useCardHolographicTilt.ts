@@ -25,14 +25,29 @@ export function useCardHolographicTilt<T extends HTMLElement>() {
       },
     );
 
-    const handleMouseMove = (e: MouseEvent) => {
+    // Cap the tilt update to once per frame instead of once per raw
+    // mousemove event — getBoundingClientRect forces a layout read.
+    let ticking = false;
+    let rafId = 0;
+    let lastClientX = 0;
+    let lastClientY = 0;
+    const applyTilt = () => {
+      ticking = false;
       const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      const x = (lastClientX - rect.left) / rect.width - 0.5;
+      const y = (lastClientY - rect.top) / rect.height - 0.5;
       card.style.transform = `perspective(600px) rotateX(${-y * 14}deg) rotateY(${x * 14}deg) scale(1.03)`;
       if (shimmerRef.current) {
         shimmerRef.current.style.backgroundPosition = `${50 + x * 60}% ${50 + y * 60}%`;
         shimmerRef.current.style.opacity = "1";
+      }
+    };
+    const handleMouseMove = (e: MouseEvent) => {
+      lastClientX = e.clientX;
+      lastClientY = e.clientY;
+      if (!ticking) {
+        ticking = true;
+        rafId = requestAnimationFrame(applyTilt);
       }
     };
     const handleMouseLeave = () => {
@@ -50,6 +65,7 @@ export function useCardHolographicTilt<T extends HTMLElement>() {
     card.addEventListener("mouseenter", handleMouseEnter);
 
     return () => {
+      cancelAnimationFrame(rafId);
       card.removeEventListener("mousemove", handleMouseMove);
       card.removeEventListener("mouseleave", handleMouseLeave);
       card.removeEventListener("mouseenter", handleMouseEnter);

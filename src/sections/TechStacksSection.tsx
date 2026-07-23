@@ -7,7 +7,7 @@ import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
 
-const SKILL_CATEGORIES = ["Frontend", "Backend", "DevOps", "Tools", "Design"];
+const SKILL_CATEGORIES = ["Frontend", "Backend", "DevOps", "Tooling", "Design"];
 
 export function TechStacksSection() {
   const { targetRef: sentinelRef, isIntersecting } = useIntersectionObserver({
@@ -79,7 +79,7 @@ export function TechStacksSection() {
 
         {/* Heading — hidden while a tech box is selected */}
         <div
-          className="mb-6 w-full px-gutter transition-opacity duration-300 sm:px-12 md:px-20"
+          className="mb-6 w-full px-gutter transition-opacity duration-300 sm:px-12 md:px-20 lg:px-32"
           style={{ opacity: boxSelected ? 0 : 1 }}
         >
           <SectionHeading
@@ -107,8 +107,9 @@ export function TechStacksSection() {
             opacity: boxSelected ? 0 : 1,
           }}
         >
-          {/* Count */}
+          {/* Count — decorative watermark; sr-only list above covers the content for assistive tech */}
           <p
+            aria-hidden="true"
             className="font-bold text-4xl tracking-[-0.04em] transition-all duration-700 sm:text-5xl"
             style={{
               color: "rgba(255,255,255,0.08)",

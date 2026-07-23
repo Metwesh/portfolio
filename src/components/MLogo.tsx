@@ -88,6 +88,11 @@ export function MLogo() {
   const isMobile = useIsMobile();
   const matcapTexture = useMemo(() => createMatcapTexture(), []);
 
+  // Dispose of the matcap texture when the component unmounts — otherwise it will leak memory
+  useEffect(() => {
+    return () => matcapTexture.dispose();
+  }, [matcapTexture]);
+
   const [{ scale, position }, springApi] = useSpring(() => ({
     scale: reducedMotion ? [1.5, 1.5, 1.5] : [0, 0, 0],
     position: reducedMotion ? [10, -5, -8] : [0, 0, 0],

@@ -317,6 +317,32 @@
           transform: scale(1.2);
         }
       }
+
+      /* Loading screen is otherwise excluded from the app's global
+         reduced-motion kill-switch (it unmounts before React can react
+         to the preference), so opt it out of motion here directly. */
+      @media (prefers-reduced-motion: reduce) {
+        .ls-star,
+        .ls-ring,
+        .ls-m,
+        .ls-glow,
+        .ls-dot {
+          /* biome-ignore lint/complexity/noImportantStyles: overrides each element's own infinite keyframe animation set above */
+          animation: none !important;
+        }
+        .ls-m {
+          opacity: 1;
+          filter: drop-shadow(0 0 12px rgba(0, 238, 255, 0.5));
+        }
+        .ls-glow {
+          transform: scale(1);
+          opacity: 0.8;
+        }
+        .ls-dot {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
     </style>
 
     <!-- Cloudflare Web Analytics -->

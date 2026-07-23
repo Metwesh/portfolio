@@ -1,5 +1,5 @@
 import gsap from "gsap";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { ProjectTag } from "../constants/projects";
 import { cn } from "../lib/utils";
 
@@ -16,6 +16,8 @@ export function TagsPopover({
 }: TagsPopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const popoverId = useId();
   const tagClass = cn(
     "rounded-full border border-white/10 bg-black/40 px-3 py-1 font-semibold text-white/90 text-xs backdrop-blur-md transition-all duration-300 hover:scale-110 hover:border-white/20 hover:bg-white/10",
   );
@@ -29,6 +31,24 @@ export function TagsPopover({
     gsap.killTweensOf(el);
 
     if (isOpen) {
+      // Clamp to viewport: the popover is centered on its trigger by
+      // default, which can push it off-screen near the left/right edges
+      // on narrow viewports. Shift the content box back into view via
+      // margin (not transform, which GSAP owns below).
+      const content = contentRef.current;
+      if (content) {
+        content.style.marginLeft = "0px";
+        const rect = content.getBoundingClientRect();
+        const edgeMargin = 8;
+        let shift = 0;
+        if (rect.left < edgeMargin) {
+          shift = edgeMargin - rect.left;
+        } else if (rect.right > window.innerWidth - edgeMargin) {
+          shift = window.innerWidth - edgeMargin - rect.right;
+        }
+        if (shift !== 0) content.style.marginLeft = `${shift}px`;
+      }
+
       gsap.set(el, { pointerEvents: "auto" });
       gsap.fromTo(
         el,
@@ -93,6 +113,7 @@ export function TagsPopover({
             onKeyDown={handleKeyDown}
             aria-expanded={isOpen}
             aria-label={`Show ${hiddenTags.length} more technologies`}
+            aria-describedby={popoverId}
           >
             {`+${hiddenTags.length} more`}
           </button>
@@ -100,6 +121,7 @@ export function TagsPopover({
           {/* Popover */}
           <div
             ref={popoverRef}
+            id={popoverId}
             role="tooltip"
             className="absolute bottom-full left-1/2 z-100 -translate-x-1/2 rounded-xl opacity-0"
             style={{ pointerEvents: "none" }}
@@ -109,6 +131,7 @@ export function TagsPopover({
 
             {/* Content */}
             <div
+              ref={contentRef}
               className="relative min-w-60 rounded-xl border border-white/10 bg-black/96 p-3"
               style={{
                 boxShadow:

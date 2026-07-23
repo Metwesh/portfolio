@@ -5,6 +5,7 @@ import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
 import { experiences } from "../constants/experiences";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { cn, GLASS_CARD_CLASS } from "../lib/utils";
 
 export function ExperienceSection() {
   const prefersReducedMotion = useReducedMotion();
@@ -105,7 +106,7 @@ export function ExperienceSection() {
       ref={sectionRef}
       id="experience"
       aria-labelledby="experience-heading"
-      className="relative z-10 flex flex-col items-center px-gutter py-24 sm:px-8 md:py-32"
+      className="relative z-10 flex flex-col items-center px-gutter py-24 sm:px-12 md:px-20 md:py-32 lg:px-32"
     >
       <div
         ref={headingRef as React.RefObject<HTMLDivElement>}
@@ -167,7 +168,10 @@ export function ExperienceSection() {
                 ref={(el) => {
                   cardRefs.current[index] = el;
                 }}
-                className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-transform duration-500 group-hover:-translate-y-1"
+                className={cn(
+                  GLASS_CARD_CLASS,
+                  "relative overflow-hidden transition-transform duration-500 group-hover:-translate-y-1",
+                )}
                 style={{ opacity: 0 }}
               >
                 {/* Giant watermark — clipped to card bounds by overflow-hidden */}

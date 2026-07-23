@@ -6,9 +6,14 @@ import { cn } from "../lib/utils";
 interface MobileMenuProps {
   isOpen: boolean;
   onNavClick: () => void;
+  activeHref?: string | null;
 }
 
-export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
+export function MobileMenu({
+  isOpen,
+  onNavClick,
+  activeHref,
+}: MobileMenuProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -72,8 +77,10 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
           key={link.href}
           href={link.href}
           onClick={onNavClick}
+          aria-current={activeHref === link.href ? "location" : undefined}
           className={cn(
             "focus rounded transition-all duration-500 hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2",
+            activeHref === link.href && "text-cyan-400",
             isOpen
               ? "translate-y-0 opacity-100"
               : "pointer-events-none translate-y-8 opacity-0",
@@ -116,7 +123,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
       >
         {/* Socials */}
         <div className="flex flex-col items-center gap-2">
-          <span className="mb-1 text-white/30 text-xs uppercase tracking-widest">
+          <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">
             Socials
           </span>
           {socialLinks.slice(0, 2).map((link) => (
@@ -136,7 +143,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
 
         {/* Resume */}
         <div className="flex flex-col items-center gap-2">
-          <span className="mb-1 text-white/30 text-xs uppercase tracking-widest">
+          <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">
             Resume
           </span>
           <a
@@ -153,7 +160,7 @@ export function MobileMenu({ isOpen, onNavClick }: MobileMenuProps) {
 
         {/* Contact */}
         <div className="flex flex-col items-center gap-2">
-          <span className="mb-1 text-white/30 text-xs uppercase tracking-widest">
+          <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">
             Contact
           </span>
           {socialLinks.slice(3).map((link) => (

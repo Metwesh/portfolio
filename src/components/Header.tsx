@@ -1,6 +1,6 @@
 import { refractive } from "@hashintel/refractive";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { ANIMATION_CONFIG, navLinks } from "../constants";
+import { ANIMATION_CONFIG, logoGradientStops, navLinks } from "../constants";
 import { cn } from "../lib/utils";
 import { MobileMenu } from "./MobileMenu";
 
@@ -35,9 +35,25 @@ function HeaderShell({
 
 export const Header = memo(({ scrollY }: { scrollY: number }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeHref, setActiveHref] = useState<string | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   const headerBg = scrollY > ANIMATION_CONFIG.HEADER_VISIBLE_THRESHOLD;
+
+  // Scroll-spy: highlight whichever nav section's top has crossed the
+  // "active" line near the top of the viewport. Piggybacks on the scrollY
+  // updates Header already re-renders on (throttled upstream to >20px).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scrollY is only a re-run trigger, the effect reads live DOM rects instead of the value itself
+  useEffect(() => {
+    const threshold = window.innerHeight * 0.35;
+    let current: string | null = null;
+    for (const link of navLinks) {
+      const el = document.querySelector(link.href);
+      if (!el) continue;
+      if (el.getBoundingClientRect().top <= threshold) current = link.href;
+    }
+    setActiveHref(current);
+  }, [scrollY]);
 
   const handleMenuOpen = () => {
     setMenuOpen((prev) => !prev);
@@ -107,9 +123,13 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
                 y2="439"
                 gradientUnits="userSpaceOnUse"
               >
-                <stop stopColor="#22D3EE" />
-                <stop offset="0.5" stopColor="#3B82F6" />
-                <stop offset="1" stopColor="#A855F7" />
+                {logoGradientStops.map((stop) => (
+                  <stop
+                    key={stop.color}
+                    offset={stop.offset}
+                    stopColor={stop.color}
+                  />
+                ))}
               </linearGradient>
             </defs>
           </svg>
@@ -162,7 +182,11 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
               key={link.href}
               href={link.href}
               data-magnetic
-              className="transition-colors hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2 max-lg:text-base"
+              aria-current={activeHref === link.href ? "location" : undefined}
+              className={cn(
+                "transition-colors hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2 max-lg:text-base",
+                activeHref === link.href && "text-cyan-400",
+              )}
             >
               {link.label}
             </a>
@@ -170,7 +194,11 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
         </nav>
       </div>
 
-      <MobileMenu isOpen={menuOpen} onNavClick={handleNavClick} />
+      <MobileMenu
+        isOpen={menuOpen}
+        onNavClick={handleNavClick}
+        activeHref={activeHref}
+      />
     </HeaderShell>
   );
 });

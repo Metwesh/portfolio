@@ -17,7 +17,7 @@ const socialLinks = [
     external: true,
   },
   {
-    href: "/public/documents/Mohamed%20H.%20Aly.pdf",
+    href: `${import.meta.env.BASE_URL}documents/Mohamed%20H.%20Aly.pdf`,
     label: "Resume",
     external: true,
   },
@@ -59,6 +59,14 @@ const accentColors = {
 
 const mainLogoPath = "./m-logo/main-logo.gltf";
 
+// Shared cyan → blue → violet gradient used across the logo mark
+// (Header, CertificatesSection fan + main logo).
+const logoGradientStops = [
+  { offset: undefined, color: "#22D3EE" },
+  { offset: "0.5", color: "#3B82F6" },
+  { offset: "1", color: "#A855F7" },
+] as const;
+
 const breakpoints = {
   smallMobile: 640,
   mobile: 768,
@@ -66,4 +74,11 @@ const breakpoints = {
   desktop: 1280,
 } as const;
 
-export { accentColors, breakpoints, mainLogoPath, navLinks, socialLinks };
+export {
+  accentColors,
+  breakpoints,
+  logoGradientStops,
+  mainLogoPath,
+  navLinks,
+  socialLinks,
+};

@@ -235,6 +235,20 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
   const mouse = useRef({ x: 0, y: 0 });
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [isTabHidden, setIsTabHidden] = useState(document.hidden);
+
+  // Stop the render loop entirely while the tab is backgrounded — rAF still
+  // fires (throttled) in most browsers, so this saves real GPU/battery cost.
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+    document.addEventListener(
+      "visibilitychange",
+      () => setIsTabHidden(document.hidden),
+      { signal },
+    );
+    return () => controller.abort();
+  }, []);
 
   // Mouse parallax for camera
   useEffect(() => {
@@ -339,7 +353,9 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
         gl={{ antialias: qualityTier === "high" }}
         shadows={ENABLE_SHADOWS ? { type: SHADOW_MAP_TYPE } : false}
         dpr={[1, MAX_DPR]}
-        frameloop={prefersReducedMotion ? "demand" : "always"}
+        frameloop={
+          isTabHidden ? "never" : prefersReducedMotion ? "demand" : "always"
+        }
         performance={{ min: 0.5 }}
       >
         <Suspense fallback={null}>
