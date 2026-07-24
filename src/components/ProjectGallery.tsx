@@ -330,7 +330,7 @@ function GalleryCards() {
 // ─── Public export ────────────────────────────────────────────────────────────
 export function ProjectGallery() {
   return (
-    <group position={[0, -1, 3]}>
+    <group position={[0, -0.4, 3]}>
       <GalleryCards />
     </group>
   );

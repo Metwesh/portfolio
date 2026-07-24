@@ -2,7 +2,6 @@ import { Environment, Html, PerspectiveCamera } from "@react-three/drei";
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
-  lazy,
   type PointerEvent as ReactPointerEvent,
   Suspense,
   useEffect,
@@ -23,10 +22,6 @@ import { MLogo } from "./MLogo";
 import { ProjectGallery } from "./ProjectGallery";
 import { TechBox } from "./TechBox";
 import { TechTooltip } from "./TechTooltip";
-
-const Stats = lazy(() =>
-  import("@react-three/drei").then((mod) => ({ default: mod.Stats })),
-);
 
 // Quality-derived constants — stable for the session
 // Cap DPR: high=1.5, medium/low=1 — biggest fill-rate win on Retina screens
@@ -380,7 +375,6 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
         }
         performance={{ min: 0.5 }}
       >
-        {import.meta.env.DEV && <Stats />}
         <Suspense fallback={null}>
           <PerspectiveCamera
             makeDefault

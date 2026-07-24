@@ -1,6 +1,6 @@
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Odometer, type OdometerHandle } from "../components/Odometer";
 import { SectionHeading } from "../components/SectionHeading";
 import { TagsPopover } from "../components/TagsPopover";
@@ -8,6 +8,47 @@ import { PROJECTS } from "../constants/projects";
 import { lenisInstance } from "../lib/lenisInstance";
 import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
+import { damp } from "../utils/damp";
+
+// Row heights for the stacked overlay — content is absolutely positioned
+// inside each, so these govern spacing between title/description/actions
+// regardless of which project is currently showing (no layout reflow as
+// content changes length).
+const TITLE_ROW_PX = 48;
+const DESC_ROW_EM = 4.2;
+const ACTIONS_ROW_PX = 28;
+
+// Per-row slide distance (px) for the continuous reveal below. Large enough
+// that a neighbor is mostly clear of the active item's text footprint by
+// the time it's still meaningfully opaque — unlike the 3D cards (where a
+// soft image/opacity blend between neighbors reads fine), two blocks of
+// *text* overlapping at the same position is illegible even at moderate
+// opacity, so the position needs to have moved well clear, not just faded.
+const TITLE_SLIDE_PX = 80;
+const DESC_SLIDE_PX = 240;
+const ACTIONS_SLIDE_PX = 200;
+
+// Opacity is a plateau-then-fade curve of distance-from-active (`ad`), not
+// a straight linear ramp: it stays fully opaque out to OPACITY_PLATEAU (a
+// genuine "hold" while scroll sits near a card, so stopping between two
+// cards doesn't leave both halfway-visible and unreadable), then eases out
+// to 0 by OPACITY_FADE_END. Position keeps moving perfectly linearly with
+// scroll throughout — only visibility gets this shape, so it still reads as
+// continuous, not a snap.
+const OPACITY_PLATEAU = 0.18;
+const OPACITY_FADE_END = 0.75;
+// How far (in fractional card indices) a neighbor stays part-visible before
+// fully fading — keeps a couple items rendered/animating around the active
+// one instead of a hard cut, with a small margin past OPACITY_FADE_END.
+const REVEAL_RANGE = 1.0;
+
+// Smoothstep — 0 below edge0, 1 above edge1, eased S-curve between. Used to
+// shape the opacity plateau-then-fade above: gentle near both ends (the
+// "stays, then transitions" feel), not a linear ramp.
+function smoothstep(edge0: number, edge1: number, x: number) {
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
 
 // Scroll distance per card, as a multiple of viewport width. Lower = faster
 // card sweep per unit of scroll input — at typical slow-scroll speeds, the
@@ -28,16 +69,24 @@ let _wheelLockTimer: ReturnType<typeof setTimeout> | null = null;
 export function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const odometerRef = useRef<OdometerHandle>(null);
-  const nameRef = useRef<HTMLDivElement>(null);
-  const descRef = useRef<HTMLParagraphElement>(null);
-  const actionsRef = useRef<HTMLDivElement>(null);
-
-  // Active project index for DOM overlay — updated by GSAP onUpdate
-  const [activeIndex, setActiveIndex] = useState(0);
-  // displayIndex trails activeIndex: updates after fade-out completes
-  const [displayIndex, setDisplayIndex] = useState(0);
-  const isMounted = useRef(false);
+  // Wrapper rows — one per row type, fade as a group on pin enter/leave.
+  const titleWrapRef = useRef<HTMLDivElement>(null);
+  const descWrapRef = useRef<HTMLDivElement>(null);
+  const actionsWrapRef = useRef<HTMLDivElement>(null);
+  // All N projects' content is pre-rendered and stacked inside each wrapper
+  // above — one ref per project per row — and continuously
+  // positioned/faded by index distance from scroll progress in
+  // updateOverlay below, instead of swapping DOM content per card crossing.
+  const titleRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const descRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+  const actionsRefs = useRef<(HTMLDivElement | null)[]>([]);
   const prevIndexRef = useRef(-1);
+  // Independently lagged continuous index per row — different lambda per
+  // row (title fastest, actions slowest) so the three rows arrive slightly
+  // out of phase with each other instead of all snapping together.
+  const titleFRef = useRef(0);
+  const descFRef = useRef(0);
+  const actionsFRef = useRef(0);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -71,18 +120,29 @@ export function ProjectsSection() {
           onEnter: () => {
             attachActiveListeners();
             scrollStore.projectSectionActive = true;
-            gsap.to([nameRef.current, descRef.current, actionsRef.current], {
-              opacity: 1,
-              y: 0,
-              duration: 0.2,
-              ease: "power2.out",
-              stagger: 0.025,
-            });
+            gsap.to(
+              [
+                titleWrapRef.current,
+                descWrapRef.current,
+                actionsWrapRef.current,
+              ],
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.2,
+                ease: "power2.out",
+                stagger: 0.025,
+              },
+            );
           },
           onLeave: () => {
             detachActiveListeners();
             scrollStore.projectSectionActive = false;
-            const els = [nameRef.current, descRef.current, actionsRef.current];
+            const els = [
+              titleWrapRef.current,
+              descWrapRef.current,
+              actionsWrapRef.current,
+            ];
             gsap.killTweensOf(els);
             gsap.to(els, {
               opacity: 0,
@@ -95,18 +155,29 @@ export function ProjectsSection() {
           onEnterBack: () => {
             attachActiveListeners();
             scrollStore.projectSectionActive = true;
-            gsap.to([nameRef.current, descRef.current, actionsRef.current], {
-              opacity: 1,
-              y: 0,
-              duration: 0.2,
-              ease: "power2.out",
-              stagger: 0.025,
-            });
+            gsap.to(
+              [
+                titleWrapRef.current,
+                descWrapRef.current,
+                actionsWrapRef.current,
+              ],
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.2,
+                ease: "power2.out",
+                stagger: 0.025,
+              },
+            );
           },
           onLeaveBack: () => {
             detachActiveListeners();
             scrollStore.projectSectionActive = false;
-            const els = [nameRef.current, descRef.current, actionsRef.current];
+            const els = [
+              titleWrapRef.current,
+              descWrapRef.current,
+              actionsWrapRef.current,
+            ];
             gsap.killTweensOf(els);
             gsap.to(els, {
               opacity: 0,
@@ -127,7 +198,6 @@ export function ProjectsSection() {
             if (idx !== prevIndexRef.current) {
               prevIndexRef.current = idx;
               odometerRef.current?.setValue(idx + 1);
-              setActiveIndex(idx);
             }
           },
         },
@@ -211,6 +281,91 @@ export function ProjectsSection() {
       _touchLock = null;
     }
 
+    // Drives the continuous stacked-overlay reveal — one call per tick,
+    // reading the same live scroll progress the 3D cards use. Each row gets
+    // its own lagged copy of the continuous card index (different damp
+    // factor per row) so title/description/actions arrive slightly out of
+    // phase with each other rather than snapping together, and each row's
+    // slide direction differs (title vertical, description/actions
+    // horizontal in opposite directions) so the whole block doesn't read as
+    // one rigid unit sliding as-is. Runs on gsap.ticker — same clock as
+    // Lenis/ScrollTrigger/R3F's advance() — to stay in lockstep with the
+    // gallery instead of a competing rAF loop.
+    function updateOverlay() {
+      const activeF = scrollStore.projectProgress * (PROJECTS.length - 1);
+      const dt = gsap.ticker.deltaRatio() / 60;
+      // Damp toward the nearest whole card, not the raw fractional scroll
+      // position — this scroll model doesn't snap (the 3D cards themselves
+      // can rest anywhere), so without rounding, stopping between two cards
+      // leaves both neighbors permanently at ~40% opacity, unreadable. The
+      // rounded target only changes in discrete integer steps as scroll
+      // crosses a card's midpoint, so each row holds firm on the current
+      // card for the first half of the scroll to the next one, then eases
+      // over — the "stays, then transitions" feel, and always settles on
+      // exactly one clean, fully-opaque item at rest. Same pattern as the
+      // Odometer digit counter, which never shows "2.5" either.
+      const target = Math.round(activeF);
+
+      // Slower than the card gallery's own damp — big text needs more
+      // weight/inertia than a fast-snapping element, or the transition
+      // reads as nervous/twitchy rather than deliberate.
+      titleFRef.current = damp(titleFRef.current, target, 0.075, dt);
+      descFRef.current = damp(descFRef.current, target, 0.06, dt);
+      actionsFRef.current = damp(actionsFRef.current, target, 0.05, dt);
+
+      for (let i = 0; i < PROJECTS.length; i++) {
+        const tEl = titleRefs.current[i];
+        if (tEl) {
+          const d = i - titleFRef.current;
+          const ad = Math.abs(d);
+          if (ad < REVEAL_RANGE) {
+            tEl.style.opacity = String(
+              1 - smoothstep(OPACITY_PLATEAU, OPACITY_FADE_END, ad),
+            );
+            tEl.style.transform = `translateY(${d * TITLE_SLIDE_PX}px)`;
+          } else if (tEl.style.opacity !== "0") {
+            tEl.style.opacity = "0";
+          }
+        }
+
+        const dEl = descRefs.current[i];
+        if (dEl) {
+          const d = i - descFRef.current;
+          const ad = Math.abs(d);
+          if (ad < REVEAL_RANGE) {
+            dEl.style.opacity = String(
+              1 - smoothstep(OPACITY_PLATEAU, OPACITY_FADE_END, ad),
+            );
+            dEl.style.transform = `translateX(${d * DESC_SLIDE_PX}px)`;
+          } else if (dEl.style.opacity !== "0") {
+            dEl.style.opacity = "0";
+          }
+        }
+
+        const aEl = actionsRefs.current[i];
+        if (aEl) {
+          const d = i - actionsFRef.current;
+          const ad = Math.abs(d);
+          const isNear = ad < 0.5;
+          if (ad < REVEAL_RANGE) {
+            aEl.style.opacity = String(
+              1 - smoothstep(OPACITY_PLATEAU, OPACITY_FADE_END, ad),
+            );
+            // Opposite sign from the description row above — the two
+            // horizontal rows slide in from different sides instead of
+            // moving as one matched block.
+            aEl.style.transform = `translateX(${-d * ACTIONS_SLIDE_PX}px)`;
+            aEl.style.pointerEvents = isNear ? "auto" : "none";
+          } else {
+            if (aEl.style.opacity !== "0") aEl.style.opacity = "0";
+            if (aEl.style.pointerEvents !== "none") {
+              aEl.style.pointerEvents = "none";
+            }
+          }
+        }
+      }
+    }
+
     // wheel/touchmove are non-passive (they call preventDefault) — keeping
     // them attached at the window level for the component's whole lifetime
     // would block the browser's scroll fast-path site-wide, not just while
@@ -229,12 +384,14 @@ export function ProjectsSection() {
       window.addEventListener("touchmove", handleTouchMove, {
         passive: false,
       });
+      gsap.ticker.add(updateOverlay);
     }
     function detachActiveListeners() {
       if (!activeListenersAttached) return;
       activeListenersAttached = false;
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchmove", handleTouchMove);
+      gsap.ticker.remove(updateOverlay);
       // Safety net: if the section is left mid-gesture, make sure Lenis
       // isn't left reading deltaX for normal vertical scroll elsewhere.
       const lenis = lenisInstance.current;
@@ -252,6 +409,7 @@ export function ProjectsSection() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
+      gsap.ticker.remove(updateOverlay);
       if (lenisInstance.current) {
         lenisInstance.current.options.gestureOrientation = "vertical";
       }
@@ -262,44 +420,6 @@ export function ProjectsSection() {
       scrollStore.projectSectionActive = false;
     };
   }, []);
-
-  // Animate out → swap content → animate in on index change
-  useEffect(() => {
-    const els = [nameRef.current, descRef.current, actionsRef.current].filter(
-      Boolean,
-    );
-    if (!isMounted.current) {
-      isMounted.current = true;
-      return;
-    }
-    gsap.killTweensOf(els);
-    gsap.to(els, {
-      opacity: 0,
-      y: -8,
-      duration: 0.12,
-      ease: "power2.in",
-      stagger: 0.025,
-      onComplete: () => {
-        setDisplayIndex(activeIndex);
-      },
-    });
-  }, [activeIndex]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: displayIndex is the trigger, refs don't need listing
-  useEffect(() => {
-    const els = [nameRef.current, descRef.current, actionsRef.current].filter(
-      Boolean,
-    );
-    gsap.killTweensOf(els);
-    gsap.fromTo(
-      els,
-      { opacity: 0, y: 8 },
-      { opacity: 1, y: 0, duration: 0.18, ease: "power2.out", stagger: 0.03 },
-    );
-  }, [displayIndex]);
-
-  const activeProject = PROJECTS[displayIndex];
-  const isClickable = !!activeProject.link;
 
   return (
     <section
@@ -325,87 +445,132 @@ export function ProjectsSection() {
           </span>
         </div>
 
-        {/* Active project detail overlay */}
+        {/* Active project detail overlay — every project's title/description/
+            actions is pre-rendered and stacked here; updateOverlay above
+            continuously positions/fades each one by its distance from the
+            live scroll-driven card index instead of swapping DOM content
+            per card crossing (that swap — React re-render + GSAP tweens +
+            a fresh <img> decode, repeated on every one of 15 cards — was
+            the confirmed source of dropped frames while scrolling). */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pb-7 md:pb-14">
-          {/* Logo + Project name */}
+          {/* Title row */}
           <div
-            ref={nameRef}
-            className="mb-3 flex flex-col items-center gap-2 opacity-0"
+            ref={titleWrapRef}
+            className="relative w-full overflow-hidden opacity-0"
+            style={{ height: TITLE_ROW_PX }}
           >
-            <div className="relative flex items-end gap-2">
-              {activeProject.logo && (
-                <div
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-lg border p-1",
-                    activeProject.darkLogo
-                      ? "border-white/30 bg-white/90"
-                      : "border-white/20 bg-white/10 backdrop-blur-sm",
+            {PROJECTS.map((project, i) => (
+              <div
+                key={project.name}
+                ref={(el) => {
+                  titleRefs.current[i] = el;
+                }}
+                className="absolute inset-x-0 top-0 flex flex-col items-center gap-2 opacity-0"
+              >
+                <div className="relative flex items-end gap-2">
+                  {project.logo && (
+                    <div
+                      className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-lg border p-1",
+                        project.darkLogo
+                          ? "border-white/30 bg-white/90"
+                          : "border-white/20 bg-white/15",
+                      )}
+                    >
+                      <img
+                        src={project.logo}
+                        alt={`${project.name} logo`}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
                   )}
-                >
-                  <img
-                    src={activeProject.logo}
-                    alt={`${activeProject.name} logo`}
-                    className="h-full w-full object-contain"
+                  <h3 className="relative inline-block text-balance font-bold text-2xl text-white tracking-tight sm:text-3xl">
+                    {project.name}
+                  </h3>
+                  <span
+                    className="absolute -bottom-1.5 left-0 h-0.5 w-full rounded-full"
+                    style={{
+                      background: `linear-gradient(90deg, ${project.color}, transparent)`,
+                    }}
                   />
                 </div>
-              )}
-              <h3 className="relative inline-block text-balance font-bold text-2xl text-white tracking-tight sm:text-3xl">
-                {activeProject.name}
-              </h3>
-              <span
-                className="absolute -bottom-1.5 left-0 h-0.5 w-full rounded-full transition-all duration-500"
-                style={{
-                  background: `linear-gradient(90deg, ${activeProject.color}, transparent)`,
-                }}
-              />
-            </div>
+              </div>
+            ))}
           </div>
 
-          {/* Description */}
-          <p
-            ref={descRef}
-            className="mb-4 max-w-sm px-6 text-center text-white/60 text-xs leading-relaxed opacity-0 sm:max-w-lg sm:px-0 sm:text-sm"
-          >
-            {activeProject.description}
-          </p>
-
-          {/* Tags + visit button */}
+          {/* Description row */}
           <div
-            ref={actionsRef}
-            className="pointer-events-auto flex flex-wrap items-center justify-center gap-3 opacity-0"
+            ref={descWrapRef}
+            className="relative mb-4 w-full max-w-sm overflow-x-hidden overflow-y-visible opacity-0 sm:max-w-lg"
+            style={{ height: `${DESC_ROW_EM}em` }}
           >
-            {activeProject.tags && activeProject.tags.length > 0 && (
-              <TagsPopover
-                tags={activeProject.tags}
-                visibleCount={3}
-                projectColor={activeProject.color}
-              />
-            )}
-            {isClickable && (
-              <a
-                href={activeProject.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 font-semibold text-white text-xs backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/10"
-                style={{ boxShadow: `0 0 16px ${activeProject.color}40` }}
+            {PROJECTS.map((project, i) => (
+              <p
+                key={project.name}
+                ref={(el) => {
+                  descRefs.current[i] = el;
+                }}
+                className="absolute inset-x-0 top-0 px-6 text-center text-white/60 text-xs leading-relaxed opacity-0 sm:px-0 sm:text-sm"
               >
-                Visit
-                <svg
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                {project.description}
+              </p>
+            ))}
+          </div>
+
+          {/* Tags + visit button row — overflow-y stays visible (not just
+              unset) because TagsPopover's hover panel escapes upward via
+              `bottom-full`; only overflow-x is clipped so sliding neighbor
+              rows don't bleed out sideways. Explicitly setting both axes
+              matters here: leaving overflow-y unset while overflow-x is
+              hidden lets the browser silently compute overflow-y as `auto`
+              instead of `visible`, which clips the popover anyway. */}
+          <div
+            ref={actionsWrapRef}
+            className="relative w-full overflow-x-clip overflow-y-visible opacity-0"
+            style={{ height: ACTIONS_ROW_PX }}
+          >
+            {PROJECTS.map((project, i) => (
+              <div
+                key={project.name}
+                ref={(el) => {
+                  actionsRefs.current[i] = el;
+                }}
+                className="pointer-events-none absolute inset-x-0 top-0 flex flex-wrap items-center justify-center gap-3 opacity-0"
+              >
+                {project.tags && project.tags.length > 0 && (
+                  <TagsPopover
+                    tags={project.tags}
+                    visibleCount={3}
+                    projectColor={project.color}
                   />
-                </svg>
-              </a>
-            )}
+                )}
+                {project.link && (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/8 px-3 py-1 font-semibold text-white text-xs transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/15"
+                    style={{ boxShadow: `0 0 16px ${project.color}40` }}
+                  >
+                    Visit
+                    <svg
+                      className="h-3 w-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
+                  </a>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>
