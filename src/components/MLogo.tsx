@@ -134,6 +134,7 @@ export function MLogo() {
   }));
 
   const outerRef = useRef<ThreeGroup>(null);
+  const ringGroupRef = useRef<ThreeGroup>(null);
   const selectZRef = useRef(0);
   const selectOpacityRef = useRef(1.0);
   const mMaterialsRef = useRef<ThreeMeshMatcapMaterial[]>([]);
@@ -207,12 +208,16 @@ export function MLogo() {
       }
     }
 
-    // Ring drama: spin up + expand + flatten on selection, glow then fade
+    // Ring drama: spin up + expand + flatten on selection, glow through
+    // (capped, not full-bright) instead of fading away with the retreating M.
     ringDramaRef.current +=
       ((isSelected ? 1 : 0) - ringDramaRef.current) * 0.05;
     const drama = ringDramaRef.current;
-    const glow = drama > 0 ? 1 + Math.sin(drama * Math.PI) * 0.8 : 1;
-    const ringFade = drama > 0 ? Math.max(0, 1 - drama * 1.2) : op;
+    const glow = drama > 0 ? 1 + Math.sin(drama * Math.PI) * 0.5 : 1;
+    // op == (1-drama)^2 always (both driven by the same isSelected lerp), so
+    // this dips mid-transition then swells back up — capped well under full
+    // opacity so the glow doesn't dominate the view once selected.
+    const ringFade = Math.max(op, drama) * 0.65;
     for (let i = 0; i < 3; i++) {
       if (!ringRefsArrRef.current[i].current) continue;
       const uniforms = ringUniformsRef.current[i];
@@ -253,6 +258,18 @@ export function MLogo() {
     group.current.position.y = posY;
     group.current.position.z = posZ;
 
+    // Rings live in a separate group (see JSX) so the M's selection z-drift
+    // — applied to outerRef, an ANCESTOR of group so it stays a straight
+    // world-space offset unaffected by group's own rotation above — never
+    // reaches them. Mirror the same rotation/position here so rings still
+    // co-move with the M during normal (non-selected) motion.
+    if (ringGroupRef.current) {
+      ringGroupRef.current.rotation.y = group.current.rotation.y;
+      ringGroupRef.current.rotation.x = group.current.rotation.x;
+      ringGroupRef.current.position.y = posY;
+      ringGroupRef.current.position.z = posZ;
+    }
+
     // Publish for TechConstellation to co-locate on the M
     scrollStore.mLogoY = posY;
     scrollStore.mLogoZ = posZ;
@@ -271,8 +288,10 @@ export function MLogo() {
     ring2SpinRef.current -= delta * 0.28 * spinMult;
     ring3SpinRef.current += delta * 0.18 * spinMult;
 
-    // Expand outward on selection
-    const ringScale = 1 + drama * 1.5;
+    // Expand outward on selection — a modest 1.8x, framing the selected box
+    // close-up rather than trying to reach the full flung-out sphere shell
+    // (which would put the ring right up against the camera).
+    const ringScale = 1 + drama * 0.8;
 
     if (ring1Ref.current) {
       // ring1 target tilt = [PI/2, 0, 0] = same as flat, so it just spins on z
@@ -335,20 +354,36 @@ export function MLogo() {
   }, [reducedMotion]);
 
   return (
-    <group ref={outerRef}>
+    <>
+      {/* outerRef is the OUTER ancestor here (not nested inside the rotating
+          a.group) — its selection z-drift is applied in world space, so the
+          M retreats in a straight line instead of wobbling with group's
+          oscillating rotation. */}
+      <group ref={outerRef}>
+        <a.group
+          ref={group}
+          dispose={null}
+          scale={scale as unknown as [number, number, number]}
+          {...(reducedMotion
+            ? { position: position as unknown as [number, number, number] }
+            : false)}
+        >
+          <primitive object={scene} />
+        </a.group>
+      </group>
+
+      {/* Orbital rings — a separate group (see useFrame) that mirrors group's
+          rotation/position but sits outside outerRef, so the M's selection
+          z-drift never reaches them. Fresnel rim-glow shader: brightens
+          toward the silhouette edge like a lit energy ring, instead of a
+          flat matte tube. */}
       <a.group
-        ref={group}
-        dispose={null}
+        ref={ringGroupRef}
         scale={scale as unknown as [number, number, number]}
         {...(reducedMotion
           ? { position: position as unknown as [number, number, number] }
           : false)}
       >
-        <primitive object={scene} />
-
-        {/* Orbital rings — co-move with the M logo. Fresnel rim-glow shader:
-            brightens toward the silhouette edge like a lit energy ring,
-            instead of a flat matte tube. */}
         <mesh ref={ring1Ref} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[2.8, 0.042, 16, 80]} />
           <shaderMaterial
@@ -386,6 +421,6 @@ export function MLogo() {
           />
         </mesh>
       </a.group>
-    </group>
+    </>
   );
 }
