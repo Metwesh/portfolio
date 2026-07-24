@@ -2,7 +2,7 @@
   "name": "Metwesh | Portfolio",
   "short_name": "Portfolio",
   "theme_color": "#00eaff",
-  "background_color": "#080e19",
+  "background_color": "#04040d",
   "display": "standalone",
   "scope": "/portfolio/",
   "start_url": "/portfolio/",
