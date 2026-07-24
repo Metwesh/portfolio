@@ -6,9 +6,14 @@
  * Device quality tier based on memory + CPU.
  * Sampled once at module load — stable for the session.
  *
- * low    → mobile / ≤2 GB RAM / ≤2 cores
- * medium → ≤4 GB RAM / ≤4 cores
+ * low    → ≤2 GB RAM / ≤2 cores, or mobile with ≤4 GB RAM / ≤4 cores
+ * medium → ≤4 GB RAM / ≤4 cores (desktop), or a capable mobile device
  * high   → everything else
+ *
+ * Being mobile alone no longer forces "low" — a flagship phone with decent
+ * RAM/cores gets the same medium/high treatment a desktop would, since the
+ * old blanket downgrade was flattening every phone's canvas resolution
+ * regardless of how capable it actually was.
  */
 export type QualityTier = "low" | "medium" | "high";
 
@@ -18,7 +23,9 @@ export const qualityTier: QualityTier = (() => {
   const isMobile =
     /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ||
     (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
-  if (isMobile || mem <= 2 || cores <= 2) return "low";
+  if (mem <= 2 || cores <= 2 || (isMobile && (mem <= 4 || cores <= 4))) {
+    return "low";
+  }
   if (mem <= 4 || cores <= 4) return "medium";
   return "high";
 })();

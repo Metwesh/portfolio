@@ -24,8 +24,11 @@ import { TechBox } from "./TechBox";
 import { TechTooltip } from "./TechTooltip";
 
 // Quality-derived constants — stable for the session
-// Cap DPR: high=1.5, medium/low=1 — biggest fill-rate win on Retina screens
-const MAX_DPR = qualityTier === "high" ? 1.5 : 1;
+// Cap DPR per tier: still well under a phone's native 2-3x to keep fill-rate
+// in check, but no longer flattened to a flat 1x on "low" — that was the
+// biggest contributor to a visibly blocky/pixelated canvas on Retina phones.
+const MAX_DPR =
+  qualityTier === "high" ? 2 : qualityTier === "medium" ? 1.75 : 1.5;
 
 const SPHERE_RADIUS = 8;
 
@@ -357,7 +360,7 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
       className="fade-in pointer-events-none fixed inset-0 z-0 h-svh animate-in duration-1000"
     >
       <Canvas
-        gl={{ antialias: qualityTier === "high" }}
+        gl={{ antialias: qualityTier !== "low" }}
         dpr={[1, MAX_DPR]}
         // R3F's default useMeasure config re-measures the container on
         // native "scroll" events (debounced 50ms) in case a scrolled-into-

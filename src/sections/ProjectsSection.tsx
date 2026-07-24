@@ -5,6 +5,7 @@ import { Odometer, type OdometerHandle } from "../components/Odometer";
 import { SectionHeading } from "../components/SectionHeading";
 import { TagsPopover } from "../components/TagsPopover";
 import { PROJECTS } from "../constants/projects";
+import { useIsMobile } from "../hooks/useIsMobile";
 import { lenisInstance } from "../lib/lenisInstance";
 import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
@@ -15,8 +16,9 @@ import { damp } from "../utils/damp";
 // regardless of which project is currently showing (no layout reflow as
 // content changes length).
 const TITLE_ROW_PX = 48;
-const DESC_ROW_EM = 4.2;
+const DESC_ROW_EM = 4.5;
 const ACTIONS_ROW_PX = 28;
+const ACTIONS_ROW_PX_MOBILE = 64;
 
 // Per-row slide distance (px) for the continuous reveal below. Large enough
 // that a neighbor is mostly clear of the active item's text footprint by
@@ -24,7 +26,11 @@ const ACTIONS_ROW_PX = 28;
 // soft image/opacity blend between neighbors reads fine), two blocks of
 // *text* overlapping at the same position is illegible even at moderate
 // opacity, so the position needs to have moved well clear, not just faded.
-const TITLE_SLIDE_PX = 80;
+// Title shares the same horizontal treatment (slide + opacity fade) as the
+// description/actions rows below it, and the same direction as the actions
+// row specifically (opposite sign from description) — one consistent motion
+// language across all three rows instead of title doing its own thing.
+const TITLE_SLIDE_PX = 200;
 const DESC_SLIDE_PX = 240;
 const ACTIONS_SLIDE_PX = 200;
 
@@ -74,6 +80,7 @@ let _wheelLock: "x" | "y" | null = null;
 let _wheelLockTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function ProjectsSection() {
+  const isMobile = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const odometerRef = useRef<OdometerHandle>(null);
   // Wrapper rows — one per row type, fade as a group on pin enter/leave.
@@ -87,6 +94,11 @@ export function ProjectsSection() {
   const titleRefs = useRef<(HTMLDivElement | null)[]>([]);
   const descRefs = useRef<(HTMLParagraphElement | null)[]>([]);
   const actionsRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // The colored underline is intentionally NOT part of the sliding stack
+  // above — it sits in one fixed place (no translate/slide) and its own
+  // color/width simply cross to the active project via a CSS transition.
+  const underlineRef = useRef<HTMLSpanElement>(null);
+  const lastUnderlineIdxRef = useRef(-1);
   const prevIndexRef = useRef(-1);
   // Independently lagged continuous index per row — different lambda per
   // row (title fastest, actions slowest) so the three rows arrive slightly
@@ -98,6 +110,18 @@ export function ProjectsSection() {
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
+
+    // Set the static underline's initial color/width (index 0) before
+    // anything scrolls — without this it sits blank until the first scroll
+    // tick runs.
+    const initialGroup = titleRefs.current[0]?.firstElementChild;
+    if (underlineRef.current) {
+      underlineRef.current.style.background = `linear-gradient(90deg, ${PROJECTS[0].color}, transparent)`;
+      if (initialGroup) {
+        underlineRef.current.style.width = `${initialGroup.getBoundingClientRect().width}px`;
+      }
+      lastUnderlineIdxRef.current = 0;
+    }
 
     // Total scroll, in card-widths: N-1 to actually sweep through the cards,
     // plus one stick's worth reserved on each end (front + back).
@@ -332,7 +356,33 @@ export function ProjectsSection() {
       descFRef.current = damp(descFRef.current, target, 0.06, dt);
       actionsFRef.current = damp(actionsFRef.current, target, 0.05, dt);
 
+      // Update the static underline's color/width only when the nearest
+      // title actually changes (not every frame) — the element's own CSS
+      // transition (see className below) animates both smoothly, it just
+      // doesn't slide/translate position like the rest of the overlay.
+      const activeTitleIdx = Math.min(
+        PROJECTS.length - 1,
+        Math.max(0, Math.round(titleFRef.current)),
+      );
+      if (activeTitleIdx !== lastUnderlineIdxRef.current) {
+        lastUnderlineIdxRef.current = activeTitleIdx;
+        const activeProject = PROJECTS[activeTitleIdx];
+        const activeGroup =
+          titleRefs.current[activeTitleIdx]?.firstElementChild;
+        if (underlineRef.current) {
+          underlineRef.current.style.background = `linear-gradient(90deg, ${activeProject.color}, transparent)`;
+          if (activeGroup) {
+            underlineRef.current.style.width = `${activeGroup.getBoundingClientRect().width}px`;
+          }
+        }
+      }
+
       for (let i = 0; i < PROJECTS.length; i++) {
+        // Title (icon + name, moving as one block): same slide + opacity
+        // fade treatment as the description/actions rows below — just
+        // horizontal instead of vertical, same direction as actions (the
+        // two rows slide in from the same side; description is reversed
+        // from both, same as it already was).
         const tEl = titleRefs.current[i];
         if (tEl) {
           const d = i - titleFRef.current;
@@ -341,7 +391,7 @@ export function ProjectsSection() {
             tEl.style.opacity = String(
               1 - smoothstep(OPACITY_PLATEAU, OPACITY_FADE_END, ad),
             );
-            tEl.style.transform = `translateY(${d * TITLE_SLIDE_PX}px)`;
+            tEl.style.transform = `translateX(${-d * TITLE_SLIDE_PX}px)`;
           } else if (tEl.style.opacity !== "0") {
             tEl.style.opacity = "0";
           }
@@ -411,6 +461,15 @@ export function ProjectsSection() {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchmove", handleTouchMove);
       gsap.ticker.remove(updateOverlay);
+      // updateOverlay is what drives pointer-events on each project's
+      // actions row (tags/visit link) — with the ticker stopped, whichever
+      // one was "near" the moment the section went inactive stays
+      // pointer-events:auto forever, hoverable/clickable even though the
+      // whole overlay is now invisible and the section unpinned. Force
+      // every row back to none here so nothing is left interactive.
+      for (const el of actionsRefs.current) {
+        if (el) el.style.pointerEvents = "none";
+      }
       // Safety net: if the section is left mid-gesture, make sure Lenis
       // isn't left reading deltaX for normal vertical scroll elsewhere.
       const lenis = lenisInstance.current;
@@ -471,11 +530,17 @@ export function ProjectsSection() {
             per card crossing (that swap — React re-render + GSAP tweens +
             a fresh <img> decode, repeated on every one of 15 cards — was
             the confirmed source of dropped frames while scrolling). */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pb-7 md:pb-14">
-          {/* Title row */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pb-10 md:pb-14">
+          {/* Title row — icon + name move together as one block, sliding
+              horizontally with the same slide+fade treatment as the
+              description/actions rows below (same direction as actions,
+              opposite of description). The colored underline is NOT part
+              of that moving stack — it stays in a fixed position (no
+              translate/slide) while its own color+width cross to the
+              active project via a plain CSS transition. */}
           <div
             ref={titleWrapRef}
-            className="relative w-full overflow-hidden opacity-0"
+            className="relative w-full overflow-x-hidden overflow-y-visible opacity-0"
             style={{ height: TITLE_ROW_PX }}
           >
             {PROJECTS.map((project, i) => (
@@ -484,9 +549,13 @@ export function ProjectsSection() {
                 ref={(el) => {
                   titleRefs.current[i] = el;
                 }}
-                className="absolute inset-x-0 top-0 flex flex-col items-center gap-2 opacity-0"
+                className="absolute inset-x-0 top-0 flex justify-center"
               >
-                <div className="relative flex items-end gap-2">
+                {/* Inner group is content-sized (icon + gap + name), unlike
+                    its `inset-x-0` parent above — that's what lets the
+                    underline measure the icon+name group's real combined
+                    width instead of the parent's full stretched width. */}
+                <div className="flex items-end gap-2">
                   {project.logo && (
                     <div
                       className={cn(
@@ -503,24 +572,22 @@ export function ProjectsSection() {
                       />
                     </div>
                   )}
-                  <h3 className="relative inline-block text-balance font-bold text-2xl text-white tracking-tight sm:text-3xl">
+                  <h3 className="relative inline-block whitespace-nowrap font-bold text-2xl text-white tracking-tight sm:text-3xl">
                     {project.name}
                   </h3>
-                  <span
-                    className="absolute -bottom-1.5 left-0 h-0.5 w-full rounded-full"
-                    style={{
-                      background: `linear-gradient(90deg, ${project.color}, transparent)`,
-                    }}
-                  />
                 </div>
               </div>
             ))}
+            <span
+              ref={underlineRef}
+              className="absolute bottom-0 left-1/2 h-0.5 -translate-x-1/2 rounded-full transition-all duration-300 ease-out"
+            />
           </div>
 
           {/* Description row */}
           <div
             ref={descWrapRef}
-            className="relative mb-4 w-full max-w-sm overflow-x-hidden overflow-y-visible opacity-0 sm:max-w-lg"
+            className="relative mt-3 mb-4 w-full max-w-sm overflow-x-hidden overflow-y-visible opacity-0 sm:max-w-lg"
             style={{ height: `${DESC_ROW_EM}em` }}
           >
             {PROJECTS.map((project, i) => (
@@ -529,7 +596,7 @@ export function ProjectsSection() {
                 ref={(el) => {
                   descRefs.current[i] = el;
                 }}
-                className="absolute inset-x-0 top-0 px-6 text-center text-white/60 text-xs leading-relaxed opacity-0 sm:px-0 sm:text-sm"
+                className="absolute inset-x-0 top-0 line-clamp-3 px-6 text-center text-white/60 text-xs leading-relaxed opacity-0 sm:line-clamp-none sm:px-0 sm:text-sm"
               >
                 {project.description}
               </p>
@@ -546,7 +613,9 @@ export function ProjectsSection() {
           <div
             ref={actionsWrapRef}
             className="relative w-full overflow-x-clip overflow-y-visible opacity-0"
-            style={{ height: ACTIONS_ROW_PX }}
+            style={{
+              height: isMobile ? ACTIONS_ROW_PX_MOBILE : ACTIONS_ROW_PX,
+            }}
           >
             {PROJECTS.map((project, i) => (
               <div
