@@ -3,12 +3,19 @@
   
 # 👋 Hi, I'm Mohamed H. Aly
 
-  <img src="https://img.shields.io/badge/Frontend%20Engineer-Next.js%20%7C%20React%20%7C%20TypeScript-blue" />
+  <img src="https://img.shields.io/badge/Senior%20Software%20Developer-blue" />
   <img src="https://img.shields.io/badge/Location-Cairo,%20Egypt-orange" />
-  <img src="https://img.shields.io/badge/Contact-mohamedh.aly@hotmail.com-green" />
+  <a href="mailto:mohamedh.aly@hotmail.com">
+    <img src="https://img.shields.io/badge/Contact-mohamedh.aly@hotmail.com-green" />
+    </a>
   <br/>
-  <a href="https://metwesh.github.io/portfolio/"><img src="https://img.shields.io/badge/Portfolio-Visit-blueviolet?logo=Firefox" /></a>
-  <a href="https://www.linkedin.com/in/mohamed-h-aly/"><img src="https://img.shields.io/badge/LinkedIn-Connect-blue?logo=LinkedIn" /></a>
+  <a href="https://metwesh.github.io/portfolio/">
+    <img src="https://img.shields.io/badge/Portfolio-Visit-blueviolet?logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bS0xIDE3LjkzYy0zLjk1LS40OS03LTMuODUtNy03LjkzIDAtLjYyLjA4LTEuMjEuMjEtMS43OUw5IDE1djFjMCAxLjEuOSAyIDIgMnYxLjkzem02LjktMi41NGMtLjI2LS44MS0xLTEuMzktMS45LTEuMzloLTF2LTNjMC0uNTUtLjQ1LTEtMS0xSDh2LTJoMmMuNTUgMCAxLS40NSAxLTFWN2gyYzEuMSAwIDItLjkgMi0ydi0uNDFjMi45MyAxLjE5IDUgNC4wNiA1IDcuNDEgMCAyLjA4LS44IDMuOTctMi4xIDUuMzl6Ii8+PC9zdmc+" />
+  </a>
+  
+  <a href="https://www.linkedin.com/in/mohamed-h-aly/">
+    <img src="https://img.shields.io/badge/LinkedIn-Connect-blue?logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZiI+PHBhdGggZD0iTTIwLjQ0NyAyMC40NTJoLTMuNTU0di01LjU2OWMwLTEuMzI4LS4wMjctMy4wMzctMS44NTItMy4wMzctMS44NTMgMC0yLjEzNiAxLjQ0NS0yLjEzNiAyLjkzOXY1LjY2N0g5LjM1MVY5aDMuNDE0djEuNTYxaC4wNDZjLjQ3Ny0uOSAxLjYzNy0xLjg1IDMuMzctMS44NSAzLjYwMSAwIDQuMjY3IDIuMzcgNC4yNjcgNS40NTV2Ni4yODZ6TTUuMzM3IDcuNDMzYTIuMDYyIDIuMDYyIDAgMCAxLTIuMDYzLTIuMDY1IDIuMDY0IDIuMDY0IDAgMSAxIDIuMDYzIDIuMDY1em0xLjc4MiAxMy4wMTlIMy41NTVWOWgzLjU2NHYxMS40NTJ6TTIyLjIyNSAwSDEuNzcxQy43OTIgMCAwIC43NzQgMCAxLjcyOXYyMC41NDJDMCAyMy4yMjcuNzkyIDI0IDEuNzcxIDI0aDIwLjQ1MUMyMy4yIDI0IDI0IDIzLjIyNyAyNCAyMi4yNzFWMS43MjlDMjQgLjc3NCAyMy4yIDAgMjIuMjIyIDBoLjAwM3oiLz48L3N2Zz4=" />
+  </a>
 </div>
 
 ---
@@ -16,40 +23,60 @@
 ## 🚀 About Me
 
 - 📍 Cairo, Egypt
-- 💻 Frontend Engineer | Senior Frontend Engineer | Interface Specialist
-- 🏢 THE ADDRESS HOLDING, SIDEUP, ADVANCED COMPUTER TECHNOLOGIES (ACT)
+- 💻 Senior Software Developer | Senior Frontend Engineer | Frontend Engineer | Interface Specialist
+- 🏢 E& (Etisalat UAE), THE ADDRESS HOLDING, SIDEUP, ADVANCED COMPUTER TECHNOLOGIES (ACT)
 - 🎓 B.S. Management Information Systems, Arab Academy for Science & Technology
 
 ---
 
 ## 💼 Experience
 
-| Company             | Role                     | Duration            |
-| ------------------- | ------------------------ | ------------------- |
-| THE ADDRESS HOLDING | Frontend Engineer        | Nov 2024 - Present  |
-| SIDEUP              | Senior Frontend Engineer | Dec 2023 – Nov 2024 |
-| SIDEUP              | Frontend Engineer        | Feb 2023 – Dec 2023 |
-| ACT                 | Interface Specialist     | Feb 2022 - Feb 2023 |
+| Company             | Role                      | Duration            |
+| ------------------- | ------------------------- | ------------------- |
+| E& (Etisalat UAE)   | Senior Software Developer | Dec 2025 - Present  |
+| THE ADDRESS HOLDING | Frontend Engineer         | Nov 2024 - Dec 2025 |
+| SIDEUP              | Senior Frontend Engineer  | Dec 2023 – Nov 2024 |
+| SIDEUP              | Frontend Engineer         | Feb 2023 – Dec 2023 |
+| ACT                 | Interface Specialist      | Feb 2022 - Feb 2023 |
 
 <details>
   <summary>🔎 See More</summary>
 
-- **THE ADDRESS HOLDING**
+- **E& (Etisalat UAE)**
+  - **Senior Software Developer (Dec 2025 – Present)**
 
-  - Built CRMs/HRMs with Next.js, focusing on performance and scalability.
-  - Led property listing e-commerce site (85%+ code authored).
-  - SEO: SSR & dynamic routing for organic visibility.
-  - Collaborated with designers & backend for seamless UI/UX.
+  - Modernized a 15-year-old Java Server Faces CIM portal to React using a micro-frontend architecture, with each module backed by a dedicated BFF microservice.
+  - Reduced internal component library size from 50 MB to under 5 MB by removing redundancy and dead code while preserving full feature parity.
+  - Optimized interactive data-grid cell selection from $O(n)$ to $O(1)$ by replacing linear scans with direct index lookups.
+  - Drove React adoption across teams transitioning from legacy JSF by establishing standards and patterns that accelerated delivery across micro-frontend modules.
+
+- **THE ADDRESS HOLDING**
+  - **Frontend Engineer (Nov 2024 – Dec 2025)**
+
+  - Built CRM and HRM platforms with Next.js, focusing on performance, scalability, and maintainability.
+  - Led frontend delivery of a property-listing e-commerce platform and authored over 85% of the codebase.
+  - Implemented SSR and dynamic routing strategies to strengthen SEO and improve organic visibility.
+  - Collaborated closely with design and backend teams to deliver cohesive, high-quality user experiences.
 
 - **SIDEUP**
+  - **Senior Frontend Engineer (Dec 2023 – Nov 2024)**
+    - Led and mentored junior engineers, fostering a collaborative environment that strengthened team capability and productivity.
+    - Provided hands-on coding leadership through effective task distribution and ownership of complex features to ensure high code quality.
+    - Partnered with stakeholders to shape dashboard direction around user needs and business objectives.
+    - Drove process optimizations that streamlined workflows and improved code efficiency and reliability.
 
-  - Mentored engineers, led dashboard direction, optimized workflows.
-  - Built B2C shipping dashboard (React, TypeScript, Bootstrap).
-  - Ensured robust code quality and system reliability.
+  - **Frontend Engineer (Feb 2023 – Dec 2023)**
+    - Led frontend development of a B2C shipping dashboard using React, TypeScript, and Bootstrap, ensuring seamless backend integration.
+    - Collaborated with UX designers to deliver intuitive interfaces that improved usability and user satisfaction.
+    - Partnered with QA on rigorous testing and debugging to maintain high reliability and performance.
+    - Quickly adopted Next.js and Material UI to maintain and enhance previous versions, demonstrating strong adaptability.
 
 - **ACT**
-  - Integrated hotel digital subsystems (Door Lock, IPTV, POS) with PMS.
-  - Coordinated Oracle Opera Web Services for 480+ IHG hotels globally.
+  - **Interface Specialist (Feb 2022 – Feb 2023)**
+    - Integrated hotel digital subsystems, including Door Lock Systems, IPTV, and POS, with Property Management Systems to enable seamless operations.
+    - Collaborated in agile environments to prioritize stakeholder requirements and maintain strong cross-team alignment.
+    - Performed remote troubleshooting by analyzing logs and error codes to reduce downtime and accelerate issue resolution.
+    - Coordinated integration of Oracle Opera Web Services for 480+ IHG hotels globally within four months, ensuring timely execution across multiple stakeholders.
 
 </details>
 
@@ -75,7 +102,7 @@
 ## 📊 Stats
 
 <p align="center">
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=Metwesh&theme=radical" width="400" />
+  <img src="https://streak-stats.demolab.com/?user=Metwesh&theme=radical" width="400" />
 </p>
 
 ---
@@ -83,67 +110,15 @@
 ## 📫 Contact
 
 - 📧 Email: <mohamedh.aly@hotmail.com>
+- 📱 Tel: +20 127 818 9999
 - 🌐 [Portfolio Website](https://metwesh.github.io/portfolio/)
 - 💼 [LinkedIn](https://www.linkedin.com/in/mohamed-h-aly/)
-- 📱 +201065583557
 
 ---
 
 ## 🏆 Projects & Certificates
 
 A comprehensive list of all the projects I've contributed to, including detailed descriptions and the technologies utilized, can be found in my [online portfolio](https://metwesh.github.io/portfolio/). Additionally, my completed courses and certificates are available there as well.
-
----
-
-## 🛠️ Development
-
-### Prerequisites
-
-- Node.js 18+ or higher
-- Yarn package manager
-
-### Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/Metwesh/portfolio.git
-cd portfolio
-
-# Install dependencies
-yarn install
-
-# Start development server
-yarn dev
-```
-
-### Available Scripts
-
-- `yarn dev` - Start development server
-- `yarn build` - Build for production
-- `yarn build:analyze` - Build with bundle analysis
-- `yarn preview` - Preview production build
-- `yarn test` - Run tests
-- `yarn test:ui` - Run tests with UI
-- `yarn test:coverage` - Generate test coverage
-- `yarn lint` - Lint code
-- `yarn prettier` - Format code
-- `yarn system:fix` - Run all checks and fixes
-
-### Tech Stack
-
-- **Framework**: React 19 + TypeScript
-- **Styling**: Tailwind CSS 4
-- **3D Graphics**: Three.js + React Three Fiber
-- **Build Tool**: Vite 7
-- **Testing**: Vitest + React Testing Library
-- **Code Quality**: BiomeJS
-- **PWA**: Vite PWA Plugin
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
