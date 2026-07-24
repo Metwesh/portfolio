@@ -22,8 +22,6 @@ let _touchStartX = 0;
 let _touchStartY = 0;
 let _touchLastX = 0;
 let _touchLock: "x" | "y" | null = null;
-let _wheelTickScheduled = false;
-let _wheelDeltaAccum = 0;
 let _wheelLock: "x" | "y" | null = null;
 let _wheelLockTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -139,52 +137,46 @@ export function ProjectsSection() {
     const handleLoad = () => ScrollTrigger.refresh();
     window.addEventListener("load", handleLoad);
 
+    // Earlier versions of this handler read deltaX itself and drove
+    // lenis.scrollTo(..., { immediate: true }) manually to convert
+    // horizontal wheel input into forward progress through the pin. That
+    // path bypasses Lenis's own inertia entirely, so it had to reimplement
+    // momentum from scratch — accumulate deltas, release them gradually —
+    // which turned out to alias against the render tick: however many
+    // wheel events land in the window before any given tick varies (the
+    // wheel-event clock and the rAF/tick clock are independent), so "release
+    // a fraction of whatever's queued this tick" is inherently lumpy frame
+    // to frame. That showed up as measurable stutter (confirmed via traced
+    // frame data, not just guesswork) that persisted no matter how the
+    // release curve was tuned, because the lumpiness was in the input to
+    // that curve, not its shape.
+    //
+    // Lenis's own native wheel listener (always live, via VirtualScroll) is
+    // already the proven, battle-tested engine behind every other smooth
+    // scroll on this site — it just defaults to reading deltaY. Rather than
+    // fighting or reimplementing it, this handler now only decides *which*
+    // axis Lenis should read for the live gesture (sticky per gesture, same
+    // hysteresis as before) and lets Lenis's own scrollTo/easing do the
+    // actual motion — inheriting its already-smooth behavior instead of a
+    // second, competing implementation.
     function handleWheel(e: WheelEvent) {
       if (!scrollStore.projectSectionActive) return;
       const absX = Math.abs(e.deltaX);
       const absY = Math.abs(e.deltaY);
+      const lenis = lenisInstance.current;
 
-      // Lock to whichever axis dominates at gesture start and hold that
-      // lock until the gesture goes quiet — mirrors the touch handler
-      // below. Without this, a single wheel tick where deltaX momentarily
-      // edges out deltaY (common trackpad noise during momentum
-      // deceleration) hijacks that one event into an immediate/un-eased
-      // scroll jump, producing a visible stutter mid-glide.
       if (_wheelLock === null && (absX > 3 || absY > 3)) {
         _wheelLock = absX > absY ? "x" : "y";
+        if (lenis) {
+          lenis.options.gestureOrientation =
+            _wheelLock === "x" ? "horizontal" : "vertical";
+        }
       }
       if (_wheelLockTimer) clearTimeout(_wheelLockTimer);
       _wheelLockTimer = setTimeout(() => {
         _wheelLock = null;
+        if (lenis) lenis.options.gestureOrientation = "vertical";
       }, 150);
-
-      if (_wheelLock !== "x") return;
-
-      e.preventDefault();
-      _wheelDeltaAccum += e.deltaX;
-      if (!_wheelTickScheduled) {
-        _wheelTickScheduled = true;
-        // Apply on gsap.ticker rather than our own requestAnimationFrame —
-        // a separate native rAF here raced the ticker that drives
-        // Lenis/ScrollTrigger/the R3F render loop, and desynced worst at
-        // slow scroll (small per-tick deltas make the phase drift visible).
-        const onTick = () => {
-          gsap.ticker.remove(onTick);
-          _wheelTickScheduled = false;
-          const lenis = lenisInstance.current;
-          if (lenis) {
-            lenis.scrollTo(
-              Math.max(
-                0,
-                Math.min(lenis.limit, lenis.scroll + _wheelDeltaAccum * 1.5),
-              ),
-              { immediate: true },
-            );
-          }
-          _wheelDeltaAccum = 0;
-        };
-        gsap.ticker.add(onTick);
-      }
     }
 
     function handleTouchStart(e: TouchEvent) {
@@ -230,7 +222,10 @@ export function ProjectsSection() {
     function attachActiveListeners() {
       if (activeListenersAttached) return;
       activeListenersAttached = true;
-      window.addEventListener("wheel", handleWheel, { passive: false });
+      // handleWheel no longer calls preventDefault itself (Lenis's own
+      // listener does that once it processes the event), but touchmove
+      // still needs to stay non-passive for its own manual scrollTo below.
+      window.addEventListener("wheel", handleWheel, { passive: true });
       window.addEventListener("touchmove", handleTouchMove, {
         passive: false,
       });
@@ -240,6 +235,10 @@ export function ProjectsSection() {
       activeListenersAttached = false;
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchmove", handleTouchMove);
+      // Safety net: if the section is left mid-gesture, make sure Lenis
+      // isn't left reading deltaX for normal vertical scroll elsewhere.
+      const lenis = lenisInstance.current;
+      if (lenis) lenis.options.gestureOrientation = "vertical";
     }
 
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
@@ -253,6 +252,9 @@ export function ProjectsSection() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
+      if (lenisInstance.current) {
+        lenisInstance.current.options.gestureOrientation = "vertical";
+      }
       if (_wheelLockTimer) clearTimeout(_wheelLockTimer);
       _wheelLock = null;
       section.style.height = "";

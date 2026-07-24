@@ -143,6 +143,16 @@ function GalleryCards() {
   const responsiveScaleRef = useRef(1.0);
   const lastSizeRef = useRef({ width: 0, height: 0 });
 
+  // Single filtered copy of activeF, shared by every per-card dist/band/rotation
+  // target below. Deriving those straight from the raw activeF (each then
+  // re-damped independently, with its own lambda) let scale/opacity/rotation
+  // drift out of phase with each other and with the group's own (separately
+  // damped) position — reads as jitter once per-frame scroll deltas get small
+  // (slow scroll, or fast scroll decelerating to a stop). One shared filtered
+  // source keeps every card property moving in lockstep, same fix pattern as
+  // CameraRig's single smoothed position feeding the M piece.
+  const smoothedActiveFRef = useRef(0);
+
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
@@ -197,6 +207,13 @@ function GalleryCards() {
       0.1,
       delta,
     );
+    smoothedActiveFRef.current = damp(
+      smoothedActiveFRef.current,
+      activeF,
+      0.1,
+      delta,
+    );
+    const smoothActiveF = smoothedActiveFRef.current;
 
     // Single loop drives all cards — replaces N separate useFrame subscriptions
     const exiting = !active && p > 0.01;
@@ -212,7 +229,7 @@ function GalleryCards() {
       )
         continue;
 
-      const dist = Math.abs(activeF - i);
+      const dist = Math.abs(smoothActiveF - i);
       // Continuous near/mid/far blend instead of hard dist thresholds —
       // a step function here means damp() can fully settle into one tier
       // (scale/opacity/etc.) before the target suddenly flips to the next,
@@ -280,7 +297,10 @@ function GalleryCards() {
       );
       border.current.position.y = mesh.current.position.y;
 
-      const targetRotY = Math.max(-0.25, Math.min(0.25, (activeF - i) * 0.12));
+      const targetRotY = Math.max(
+        -0.25,
+        Math.min(0.25, (smoothActiveF - i) * 0.12),
+      );
       mesh.current.rotation.y = damp(
         mesh.current.rotation.y,
         targetRotY,
