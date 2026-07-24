@@ -3,10 +3,11 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
+  AdditiveBlending,
   CanvasTexture,
+  Color,
   type Group as ThreeGroup,
   type Mesh as ThreeMesh,
-  type MeshBasicMaterial as ThreeMeshBasicMaterial,
   MeshMatcapMaterial as ThreeMeshMatcapMaterial,
 } from "three";
 import { CENTERPIECE_PATH } from "../constants/misc";
@@ -16,9 +17,42 @@ import { scrollStore } from "../stores/scrollStore";
 
 // Module-level constants — no allocation inside useFrame
 const _lerpVal = (a: number, b: number, t: number) => a + (b - a) * t;
-const RING_BASES = [0.38, 0.3, 0.22] as const;
-const RING_HUES = [0.53, 0.78, 0.0] as const;
-const RING_SATS = [1.0, 0.85, 0.0] as const;
+const RING_BASES = [0.95, 0.8, 0.65] as const;
+// Ordered center-out by ring radius (ring3=2.4 innermost, ring1=2.8, ring2=3.2 outermost):
+// cyan -> white -> purple
+const RING_HUES = [0.0, 0.78, 0.53] as const;
+const RING_SATS = [0.0, 0.85, 1.0] as const;
+
+// Fresnel rim-glow shader — the tube brightens toward its silhouette edges
+// (grazing view angle), reading as a soft glowing energy ring instead of a
+// flat-shaded matte tube. Additive blending + toneMapped=false in the JSX
+// let the color punch past ACES tonemapping instead of getting crushed.
+// Opacity/pulse/fade is baked into uColor's magnitude (scaled in JS) rather
+// than a separate float uniform — three shares one compiled program across
+// all 3 rings (identical shader source), and a second scalar uniform on that
+// shared program was silently failing to reach the GPU across instances;
+// folding fade into the already-working vec3 color sidesteps it.
+const RING_VERTEX_SHADER = /* glsl */ `
+  varying vec3 vNormal;
+  varying vec3 vViewPosition;
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    vViewPosition = -mvPosition.xyz;
+    gl_Position = projectionMatrix * mvPosition;
+  }
+`;
+const RING_FRAGMENT_SHADER = /* glsl */ `
+  varying vec3 vNormal;
+  varying vec3 vViewPosition;
+  uniform vec3 uColor;
+  void main() {
+    vec3 viewDir = normalize(vViewPosition);
+    float rim = pow(1.0 - abs(dot(viewDir, normalize(vNormal))), 2.4);
+    float intensity = 0.4 + rim * 1.6;
+    gl_FragColor = vec4(uColor * intensity, 1.0);
+  }
+`;
 
 function createMatcapTexture(): CanvasTexture {
   const size = 256;
@@ -109,6 +143,13 @@ export function MLogo() {
   const ring3Ref = useRef<ThreeMesh>(null);
   // Stable array — avoids allocating [ring1Ref, ring2Ref, ring3Ref] every frame
   const ringRefsArrRef = useRef([ring1Ref, ring2Ref, ring3Ref]);
+  // Stable shader uniforms — one {uColor} per ring, mutated in-place each
+  // frame. Fade/pulse is baked into the color's magnitude (see shader consts).
+  const ringUniformsRef = useRef([
+    { uColor: { value: new Color() } },
+    { uColor: { value: new Color() } },
+    { uColor: { value: new Color() } },
+  ]);
 
   // Ring animation state
   const ringTiltRef = useRef(0); // 0 = all-flat (saturn rings), 1 = orb config
@@ -170,26 +211,20 @@ export function MLogo() {
     ringDramaRef.current +=
       ((isSelected ? 1 : 0) - ringDramaRef.current) * 0.05;
     const drama = ringDramaRef.current;
-    // ring hue bases: cyan ~0.53, purple ~0.78, white (s=0)
     const glow = drama > 0 ? 1 + Math.sin(drama * Math.PI) * 0.8 : 1;
     const ringFade = drama > 0 ? Math.max(0, 1 - drama * 1.2) : op;
     for (let i = 0; i < 3; i++) {
-      const ref = ringRefsArrRef.current[i];
-      const mat = ref.current?.material as ThreeMeshBasicMaterial | undefined;
-      if (!mat) continue;
+      if (!ringRefsArrRef.current[i].current) continue;
+      const uniforms = ringUniformsRef.current[i];
       // Per-ring opacity pulse at different frequencies + phases
       const pulse = 0.72 + Math.sin(t * (1.0 + i * 0.35) + i * 2.09) * 0.28;
       const newOpacity = Math.min(1, RING_BASES[i] * glow * ringFade * pulse);
-      mat.opacity = newOpacity;
       // Slow hue drift
       const hShift = Math.sin(t * 0.25 + i * 1.57) * 0.04;
-      const lum = 0.65 + Math.sin(t * 0.6 + i * 1.0) * 0.1;
-      mat.color.setHSL(RING_HUES[i] + hShift, RING_SATS[i], lum);
-      const shouldBeTransparent = newOpacity < 0.99;
-      if (mat.transparent !== shouldBeTransparent) {
-        mat.transparent = shouldBeTransparent;
-        mat.needsUpdate = true;
-      }
+      const lum = 0.7 + Math.sin(t * 0.6 + i * 1.0) * 0.12;
+      uniforms.uColor.value
+        .setHSL(RING_HUES[i] + hShift, RING_SATS[i], lum)
+        .multiplyScalar(newOpacity);
     }
 
     if (reducedMotion || !group.current) return;
@@ -311,18 +346,44 @@ export function MLogo() {
       >
         <primitive object={scene} />
 
-        {/* Orbital rings — co-move with the M logo */}
+        {/* Orbital rings — co-move with the M logo. Fresnel rim-glow shader:
+            brightens toward the silhouette edge like a lit energy ring,
+            instead of a flat matte tube. */}
         <mesh ref={ring1Ref} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[2.8, 0.042, 16, 80]} />
-          <meshBasicMaterial color="#00eeff" opacity={0.38} transparent />
+          <shaderMaterial
+            uniforms={ringUniformsRef.current[0]}
+            vertexShader={RING_VERTEX_SHADER}
+            fragmentShader={RING_FRAGMENT_SHADER}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
         </mesh>
         <mesh ref={ring2Ref} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[3.2, 0.034, 16, 80]} />
-          <meshBasicMaterial color="#a855f7" opacity={0.3} transparent />
+          <shaderMaterial
+            uniforms={ringUniformsRef.current[1]}
+            vertexShader={RING_VERTEX_SHADER}
+            fragmentShader={RING_FRAGMENT_SHADER}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
         </mesh>
         <mesh ref={ring3Ref} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[2.4, 0.038, 16, 80]} />
-          <meshBasicMaterial color="#ffffff" opacity={0.22} transparent />
+          <shaderMaterial
+            uniforms={ringUniformsRef.current[2]}
+            vertexShader={RING_VERTEX_SHADER}
+            fragmentShader={RING_FRAGMENT_SHADER}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
         </mesh>
       </a.group>
     </group>

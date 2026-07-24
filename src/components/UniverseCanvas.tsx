@@ -34,6 +34,7 @@ const SPHERE_RADIUS = 8;
 const _techDrag = {
   velY: 0, // Y-axis (horizontal drag) velocity
   velX: 0, // X-axis (vertical drag) velocity
+  active: false, // true while a grab-drag gesture is in progress
 };
 
 // ─── Tech Constellation ──────────────────────────────────────────────────────
@@ -113,11 +114,12 @@ function TechConstellation({
     // Scroll-driven spin + idle auto-spin — paused while a box is selected or hovered
     const rawDelta = scrollStore.raw - prevRawRef.current;
     prevRawRef.current = scrollStore.raw;
-    if (inView && !selected && !hovered) {
+    const dragging = _techDrag.active;
+    if (inView && !selected && !hovered && !dragging) {
       scrollVelRef.current += rawDelta * 0.00008;
       scrollVelRef.current += 0.00009; // idle auto-spin
     }
-    scrollVelRef.current *= selected || hovered ? 0.93 : 0.97;
+    scrollVelRef.current *= selected || hovered || dragging ? 0.93 : 0.97;
     rotYRef.current += scrollVelRef.current;
 
     // Clamp X tilt so the sphere never flips completely upside-down
@@ -307,6 +309,7 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
       lastX = e.clientX;
       lastY = e.clientY;
       active = true;
+      _techDrag.active = true;
       _techDrag.velY = 0;
       _techDrag.velX = 0;
     };
@@ -327,6 +330,11 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
 
     const onUp = () => {
       active = false;
+      _techDrag.active = false;
+      // Pointer may have come to rest over a box mesh with no further move
+      // event to fire its pointerleave (e.g. trackpad scroll afterward) —
+      // clear the stale hover so scroll-driven spin doesn't stay frozen.
+      scrollStore.techBoxHovered = false;
     };
 
     el.addEventListener("pointerdown", onDown);
