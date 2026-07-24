@@ -9,8 +9,8 @@ import {
   useState,
 } from "react";
 import type * as THREE from "three";
-import { BasicShadowMap, PCFShadowMap, Vector3 as ThreeVector3 } from "three";
-import { technologies } from "../constants/technologies";
+import { Vector3 as ThreeVector3 } from "three";
+import { TECHNOLOGIES } from "../constants/technologies";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { LIGHT_ARGUMENTS } from "../shaders/FogArguments";
 import { scrollStore } from "../stores/scrollStore";
@@ -23,8 +23,6 @@ import { TechBox } from "./TechBox";
 import { TechTooltip } from "./TechTooltip";
 
 // Quality-derived constants — stable for the session
-const SHADOW_MAP_TYPE = qualityTier === "high" ? PCFShadowMap : BasicShadowMap;
-const ENABLE_SHADOWS = qualityTier !== "low";
 // Cap DPR: high=1.5, medium/low=1 — biggest fill-rate win on Retina screens
 const MAX_DPR = qualityTier === "high" ? 1.5 : 1;
 
@@ -56,12 +54,12 @@ function TechConstellation({
 
   const points = useMemo(() => {
     const temp = [];
-    const offset = 2 / technologies.length;
+    const offset = 2 / TECHNOLOGIES.length;
     const increment = Math.PI * (3 - Math.sqrt(5));
-    for (let i = 0; i < technologies.length; i++) {
+    for (let i = 0; i < TECHNOLOGIES.length; i++) {
       const y = i * offset - 1 + offset / 2;
       const r = Math.sqrt(1 - y ** 2);
-      const phi = ((i + 1) % technologies.length) * increment;
+      const phi = ((i + 1) % TECHNOLOGIES.length) * increment;
       const x = Math.cos(phi) * r;
       const z = Math.sin(phi) * r;
       temp.push(
@@ -176,10 +174,10 @@ function TechConstellation({
           const isSelected = selectedIndex === index;
           return (
             <TechBox
-              key={`${technologies[index].name}-${index}`}
+              key={`${TECHNOLOGIES[index].name}-${index}`}
               index={index}
               position={targetPosition}
-              data={technologies[index]}
+              data={TECHNOLOGIES[index]}
               onClick={() =>
                 setSelectedIndex(selectedIndex === index ? null : index)
               }
@@ -200,8 +198,8 @@ function TechConstellation({
           style={{ pointerEvents: "auto", userSelect: "none" }}
         >
           <TechTooltip
-            technologyName={technologies[selectedIndex].name}
-            isWip={technologies[selectedIndex].wip || false}
+            technologyName={TECHNOLOGIES[selectedIndex].name}
+            isWip={TECHNOLOGIES[selectedIndex].wip || false}
             onClose={handleClose}
             onPointerDown={handleButtonPointerDown}
             onPointerUp={handleButtonPointerUp}
@@ -351,10 +349,20 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
     >
       <Canvas
         gl={{ antialias: qualityTier === "high" }}
-        shadows={ENABLE_SHADOWS ? { type: SHADOW_MAP_TYPE } : false}
         dpr={[1, MAX_DPR]}
+        // R3F's default useMeasure config re-measures the container on
+        // native "scroll" events (debounced 50ms) in case a scrolled-into-
+        // view canvas needs to resize. This wrapper is `fixed inset-0` —
+        // its size never depends on scroll position — so that listener
+        // only ever adds a forced-layout task ~50ms after scrolling stops,
+        // which is exactly when a user pauses on a focused gallery card.
+        resize={{ scroll: false }}
         frameloop={
-          isTabHidden ? "never" : prefersReducedMotion ? "demand" : "always"
+          // "never": rendering is driven manually by advance() from the same
+          // gsap.ticker callback that drives Lenis + ScrollTrigger, so scroll
+          // and camera share one clock instead of racing two independent
+          // rAF loops (R3F's default "always" loop vs GSAP's ticker).
+          isTabHidden ? "never" : prefersReducedMotion ? "demand" : "never"
         }
         performance={{ min: 0.5 }}
       >
@@ -368,11 +376,7 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
           {!prefersReducedMotion && <CameraRig mouse={mouse} />}
 
           <ambientLight intensity={0.7} />
-          <directionalLight
-            position={[5, 10, 5]}
-            intensity={1.2}
-            castShadow={ENABLE_SHADOWS}
-          />
+          <directionalLight position={[5, 10, 5]} intensity={1.2} />
           <Environment background={false} resolution={64}>
             <ambientLight intensity={0.1} />
             <pointLight

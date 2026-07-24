@@ -4,11 +4,11 @@ import { lazy, Suspense } from "react";
 import { Footer, Header } from "./components";
 import { CustomCursor } from "./components/CustomCursor";
 import { UniverseCanvas } from "./components/UniverseCanvas";
-import { mainLogoPath } from "./constants";
+import { CENTERPIECE_PATH } from "./constants/misc";
 import { useLenisScroll } from "./hooks/useLenisScroll";
 
 // Preload the model
-useGLTF.preload(mainLogoPath);
+useGLTF.preload(CENTERPIECE_PATH);
 
 // Lazy load sections for better performance — import each section's own
 // file directly (not the barrel) so Rollup can actually split them into

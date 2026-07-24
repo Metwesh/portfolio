@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { ScrollHelper } from "../components";
 import { SectionHeading } from "../components/SectionHeading";
-import { navLinks } from "../constants";
-import { technologies } from "../constants/technologies";
+import { NAV_LINKS, SKILL_CATEGORIES } from "../constants/misc";
+import { TECHNOLOGIES } from "../constants/technologies";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
-
-const SKILL_CATEGORIES = ["Frontend", "Backend", "DevOps", "Tooling", "Design"];
 
 export function TechStacksSection() {
   const { targetRef: sentinelRef, isIntersecting } = useIntersectionObserver({
@@ -92,7 +90,7 @@ export function TechStacksSection() {
 
         {/* Screen-reader fallback — the 3D sphere is purely visual */}
         <ul className="sr-only">
-          {technologies.map((t) => (
+          {TECHNOLOGIES.map((t) => (
             <li key={t.name}>{t.name}</li>
           ))}
         </ul>
@@ -117,7 +115,7 @@ export function TechStacksSection() {
               transform: isIntersecting ? "translateY(0)" : "translateY(20px)",
             }}
           >
-            {technologies.length} tools.
+            {TECHNOLOGIES.length} tools.
           </p>
 
           {/* Drag hint */}
@@ -180,7 +178,7 @@ export function TechStacksSection() {
             )}
           >
             <ScrollHelper
-              href={navLinks[3].href}
+              href={NAV_LINKS[3].href}
               ariaLabel="Scroll to experience"
               className="flex w-fit"
             />

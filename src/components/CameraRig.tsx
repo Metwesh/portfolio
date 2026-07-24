@@ -4,6 +4,7 @@ import type { PerspectiveCamera as ThreePerspectiveCamera } from "three";
 import { Vector3 } from "three";
 import { CAMERA_WAYPOINTS } from "../constants/cameraWaypoints";
 import { scrollStore } from "../stores/scrollStore";
+import { damp, dampAlpha } from "../utils/damp";
 
 interface CameraRigProps {
   mouse: React.RefObject<{ x: number; y: number }>;
@@ -28,7 +29,7 @@ export function CameraRig({ mouse }: CameraRigProps) {
   // Smooth weight for the projects-section camera lock (0 = free, 1 = locked).
   const projectLockRef = useRef(0);
 
-  useFrame(() => {
+  useFrame((_state, delta) => {
     const progress = scrollStore.progress;
 
     const waypoints = CAMERA_WAYPOINTS;
@@ -56,7 +57,12 @@ export function CameraRig({ mouse }: CameraRigProps) {
 
     // Smooth-lock camera to the projects view while the gallery is pinned.
     const wantsLock = scrollStore.projectSectionActive ? 1 : 0;
-    projectLockRef.current += (wantsLock - projectLockRef.current) * 0.08;
+    projectLockRef.current = damp(
+      projectLockRef.current,
+      wantsLock,
+      0.08,
+      delta,
+    );
     const lw = projectLockRef.current;
     if (lw > 0.001) {
       _targetPos.z = _targetPos.z * (1 - lw) + 14 * lw;
@@ -71,17 +77,17 @@ export function CameraRig({ mouse }: CameraRigProps) {
     const targetFov = prev.fov + (next.fov - prev.fov) * t;
 
     // Normal cinematic lag: smooth position chases target
-    _smoothPos.lerp(_targetPos, 0.06);
+    _smoothPos.lerp(_targetPos, dampAlpha(0.06, delta));
     cam.position.copy(_smoothPos);
 
     // Smooth lookAt transition
-    _currentLookAt.lerp(_targetLookAt, 0.06);
+    _currentLookAt.lerp(_targetLookAt, dampAlpha(0.06, delta));
     cam.lookAt(_currentLookAt);
 
     // FOV lerp — skip matrix rebuild when converged
-    const fovDelta = (targetFov - cam.fov) * 0.05;
-    if (Math.abs(fovDelta) > 0.001) {
-      cam.fov += fovDelta;
+    const dampedFov = damp(cam.fov, targetFov, 0.05, delta);
+    if (Math.abs(dampedFov - cam.fov) > 0.001) {
+      cam.fov = dampedFov;
       cam.updateProjectionMatrix();
     }
   });

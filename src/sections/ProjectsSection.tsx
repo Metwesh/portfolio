@@ -4,17 +4,28 @@ import { useEffect, useRef, useState } from "react";
 import { Odometer, type OdometerHandle } from "../components/Odometer";
 import { SectionHeading } from "../components/SectionHeading";
 import { TagsPopover } from "../components/TagsPopover";
-import { projects } from "../constants/projects";
+import { PROJECTS } from "../constants/projects";
 import { lenisInstance } from "../lib/lenisInstance";
 import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
+
+// Scroll distance per card, as a multiple of viewport width. Lower = faster
+// card sweep per unit of scroll input — at typical slow-scroll speeds, the
+// resulting per-frame movement is large enough to stay clear of the
+// sub-pixel-per-frame range where card motion reads as steppy (a big,
+// sharp-edged object sliding by is the worst case for that perceptual
+// effect; masking it needs more distance covered per frame, not tighter
+// timing — frame pacing here already measured clean).
+const SCROLL_WIDTH_PER_CARD = 0.5;
 
 let _touchStartX = 0;
 let _touchStartY = 0;
 let _touchLastX = 0;
 let _touchLock: "x" | "y" | null = null;
-let _wheelRafId = 0;
+let _wheelTickScheduled = false;
 let _wheelDeltaAccum = 0;
+let _wheelLock: "x" | "y" | null = null;
+let _wheelLockTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -34,10 +45,11 @@ export function ProjectsSection() {
     const section = sectionRef.current;
     if (!section) return;
 
-    const scrollDist = (projects.length - 0.5) * window.innerWidth * 0.65;
+    const scrollDist =
+      (PROJECTS.length - 0.5) * window.innerWidth * SCROLL_WIDTH_PER_CARD;
 
     const setHeight = () => {
-      section.style.height = `${(projects.length - 0.5) * window.innerWidth * 0.65 + window.innerHeight}px`;
+      section.style.height = `${(PROJECTS.length - 0.5) * window.innerWidth * SCROLL_WIDTH_PER_CARD + window.innerHeight}px`;
     };
     setHeight();
 
@@ -49,7 +61,13 @@ export function ProjectsSection() {
           trigger: section,
           start: "top top",
           end: `+=${scrollDist}`,
-          scrub: 1,
+          // Lenis already smooths the underlying scroll position — a numeric
+          // scrub value adds a second, independent lag on top of that,
+          // chasing an already-eased curve. That's what was still causing
+          // choppiness near project-index boundaries after the ticker sync
+          // fix. `scrub: true` tracks progress immediately (matches
+          // HeroSection's ScrollTrigger, which never had this issue).
+          scrub: true,
           invalidateOnRefresh: true,
           onRefresh: setHeight,
           onEnter: () => {
@@ -102,12 +120,12 @@ export function ProjectsSection() {
           },
           onUpdate: (self) => {
             const progress = Math.min(
-              self.progress * ((projects.length - 0.5) / (projects.length - 1)),
+              self.progress * ((PROJECTS.length - 0.5) / (PROJECTS.length - 1)),
               1,
             );
             scrollStore.projectProgress = progress;
 
-            const idx = Math.round(progress * (projects.length - 1));
+            const idx = Math.round(progress * (PROJECTS.length - 1));
             if (idx !== prevIndexRef.current) {
               prevIndexRef.current = idx;
               odometerRef.current?.setValue(idx + 1);
@@ -125,25 +143,47 @@ export function ProjectsSection() {
       if (!scrollStore.projectSectionActive) return;
       const absX = Math.abs(e.deltaX);
       const absY = Math.abs(e.deltaY);
-      if (absX > absY && absX > 3) {
-        e.preventDefault();
-        _wheelDeltaAccum += e.deltaX;
-        if (!_wheelRafId) {
-          _wheelRafId = requestAnimationFrame(() => {
-            const lenis = lenisInstance.current;
-            if (lenis) {
-              lenis.scrollTo(
-                Math.max(
-                  0,
-                  Math.min(lenis.limit, lenis.scroll + _wheelDeltaAccum * 1.5),
-                ),
-                { immediate: true },
-              );
-            }
-            _wheelDeltaAccum = 0;
-            _wheelRafId = 0;
-          });
-        }
+
+      // Lock to whichever axis dominates at gesture start and hold that
+      // lock until the gesture goes quiet — mirrors the touch handler
+      // below. Without this, a single wheel tick where deltaX momentarily
+      // edges out deltaY (common trackpad noise during momentum
+      // deceleration) hijacks that one event into an immediate/un-eased
+      // scroll jump, producing a visible stutter mid-glide.
+      if (_wheelLock === null && (absX > 3 || absY > 3)) {
+        _wheelLock = absX > absY ? "x" : "y";
+      }
+      if (_wheelLockTimer) clearTimeout(_wheelLockTimer);
+      _wheelLockTimer = setTimeout(() => {
+        _wheelLock = null;
+      }, 150);
+
+      if (_wheelLock !== "x") return;
+
+      e.preventDefault();
+      _wheelDeltaAccum += e.deltaX;
+      if (!_wheelTickScheduled) {
+        _wheelTickScheduled = true;
+        // Apply on gsap.ticker rather than our own requestAnimationFrame —
+        // a separate native rAF here raced the ticker that drives
+        // Lenis/ScrollTrigger/the R3F render loop, and desynced worst at
+        // slow scroll (small per-tick deltas make the phase drift visible).
+        const onTick = () => {
+          gsap.ticker.remove(onTick);
+          _wheelTickScheduled = false;
+          const lenis = lenisInstance.current;
+          if (lenis) {
+            lenis.scrollTo(
+              Math.max(
+                0,
+                Math.min(lenis.limit, lenis.scroll + _wheelDeltaAccum * 1.5),
+              ),
+              { immediate: true },
+            );
+          }
+          _wheelDeltaAccum = 0;
+        };
+        gsap.ticker.add(onTick);
       }
     }
 
@@ -213,6 +253,8 @@ export function ProjectsSection() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
+      if (_wheelLockTimer) clearTimeout(_wheelLockTimer);
+      _wheelLock = null;
       section.style.height = "";
       scrollStore.projectProgress = 0;
       scrollStore.projectSectionActive = false;
@@ -254,7 +296,7 @@ export function ProjectsSection() {
     );
   }, [displayIndex]);
 
-  const activeProject = projects[displayIndex];
+  const activeProject = PROJECTS[displayIndex];
   const isClickable = !!activeProject.link;
 
   return (
@@ -277,7 +319,7 @@ export function ProjectsSection() {
           </SectionHeading>
           <span className="flex items-center whitespace-pre font-mono text-sm text-white/60 tabular-nums">
             <Odometer ref={odometerRef} digits={2} initialValue={1} />
-            <span>&nbsp;/&nbsp;{String(projects.length).padStart(2, "0")}</span>
+            <span>&nbsp;/&nbsp;{String(PROJECTS.length).padStart(2, "0")}</span>
           </span>
         </div>
 

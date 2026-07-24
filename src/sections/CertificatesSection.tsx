@@ -1,9 +1,10 @@
 import { SectionHeading } from "../components/SectionHeading";
-import { INTERSECTION_OBSERVER_CONFIG, logoGradientStops } from "../constants";
-import { certificates } from "../constants/certificates";
+import { INTERSECTION_OBSERVER_CONFIG } from "../constants/animations";
+import { CERTIFICATES } from "../constants/certificates";
+import { GLASS_CARD_CLASS, LOGO_GRADIENT_STOPS } from "../constants/misc";
 import { useCardHolographicTilt } from "../hooks/useCardHolographicTilt";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
-import { cn, GLASS_CARD_CLASS } from "../lib/utils";
+import { cn } from "../lib/utils";
 
 const logoFanIds = Array.from({ length: 5 }, (_, i) => `logo-fan-${i}`);
 const tunnelRings = Array.from({ length: 8 }, (_, i) => ({
@@ -107,7 +108,7 @@ function MLLogoCard() {
                   y2="439"
                   gradientUnits="userSpaceOnUse"
                 >
-                  {logoGradientStops.map((stop) => (
+                  {LOGO_GRADIENT_STOPS.map((stop) => (
                     <stop
                       key={stop.color}
                       offset={stop.offset}
@@ -138,7 +139,7 @@ function MLLogoCard() {
                 y2="439"
                 gradientUnits="userSpaceOnUse"
               >
-                {logoGradientStops.map((stop) => (
+                {LOGO_GRADIENT_STOPS.map((stop) => (
                   <stop
                     key={stop.color}
                     offset={stop.offset}
@@ -173,7 +174,7 @@ function CertCard({
   cert,
   isFeatured,
 }: {
-  cert: (typeof certificates)[number];
+  cert: (typeof CERTIFICATES)[number];
   isFeatured: boolean;
 }) {
   const { cardRef, shimmerRef } = useCardHolographicTilt<HTMLAnchorElement>();
@@ -324,7 +325,7 @@ export function CertificatesSection() {
 
       <div className="w-full max-w-6xl">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
-          {certificates.map((cert, index) => (
+          {CERTIFICATES.map((cert, index) => (
             <CertCard
               key={cert.title}
               cert={cert}

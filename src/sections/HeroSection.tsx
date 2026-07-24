@@ -1,7 +1,8 @@
 import gsap from "gsap";
 import { useEffect, useRef } from "react";
 import { ScrollHelper } from "../components";
-import { INTERSECTION_OBSERVER_CONFIG, navLinks } from "../constants";
+import { INTERSECTION_OBSERVER_CONFIG } from "../constants/animations";
+import { NAV_LINKS } from "../constants/misc";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 
@@ -225,7 +226,7 @@ export function HeroSection() {
         {/* Scroll cue */}
         <div ref={scrollCueRef} className="opacity-0 motion-reduce:opacity-100">
           <ScrollHelper
-            href={navLinks[0].href}
+            href={NAV_LINKS[0].href}
             ariaLabel="Scroll to projects"
             className="flex w-fit"
           />

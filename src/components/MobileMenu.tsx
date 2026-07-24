@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { navLinks, socialLinks } from "../constants";
+import { NAV_LINKS, SOCIAL_LINKS } from "../constants/misc";
 import { cn } from "../lib/utils";
 
 interface MobileMenuProps {
@@ -72,7 +72,7 @@ export function MobileMenu({
       )}
     >
       {/* Navigation Links */}
-      {navLinks.map((link, index) => (
+      {NAV_LINKS.map((link, index) => (
         <a
           key={link.href}
           href={link.href}
@@ -103,7 +103,7 @@ export function MobileMenu({
             : "pointer-events-none translate-y-8 opacity-0",
         )}
         style={{
-          transitionDelay: isOpen ? `${navLinks.length * 80 + 120}ms` : "0ms",
+          transitionDelay: isOpen ? `${NAV_LINKS.length * 80 + 120}ms` : "0ms",
         }}
       />
 
@@ -117,7 +117,7 @@ export function MobileMenu({
         )}
         style={{
           transitionDelay: isOpen
-            ? `${(navLinks.length + 1) * 80 + 120}ms`
+            ? `${(NAV_LINKS.length + 1) * 80 + 120}ms`
             : "0ms",
         }}
       >
@@ -126,7 +126,7 @@ export function MobileMenu({
           <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">
             Socials
           </span>
-          {socialLinks.slice(0, 2).map((link) => (
+          {SOCIAL_LINKS.slice(0, 2).map((link) => (
             <a
               key={link.href}
               href={link.href}
@@ -147,14 +147,14 @@ export function MobileMenu({
             Resume
           </span>
           <a
-            href={socialLinks[2].href}
+            href={SOCIAL_LINKS[2].href}
             target="_blank"
             rel="noopener noreferrer"
             onClick={onNavClick}
             className="text-white/70 transition-colors hover:text-cyan-400 focus-visible:outline-offset-2"
             tabIndex={isOpen ? 0 : -1}
           >
-            {socialLinks[2].label}
+            {SOCIAL_LINKS[2].label}
           </a>
         </div>
 
@@ -163,7 +163,7 @@ export function MobileMenu({
           <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">
             Contact
           </span>
-          {socialLinks.slice(3).map((link) => (
+          {SOCIAL_LINKS.slice(3).map((link) => (
             <a
               key={link.href}
               href={link.href}

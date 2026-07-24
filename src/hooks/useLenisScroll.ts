@@ -1,3 +1,5 @@
+import { advance } from "@react-three/fiber";
+import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { useEffect, useState } from "react";
@@ -41,13 +43,92 @@ export function useLenisScroll() {
       },
     );
 
-    // Lenis's own RAF — independent of R3F to avoid Suspense timing issues
-    let rafId: number;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
+    // Drive Lenis from GSAP's own ticker instead of a separate rAF loop.
+    // Two independent requestAnimationFrame loops (Lenis's + GSAP's, which
+    // also drives ScrollTrigger's `scrub` interpolation) race each other
+    // frame-to-frame with no guaranteed ordering — the resulting timing
+    // skew shows up as scrub stutter, worst when scroll velocity (and thus
+    // the per-frame delta) is already small, i.e. mid-deceleration or on
+    // slow scrolls. lagSmoothing(0) additionally stops GSAP from injecting
+    // its own "catch-up" delta-time correction after any frame hiccup,
+    // which otherwise shows up as the same kind of stutter.
+    gsap.ticker.lagSmoothing(0);
+    // R3F's Canvas runs frameloop="never" (see UniverseCanvas) and is
+    // advanced right here too, so the 3D scene's clock is the same tick as
+    // Lenis/ScrollTrigger's — one rAF loop instead of two racing ones.
+    const tickerCallback = (time: number) => {
+      lenis.raf(time * 1000);
+      // R3F's Clock.elapsedTime is tracked in seconds — advance() in
+      // frameloop="never" mode stamps it directly from this timestamp, so
+      // it must be seconds too, not performance.now()'s milliseconds.
+      advance(performance.now() / 1000);
+    };
+    gsap.ticker.add(tickerCallback);
+
+    // Intercept keyboard scroll keys so they route through Lenis too.
+    // Lenis only smooths `wheel`/`touch` input — arrow keys, Page Up/Down,
+    // Home/End trigger the browser's own instant native scroll, which
+    // Lenis just silently absorbs afterward with no easing. That's why
+    // keyboard scrolling looked "stepped" instead of gliding like wheel
+    // scroll does.
+    function isEditableTarget(target: EventTarget | null): boolean {
+      if (!(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+      return (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        target.isContentEditable
+      );
     }
-    rafId = requestAnimationFrame(raf);
+
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target;
+      if (isEditableTarget(target)) return;
+
+      const el = target as HTMLElement | null;
+      // Don't hijack Space/Enter's native "activate" behavior on
+      // interactive elements (buttons, links, etc).
+      if (
+        e.key === " " &&
+        el &&
+        (el.tagName === "BUTTON" ||
+          el.tagName === "A" ||
+          el.getAttribute("role") === "button")
+      ) {
+        return;
+      }
+
+      const viewport = window.innerHeight;
+      let delta: number;
+      switch (e.key) {
+        case "ArrowDown":
+          delta = 120;
+          break;
+        case "ArrowUp":
+          delta = -120;
+          break;
+        case "PageDown":
+        case " ":
+          delta = viewport * 0.9;
+          break;
+        case "PageUp":
+          delta = -viewport * 0.9;
+          break;
+        case "End":
+          delta = lenis.limit - lenis.scroll;
+          break;
+        case "Home":
+          delta = -lenis.scroll;
+          break;
+        default:
+          return;
+      }
+
+      e.preventDefault();
+      lenis.scrollTo(lenis.scroll + delta, { duration: 0.6 });
+    }
+    window.addEventListener("keydown", handleKeyDown);
 
     // Intercept hash-link clicks so they route through Lenis instead of
     // jumping natively (which bypasses smooth scroll entirely).
@@ -72,9 +153,10 @@ export function useLenisScroll() {
     window.addEventListener("load", handleLoad);
 
     return () => {
-      cancelAnimationFrame(rafId);
+      gsap.ticker.remove(tickerCallback);
       lenis.destroy();
       lenisInstance.current = null;
+      window.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("click", handleAnchorClick);
       window.removeEventListener("load", handleLoad);
     };

@@ -8,9 +8,6 @@ import {
 } from "three";
 import BoxShader from "../shaders/BoxShader";
 import { scrollStore } from "../stores/scrollStore";
-import { qualityTier } from "../utils/performance";
-
-const ENABLE_SHADOWS = qualityTier !== "low";
 
 // Entrance/exit: boxes fly in from (or out to) wherever they last were,
 // staggered by index so the sphere visibly assembles/disperses instead of
@@ -254,8 +251,6 @@ export function TechBox({
       <mesh
         ref={meshRef}
         name={data.name}
-        castShadow={ENABLE_SHADOWS}
-        receiveShadow={ENABLE_SHADOWS}
         // position is now animated in useFrame
         rotation={meshRotation}
         onPointerDown={handlePointerDown}

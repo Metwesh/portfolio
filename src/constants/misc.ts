@@ -1,11 +1,11 @@
-const navLinks = [
+const NAV_LINKS = [
   { href: "#projects", label: "Projects" },
   { href: "#experience", label: "Experience" },
   { href: "#tech-stacks", label: "Tech Stacks" },
   { href: "#certificates", label: "Certificates" },
 ];
 
-const socialLinks = [
+const SOCIAL_LINKS = [
   {
     href: "https://www.linkedin.com/in/mohamed-h-aly/",
     label: "LinkedIn",
@@ -17,7 +17,7 @@ const socialLinks = [
     external: true,
   },
   {
-    href: `${import.meta.env.BASE_URL}documents/Mohamed%20H.%20Aly.pdf`,
+    href: "/documents/Mohamed%20H.%20Aly.pdf",
     label: "Resume",
     external: true,
   },
@@ -33,7 +33,7 @@ const socialLinks = [
   },
 ];
 
-const accentColors = {
+const ACCENT_COLORS = {
   blue: "#4267B2",
   magenta: "#ff00cc",
   orange: "#ff9900",
@@ -57,28 +57,37 @@ const accentColors = {
   lightAmber: "#fbbf24",
 } as const;
 
-const mainLogoPath = "./m-logo/main-logo.gltf";
+const CENTERPIECE_PATH = "./m-logo/main-logo.gltf";
 
 // Shared cyan → blue → violet gradient used across the logo mark
 // (Header, CertificatesSection fan + main logo).
-const logoGradientStops = [
+const LOGO_GRADIENT_STOPS = [
   { offset: undefined, color: "#22D3EE" },
   { offset: "0.5", color: "#3B82F6" },
   { offset: "1", color: "#A855F7" },
 ] as const;
 
-const breakpoints = {
+const BREAKPOINTS = {
   smallMobile: 640,
   mobile: 768,
   tablet: 1024,
   desktop: 1280,
 } as const;
 
+// Shared glass-card base, reused by CertificatesSection and ExperienceSection
+// cards so the look stays in sync across both.
+const GLASS_CARD_CLASS =
+  "rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl";
+
+const SKILL_CATEGORIES = ["Frontend", "Backend", "DevOps", "Tooling", "Design"];
+
 export {
-  accentColors,
-  breakpoints,
-  logoGradientStops,
-  mainLogoPath,
-  navLinks,
-  socialLinks,
+  ACCENT_COLORS,
+  BREAKPOINTS,
+  CENTERPIECE_PATH,
+  GLASS_CARD_CLASS,
+  LOGO_GRADIENT_STOPS,
+  NAV_LINKS,
+  SKILL_CATEGORIES,
+  SOCIAL_LINKS,
 };

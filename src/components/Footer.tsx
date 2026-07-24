@@ -1,10 +1,10 @@
-import { socialLinks } from "../constants";
+import { SOCIAL_LINKS } from "../constants/misc";
 
 export function Footer() {
   return (
     <footer className="relative z-10 w-full space-y-1 py-8 text-center text-gray-400 text-sm">
       <div>
-        {socialLinks.map((link, index) => (
+        {SOCIAL_LINKS.map((link, index) => (
           <span key={link.href}>
             {index > 0 && <span className="mx-2">|</span>}
             <a

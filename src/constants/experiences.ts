@@ -1,7 +1,7 @@
 import { actLogo, eAndLogo, sideupWhiteLogo, tahLogo } from "../assets";
-import { accentColors } from "./misc";
+import { ACCENT_COLORS } from "./misc";
 
-export const experiences = [
+export const EXPERIENCES = [
   {
     title: "Senior Software Developer",
     company: "E& (Etisalat UAE)",
@@ -9,7 +9,7 @@ export const experiences = [
     link: "https://www.eand.com/",
     icon: eAndLogo,
     date: "Dec 2025 - Present",
-    color: accentColors.red,
+    color: ACCENT_COLORS.red,
     points: [
       {
         title: "Portal modernization",
@@ -40,7 +40,7 @@ export const experiences = [
     link: "https://theaddressholding.com/",
     icon: tahLogo,
     date: "Nov 2024 - Dec 2025",
-    color: accentColors.yellow,
+    color: ACCENT_COLORS.yellow,
     points: [
       {
         title: "Internal system development",
@@ -71,7 +71,7 @@ export const experiences = [
     link: "https://eg.sideup.co/",
     icon: sideupWhiteLogo,
     date: "Dec 2023 - Nov 2024",
-    color: accentColors.magenta,
+    color: ACCENT_COLORS.magenta,
     points: [
       {
         title: "Led and mentored junior engineers",
@@ -102,7 +102,7 @@ export const experiences = [
     link: "https://eg.sideup.co/",
     icon: sideupWhiteLogo,
     date: "Feb 2023 - Dec 2023",
-    color: accentColors.pink,
+    color: ACCENT_COLORS.pink,
     points: [
       {
         title: "Led frontend development",
@@ -133,7 +133,7 @@ export const experiences = [
     link: "https://www.act.eg/",
     icon: actLogo,
     date: "Feb 2022 - Feb 2023",
-    color: accentColors.orange,
+    color: ACCENT_COLORS.orange,
     points: [
       {
         title: "System Integration Expertise",

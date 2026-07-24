@@ -44,7 +44,7 @@ import {
   Vue,
 } from "../assets";
 
-export const technologies = [
+export const TECHNOLOGIES = [
   {
     icon: HTML5,
     name: "HTML5",

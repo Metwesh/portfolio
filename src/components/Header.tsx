@@ -1,6 +1,7 @@
 import { refractive } from "@hashintel/refractive";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { ANIMATION_CONFIG, logoGradientStops, navLinks } from "../constants";
+import { ANIMATION_CONFIG } from "../constants/animations";
+import { LOGO_GRADIENT_STOPS, NAV_LINKS } from "../constants/misc";
 import { cn } from "../lib/utils";
 import { MobileMenu } from "./MobileMenu";
 
@@ -47,7 +48,7 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
   useEffect(() => {
     const threshold = window.innerHeight * 0.35;
     let current: string | null = null;
-    for (const link of navLinks) {
+    for (const link of NAV_LINKS) {
       const el = document.querySelector(link.href);
       if (!el) continue;
       if (el.getBoundingClientRect().top <= threshold) current = link.href;
@@ -123,7 +124,7 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
                 y2="439"
                 gradientUnits="userSpaceOnUse"
               >
-                {logoGradientStops.map((stop) => (
+                {LOGO_GRADIENT_STOPS.map((stop) => (
                   <stop
                     key={stop.color}
                     offset={stop.offset}
@@ -177,7 +178,7 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
       {/* Desktop nav */}
       <div className="relative z-40 hidden items-center gap-6 md:flex">
         <nav className="flex gap-6 font-semibold text-lg">
-          {navLinks.map((link) => (
+          {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}

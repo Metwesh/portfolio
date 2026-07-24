@@ -9,7 +9,7 @@ import {
   type MeshBasicMaterial as ThreeMeshBasicMaterial,
   MeshMatcapMaterial as ThreeMeshMatcapMaterial,
 } from "three";
-import { mainLogoPath } from "../constants";
+import { CENTERPIECE_PATH } from "../constants/misc";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { scrollStore } from "../stores/scrollStore";
@@ -83,7 +83,7 @@ function createMatcapTexture(): CanvasTexture {
 
 export function MLogo() {
   const reducedMotion = useReducedMotion();
-  const { scene } = useGLTF(mainLogoPath);
+  const { scene } = useGLTF(CENTERPIECE_PATH);
   const group = useRef<ThreeGroup>(null);
   const isMobile = useIsMobile();
   const matcapTexture = useMemo(() => createMatcapTexture(), []);
@@ -283,8 +283,6 @@ export function MLogo() {
       const old = mesh.material;
       if (old && !Array.isArray(old)) old.dispose();
       mesh.material = mat;
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
       created.push(mat);
     }
 

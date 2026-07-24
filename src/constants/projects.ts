@@ -29,7 +29,7 @@ import {
   willysLogo,
   willysWebsite,
 } from "../assets";
-import { accentColors } from "./misc";
+import { ACCENT_COLORS } from "./misc";
 
 // Valid tag color names
 export type TagColor =
@@ -69,7 +69,7 @@ export interface Project {
   link?: string;
 }
 
-export const projects: readonly Project[] = [
+export const PROJECTS: readonly Project[] = [
   // {
   //   name: "Book Rental Dashboard",
   //   description:
@@ -290,7 +290,7 @@ export const projects: readonly Project[] = [
     logo: sideupLogo,
     darkLogo: true,
     image: sideupDashboardV2,
-    color: accentColors.blue,
+    color: ACCENT_COLORS.blue,
   },
   {
     name: "Aman Accept Dashboard",
@@ -332,7 +332,7 @@ export const projects: readonly Project[] = [
     ],
     logo: amanLogo,
     image: amanDashboard,
-    color: accentColors.skyBlue,
+    color: ACCENT_COLORS.skyBlue,
     // link: "https://www.amanaccept.com/",
   },
   {
@@ -396,7 +396,7 @@ export const projects: readonly Project[] = [
     logo: sideupLogo,
     darkLogo: true,
     image: sideupDashboardV3,
-    color: accentColors.amber,
+    color: ACCENT_COLORS.amber,
     link: "https://portal.sideup.co/login",
   },
   {
@@ -432,7 +432,7 @@ export const projects: readonly Project[] = [
     logo: beltoneLogo,
     darkLogo: true,
     image: beltoneHolding,
-    color: accentColors.yellow,
+    color: ACCENT_COLORS.yellow,
     link: "https://www.beltoneholding.com/",
   },
   {
@@ -463,7 +463,7 @@ export const projects: readonly Project[] = [
     ],
     logo: dartSpaceLogo,
     image: dartSpace,
-    color: accentColors.rose,
+    color: ACCENT_COLORS.rose,
   },
   {
     name: "MARQ CRM",
@@ -498,7 +498,7 @@ export const projects: readonly Project[] = [
     logo: marqLogo,
     darkLogo: true,
     image: marqCrm,
-    color: accentColors.violet,
+    color: ACCENT_COLORS.violet,
   },
   {
     name: "Address Online",
@@ -548,7 +548,7 @@ export const projects: readonly Project[] = [
     ],
     logo: tahLogo,
     image: addOn,
-    color: accentColors.deepRose,
+    color: ACCENT_COLORS.deepRose,
   },
   {
     name: "Address Online CMS",
@@ -602,7 +602,7 @@ export const projects: readonly Project[] = [
     ],
     logo: tahLogo,
     image: addOnCms,
-    color: accentColors.red,
+    color: ACCENT_COLORS.red,
   },
   {
     name: "BRGR Spin The Wheel",
@@ -611,7 +611,7 @@ export const projects: readonly Project[] = [
     logo: brgrLogo,
     darkLogo: true,
     image: BRGRSpinTheWheel,
-    color: accentColors.lightAmber,
+    color: ACCENT_COLORS.lightAmber,
     tags: [
       {
         name: "Next.js",
@@ -700,7 +700,7 @@ export const projects: readonly Project[] = [
     logo: aradyMisrLogo,
     darkLogo: true,
     image: aradyMisr,
-    color: accentColors.green,
+    color: ACCENT_COLORS.green,
   },
   {
     name: "Arady Misr CMS",
@@ -755,7 +755,7 @@ export const projects: readonly Project[] = [
     logo: aradyMisrLogo,
     darkLogo: true,
     image: aradyMisrCms,
-    color: accentColors.cyan,
+    color: ACCENT_COLORS.cyan,
   },
   {
     name: "Willy's Website",
@@ -805,7 +805,7 @@ export const projects: readonly Project[] = [
     ],
     logo: willysLogo,
     image: willysWebsite,
-    color: accentColors.red,
+    color: ACCENT_COLORS.red,
     link: "https://willys-kitchen.com/",
   },
   {
@@ -868,7 +868,7 @@ export const projects: readonly Project[] = [
     ],
     logo: willysLogo,
     image: willysAdmin,
-    color: accentColors.indigo,
+    color: ACCENT_COLORS.indigo,
   },
   {
     name: "E& CIM Portal v2",
@@ -926,6 +926,6 @@ export const projects: readonly Project[] = [
     ],
     logo: eAndLogo,
     image: eAndConfidential,
-    color: accentColors.maroon,
+    color: ACCENT_COLORS.maroon,
   },
 ];

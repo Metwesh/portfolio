@@ -4,12 +4,14 @@ import { useCallback, useLayoutEffect, useRef } from "react";
 import type * as THREE from "three";
 import {
   ClampToEdgeWrapping,
+  MathUtils,
   type MeshBasicMaterial,
   Shape,
   ShapeGeometry,
 } from "three";
-import { projects } from "../constants/projects";
+import { PROJECTS } from "../constants/projects";
 import { scrollStore } from "../stores/scrollStore";
+import { damp } from "../utils/damp";
 
 // Apply object-fit:cover to a texture given the plane's aspect and the image's natural aspect.
 function coverTexture(tex: THREE.Texture, planeW: number, planeH: number) {
@@ -46,7 +48,7 @@ let _exitProgress = 0;
 const CARD_W = 8.2;
 const CARD_H = 6.0;
 const CARD_SPACING = 9;
-const N = projects.length;
+const N = PROJECTS.length;
 const APPROACH_Y = 12;
 
 // Shared rounded-rect geometries — created once, reused by every card
@@ -126,7 +128,7 @@ function ProjectCard3D({ index, texture, color, posX, onMount }: CardProps) {
 
 // ─── Gallery group — single useFrame drives all card + group animation ────────
 function GalleryCards() {
-  const imageUrls = projects.map((p) => p.image);
+  const imageUrls = PROJECTS.map((p) => p.image);
   const textures = useTexture(imageUrls);
   const groupRef = useRef<THREE.Group>(null);
   const exitBaseRef = useRef<number>(-1);
@@ -141,7 +143,7 @@ function GalleryCards() {
   const responsiveScaleRef = useRef(1.0);
   const lastSizeRef = useRef({ width: 0, height: 0 });
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!groupRef.current) return;
 
     // Only recompute when viewport actually changes
@@ -179,14 +181,22 @@ function GalleryCards() {
       targetY = -APPROACH_Y * _exitProgress;
     }
 
-    groupRef.current.position.y +=
-      (targetY - groupRef.current.position.y) * 0.09;
+    groupRef.current.position.y = damp(
+      groupRef.current.position.y,
+      targetY,
+      0.09,
+      delta,
+    );
     groupRef.current.scale.setScalar(responsiveScale);
 
     const activeF = p * (N - 1);
     const targetX = -activeF * CARD_SPACING * responsiveScale;
-    groupRef.current.position.x +=
-      (targetX - groupRef.current.position.x) * 0.1;
+    groupRef.current.position.x = damp(
+      groupRef.current.position.x,
+      targetX,
+      0.1,
+      delta,
+    );
 
     // Single loop drives all cards — replaces N separate useFrame subscriptions
     const exiting = !active && p > 0.01;
@@ -203,47 +213,87 @@ function GalleryCards() {
         continue;
 
       const dist = Math.abs(activeF - i);
+      // Continuous near/mid/far blend instead of hard dist thresholds —
+      // a step function here means damp() can fully settle into one tier
+      // (scale/opacity/etc.) before the target suddenly flips to the next,
+      // producing a visible pop. Only shows up once scroll is slow enough
+      // for the settle to complete before the next threshold crossing,
+      // which is exactly the "only at slow scroll" symptom this fixes.
+      const band1 = MathUtils.smoothstep(dist, 0.35, 0.65);
+      const band2 = MathUtils.smoothstep(dist, 1.35, 1.65);
 
       if (exiting) {
         const alpha = 1 - _exitProgress;
         mat.current.opacity =
-          alpha * (dist < 0.5 ? 1.0 : dist < 1.5 ? 0.65 : 0.25);
-        borderMat.current.opacity = alpha * (dist < 0.5 ? 0.22 : 0.04);
+          alpha * MathUtils.lerp(MathUtils.lerp(1.0, 0.65, band1), 0.25, band2);
+        borderMat.current.opacity = alpha * MathUtils.lerp(0.22, 0.04, band1);
         continue;
       }
 
       // Cards beyond neighbours are already at rest — cheap lerp, skip scale/rot
       if (dist > 2.5) {
-        mat.current.opacity += (0.25 - mat.current.opacity) * 0.1;
-        borderMat.current.opacity += (0.04 - borderMat.current.opacity) * 0.1;
+        mat.current.opacity = damp(mat.current.opacity, 0.25, 0.1, delta);
+        borderMat.current.opacity = damp(
+          borderMat.current.opacity,
+          0.04,
+          0.1,
+          delta,
+        );
         continue;
       }
 
-      const targetScale = dist < 0.5 ? 1.0 : dist < 1.5 ? 0.88 : 0.75;
+      const targetScale = MathUtils.lerp(
+        MathUtils.lerp(1.0, 0.88, band1),
+        0.75,
+        band2,
+      );
       const curScale = mesh.current.scale.x;
-      mesh.current.scale.setScalar(curScale + (targetScale - curScale) * 0.1);
+      mesh.current.scale.setScalar(damp(curScale, targetScale, 0.1, delta));
       border.current.scale.setScalar(mesh.current.scale.x * 1.045);
 
-      const targetOpacity = dist < 0.5 ? 1.0 : dist < 1.5 ? 0.65 : 0.25;
-      mat.current.opacity += (targetOpacity - mat.current.opacity) * 0.1;
+      const targetOpacity = MathUtils.lerp(
+        MathUtils.lerp(1.0, 0.65, band1),
+        0.25,
+        band2,
+      );
+      mat.current.opacity = damp(
+        mat.current.opacity,
+        targetOpacity,
+        0.1,
+        delta,
+      );
 
-      const targetBorder = dist < 0.5 ? 0.22 : 0.04;
-      borderMat.current.opacity +=
-        (targetBorder - borderMat.current.opacity) * 0.1;
+      const targetBorder = MathUtils.lerp(0.22, 0.04, band1);
+      borderMat.current.opacity = damp(
+        borderMat.current.opacity,
+        targetBorder,
+        0.1,
+        delta,
+      );
 
-      const targetPosY = dist < 0.5 ? Math.sin(t) * 0.08 : 0;
-      mesh.current.position.y += (targetPosY - mesh.current.position.y) * 0.05;
+      const targetPosY = Math.sin(t) * 0.08 * (1 - band1);
+      mesh.current.position.y = damp(
+        mesh.current.position.y,
+        targetPosY,
+        0.05,
+        delta,
+      );
       border.current.position.y = mesh.current.position.y;
 
       const targetRotY = Math.max(-0.25, Math.min(0.25, (activeF - i) * 0.12));
-      mesh.current.rotation.y += (targetRotY - mesh.current.rotation.y) * 0.08;
+      mesh.current.rotation.y = damp(
+        mesh.current.rotation.y,
+        targetRotY,
+        0.08,
+        delta,
+      );
       border.current.rotation.y = mesh.current.rotation.y;
     }
   });
 
   return (
     <group ref={groupRef} position={[0, APPROACH_Y, 0]}>
-      {projects.map((project, i) => (
+      {PROJECTS.map((project, i) => (
         <ProjectCard3D
           key={project.name}
           index={i}

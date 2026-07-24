@@ -1,11 +1,12 @@
 import gsap from "gsap";
 import { useEffect, useRef } from "react";
 import { SectionHeading } from "../components/SectionHeading";
-import { INTERSECTION_OBSERVER_CONFIG } from "../constants";
-import { experiences } from "../constants/experiences";
+import { INTERSECTION_OBSERVER_CONFIG } from "../constants/animations";
+import { EXPERIENCES } from "../constants/experiences";
+import { GLASS_CARD_CLASS } from "../constants/misc";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import { cn, GLASS_CARD_CLASS } from "../lib/utils";
+import { cn } from "../lib/utils";
 
 export function ExperienceSection() {
   const prefersReducedMotion = useReducedMotion();
@@ -52,15 +53,18 @@ export function ExperienceSection() {
             trigger: section,
             start: "top 70%",
             end: "bottom 30%",
-            scrub: 1,
+            // See ProjectsSection — Lenis already smooths the scroll
+            // position, so a numeric scrub double-lags on top of that.
+            // scrub: true tracks progress immediately instead.
+            scrub: true,
             onUpdate: (self) => {
               if (!dot) return;
               const p = self.progress;
               const idx = Math.min(
-                Math.floor(p * experiences.length),
-                experiences.length - 1,
+                Math.floor(p * EXPERIENCES.length),
+                EXPERIENCES.length - 1,
               );
-              const color = experiences[idx].color;
+              const color = EXPERIENCES[idx].color;
               dot.style.top = `${p * 100}%`;
               dot.style.background = color;
               dot.style.boxShadow = `0 0 16px 6px ${color}90`;
@@ -122,7 +126,7 @@ export function ExperienceSection() {
         <div
           className="absolute top-0 left-8 z-0 h-full w-px rounded-full opacity-20 max-sm:left-4"
           style={{
-            backgroundImage: `linear-gradient(to bottom, ${experiences.map((e) => e.color).join(", ")})`,
+            backgroundImage: `linear-gradient(to bottom, ${EXPERIENCES.map((e) => e.color).join(", ")})`,
           }}
         />
 
@@ -133,7 +137,7 @@ export function ExperienceSection() {
           ref={timelineRef}
           className="absolute top-0 left-8 z-0 h-full w-px rounded-full [clip-path:inset(0_0_100%_0)] max-sm:left-4"
           style={{
-            backgroundImage: `linear-gradient(to bottom, ${experiences.map((e) => e.color).join(", ")})`,
+            backgroundImage: `linear-gradient(to bottom, ${EXPERIENCES.map((e) => e.color).join(", ")})`,
           }}
         />
 
@@ -143,13 +147,13 @@ export function ExperienceSection() {
           aria-hidden="true"
           className="absolute top-0 left-8 z-10 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full max-sm:left-4"
           style={{
-            background: experiences[0].color,
-            boxShadow: `0 0 16px 6px ${experiences[0].color}90`,
+            background: EXPERIENCES[0].color,
+            boxShadow: `0 0 16px 6px ${EXPERIENCES[0].color}90`,
           }}
         />
 
         <ul className="relative z-10 space-y-16 py-12">
-          {experiences.map((experience, index) => (
+          {EXPERIENCES.map((experience, index) => (
             <li
               key={`experience-${experience.company}-${index}`}
               className="group relative pl-20 max-sm:pl-8"
