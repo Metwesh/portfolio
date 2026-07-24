@@ -27,16 +27,23 @@ export function AnimatedStars() {
   });
 
   return (
-    <group ref={group}>
-      <Stars
-        radius={250}
-        depth={100}
-        count={starCount}
-        factor={4}
-        fade
-        speed={reducedMotion ? 0 : 3}
-      />
+    <>
+      <group ref={group}>
+        <Stars
+          radius={250}
+          depth={100}
+          count={starCount}
+          factor={4}
+          fade
+          speed={reducedMotion ? 0 : 3}
+        />
+      </group>
+      {/* Not inside the parallax group above: ShootingStars already spawns
+          relative to the live camera every frame, so it needs to sit in the
+          scene's untranslated space — nesting it under that group's
+          scroll-driven offset would double-apply the shift and push stars
+          out of frame past the hero. */}
       {shootingStarCount > 0 && <ShootingStars count={shootingStarCount} />}
-    </group>
+    </>
   );
 }

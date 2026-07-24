@@ -39,28 +39,28 @@ export const EXPERIENCES = [
     abbreviation: "TAH",
     link: "https://theaddressholding.com/",
     icon: tahLogo,
-    date: "Nov 2024 - Dec 2025",
+    date: "Nov 2024 - Nov 2025",
     color: ACCENT_COLORS.yellow,
     points: [
       {
         title: "Internal system development",
         subtitle:
-          "Built and maintained CRMs and HRMs using Next.js, focusing on performance, scalability, and maintainability.",
+          "Built and maintained internal CRMs and HRMs using Next.js, optimizing frontend performance to support 2000+ active users / daily administrative workflows.",
       },
       {
         title: "Project ownership",
         subtitle:
-          "Spearheaded development of a property listing e-commerce website, authoring 85%+ of the production code.",
+          "Spearheaded end-to-end development of a high-traffic property listing platform, authoring over 85% of production code for over 10,000+ active property listings.",
       },
       {
         title: "SEO optimization",
         subtitle:
-          "Implemented server-side rendering and dynamic routing to maximize organic visibility and meet SEO best practices.",
+          "Implemented Next.js SSR and dynamic routing strategies, driving a 35% increase in organic traffic and improving Core Web Vitals to a clean 100.",
       },
       {
-        title: "Cross-functional collaboration",
+        title: "Legacy modernization",
         subtitle:
-          "Worked closely with designers and backend teams to ensure seamless UI/UX and reliable system integration.",
+          "Refactored a legacy Vue.js codebase to integrate with modern REST APIs, reducing client-side bug reports by 20% and ensuring seamless platform stability.",
       },
     ],
   },
@@ -70,28 +70,28 @@ export const EXPERIENCES = [
     abbreviation: "SIDEUP",
     link: "https://eg.sideup.co/",
     icon: sideupWhiteLogo,
-    date: "Dec 2023 - Nov 2024",
+    date: "Nov 2023 - Oct 2024",
     color: ACCENT_COLORS.magenta,
     points: [
       {
-        title: "Led and mentored junior engineers",
+        title: "Mentorship & technical leadership",
         subtitle:
-          "Cultivated a collaborative environment, fostering skill development and productivity.",
+          "Mentored junior engineers, establishing team-wide code review standards and TypeScript conventions that elevated overall code quality.",
       },
       {
-        title: "Hands-on coding leadership",
+        title: "Hands-on architecture",
         subtitle:
-          "Prioritized efficient task distribution, tackled complex features, ensuring robust code quality.",
+          "Designed complex dashboard features using React, Redux Toolkit, and state management to support real-time logistics tracking.",
       },
       {
         title: "Stakeholder collaboration",
         subtitle:
-          "Provided valuable insights, aligning dashboard direction with user needs and business objectives.",
+          "Partnered with product owners and backend engineers to translate business requirements into responsive UI components, ensuring seamless API integrations.",
       },
       {
-        title: "Process optimization",
+        title: "Process & CI/CD optimization",
         subtitle:
-          "Implemented initiatives to streamline workflows, enhance productivity, and ensure code efficiency and reliability.",
+          "Streamlined frontend workflows by setting up automated linting, pre-commit hooks, and CI/CD testing pipelines, reducing pull request review time.",
       },
     ],
   },
@@ -101,28 +101,28 @@ export const EXPERIENCES = [
     abbreviation: "SIDEUP",
     link: "https://eg.sideup.co/",
     icon: sideupWhiteLogo,
-    date: "Feb 2023 - Dec 2023",
+    date: "Feb 2023 - Oct 2023",
     color: ACCENT_COLORS.pink,
     points: [
       {
-        title: "Led frontend development",
+        title: "B2C dashboard development",
         subtitle:
-          "Spearheaded the creation of a cutting-edge B2C shipping dashboard using React, TypeScript, and Bootstrap, ensuring seamless integration with backend systems.",
+          "Led frontend implementation of a next-generation shipping dashboard using React, TypeScript, and Bootstrap.",
       },
       {
-        title: "Ensured optimal UX/UI",
+        title: "UX/UI excellence",
         subtitle:
-          "Collaborated with UX designers to create an intuitive design, enhancing user satisfaction and usability.",
+          "Partnered with designers to deliver intuitive, accessible interfaces.",
       },
       {
-        title: "Maintained system stability",
+        title: "Quality assurance",
         subtitle:
-          "Partnered with QA to conduct rigorous testing and debugging, ensuring high reliability and performance.",
+          "Collaborated with QA to execute thorough testing, debugging, and performance optimization.",
       },
       {
-        title: "Adapted to new tech",
+        title: "Adaptability",
         subtitle:
-          "Quickly mastered Next.js and Material UI to maintain and improve previous versions, demonstrating adeptness in learning new technologies.",
+          "Quickly mastered Next.js and Material UI to modernize legacy features and deliver consistent improvements.",
       },
     ],
   },
@@ -132,7 +132,7 @@ export const EXPERIENCES = [
     abbreviation: "ACT",
     link: "https://www.act.eg/",
     icon: actLogo,
-    date: "Feb 2022 - Feb 2023",
+    date: "Feb 2022 - Jan 2023",
     color: ACCENT_COLORS.orange,
     points: [
       {
@@ -154,6 +154,37 @@ export const EXPERIENCES = [
         title: "Project Coordination Expertise",
         subtitle:
           "Orchestrated the integration of Oracle's Opera Web Services for 480+ Intercontinental Holiday Inn Group (IHG) hotels globally within four months, demonstrating adeptness in coordinating complex projects with multiple stakeholders and ensuring timely execution.",
+      },
+    ],
+  },
+  {
+    title: "Freelance Frontend Engineer",
+    company: "Self-Employed",
+    abbreviation: "FREELANCE",
+    link: "",
+    icon: "/favicons/logo-no-background.svg",
+    date: "Jul 2021 - Present",
+    color: ACCENT_COLORS.cyan,
+    points: [
+      {
+        title: "Multi-industry project delivery",
+        subtitle:
+          "Delivered production Next.js and Angular platforms across industries — a payment operations dashboard (Aman Accept), a blockchain-based art e-commerce site (D'Art Space), and SEO-optimized corporate/e-commerce sites (Beltone, Willy's Kitchen).",
+      },
+      {
+        title: "Timely delivery",
+        subtitle:
+          "Delivered client projects using Next.js, Vue, Angular, and TypeScript, with focus on scalability and SEO.",
+      },
+      {
+        title: "Team collaboration",
+        subtitle:
+          "Worked closely with designers and backend teams to deliver pixel-perfect, responsive UIs.",
+      },
+      {
+        title: "Client relations",
+        subtitle:
+          "Maintained ongoing client partnerships through reliable delivery and technical guidance.",
       },
     ],
   },

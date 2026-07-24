@@ -59,6 +59,13 @@ function smoothstep(edge0: number, edge1: number, x: number) {
 // timing — frame pacing here already measured clean).
 const SCROLL_WIDTH_PER_CARD = 0.5;
 
+// Extra scroll, in card-widths, reserved at each end of the pin as a "stick"
+// — progress holds at index 0 / index N-1 for this much scroll before/after
+// the card sweep, instead of starting or ending to move the instant the pin
+// engages. Applied symmetrically (front and back) so the first and last
+// projects both get the same hold.
+const EDGE_STICK_CARDS = 0.5;
+
 let _touchStartX = 0;
 let _touchStartY = 0;
 let _touchLastX = 0;
@@ -92,11 +99,19 @@ export function ProjectsSection() {
     const section = sectionRef.current;
     if (!section) return;
 
+    // Total scroll, in card-widths: N-1 to actually sweep through the cards,
+    // plus one stick's worth reserved on each end (front + back).
+    const totalCardUnits = PROJECTS.length - 1 + 2 * EDGE_STICK_CARDS;
+    // Fraction of raw scrollTrigger progress spent stuck at each edge —
+    // used below to hold overlay/index progress at 0 or 1 while the pin
+    // still has scroll room left before/after the sweep.
+    const edgeStickFraction = EDGE_STICK_CARDS / totalCardUnits;
+
     const scrollDist =
-      (PROJECTS.length - 0.5) * window.innerWidth * SCROLL_WIDTH_PER_CARD;
+      totalCardUnits * window.innerWidth * SCROLL_WIDTH_PER_CARD;
 
     const setHeight = () => {
-      section.style.height = `${(PROJECTS.length - 0.5) * window.innerWidth * SCROLL_WIDTH_PER_CARD + window.innerHeight}px`;
+      section.style.height = `${totalCardUnits * window.innerWidth * SCROLL_WIDTH_PER_CARD + window.innerHeight}px`;
     };
     setHeight();
 
@@ -189,8 +204,12 @@ export function ProjectsSection() {
           },
           onUpdate: (self) => {
             const progress = Math.min(
-              self.progress * ((PROJECTS.length - 0.5) / (PROJECTS.length - 1)),
               1,
+              Math.max(
+                0,
+                (self.progress - edgeStickFraction) /
+                  (1 - 2 * edgeStickFraction),
+              ),
             );
             scrollStore.projectProgress = progress;
 

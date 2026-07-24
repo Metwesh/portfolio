@@ -124,7 +124,7 @@ export function ExperienceSection() {
       <div className="relative w-full max-w-5xl">
         {/* Vertical timeline track — full height, dimmed */}
         <div
-          className="absolute top-0 left-8 z-0 h-full w-px rounded-full opacity-20 max-sm:left-4"
+          className="absolute top-0 left-4 z-0 h-full w-px rounded-full opacity-20 sm:left-8"
           style={{
             backgroundImage: `linear-gradient(to bottom, ${EXPERIENCES.map((e) => e.color).join(", ")})`,
           }}
@@ -135,7 +135,7 @@ export function ExperienceSection() {
             experience section dynamically. */}
         <div
           ref={timelineRef}
-          className="absolute top-0 left-8 z-0 h-full w-px rounded-full [clip-path:inset(0_0_100%_0)] max-sm:left-4"
+          className="absolute top-0 left-4 z-0 h-full w-px rounded-full [clip-path:inset(0_0_100%_0)] sm:left-8"
           style={{
             backgroundImage: `linear-gradient(to bottom, ${EXPERIENCES.map((e) => e.color).join(", ")})`,
           }}
@@ -145,7 +145,7 @@ export function ExperienceSection() {
         <div
           ref={glowDotRef}
           aria-hidden="true"
-          className="absolute top-0 left-8 z-10 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full max-sm:left-4"
+          className="absolute top-0 left-4 z-10 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full sm:left-8"
           style={{
             background: EXPERIENCES[0].color,
             boxShadow: `0 0 16px 6px ${EXPERIENCES[0].color}90`,
@@ -156,11 +156,11 @@ export function ExperienceSection() {
           {EXPERIENCES.map((experience, index) => (
             <li
               key={`experience-${experience.company}-${index}`}
-              className="group relative pl-20 max-sm:pl-8"
+              className="group relative pl-8 sm:pl-20"
             >
               {/* Timeline dot */}
               <div
-                className="absolute top-7 left-8 z-10 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-black transition-transform duration-300 group-hover:scale-150 max-sm:left-4"
+                className="absolute top-7 left-4 z-10 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-black transition-transform duration-300 group-hover:scale-150 sm:left-8"
                 style={{
                   background: experience.color,
                   boxShadow: `0 0 12px 2px ${experience.color}80`,

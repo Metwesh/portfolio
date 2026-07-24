@@ -107,22 +107,23 @@ export function MobileMenu({
         }}
       />
 
-      {/* Footer links — Socials / Resume / Contact */}
-      <div
-        className={cn(
-          "flex items-start gap-10 font-semibold text-sm transition-all duration-500",
-          isOpen
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-8 opacity-0",
-        )}
-        style={{
-          transitionDelay: isOpen
-            ? `${(NAV_LINKS.length + 1) * 80 + 120}ms`
-            : "0ms",
-        }}
-      >
+      {/* Footer links — Socials / Resume / Contact, each column staggered
+          like the nav links above rather than fading in as one block. */}
+      <div className="flex items-start gap-10 font-semibold text-sm">
         {/* Socials */}
-        <div className="flex flex-col items-center gap-2">
+        <div
+          className={cn(
+            "flex flex-col items-center gap-2 transition-all duration-500",
+            isOpen
+              ? "translate-y-0 opacity-100"
+              : "pointer-events-none translate-y-8 opacity-0",
+          )}
+          style={{
+            transitionDelay: isOpen
+              ? `${(NAV_LINKS.length + 1) * 80 + 120}ms`
+              : "0ms",
+          }}
+        >
           <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">
             Socials
           </span>
@@ -142,7 +143,19 @@ export function MobileMenu({
         </div>
 
         {/* Resume */}
-        <div className="flex flex-col items-center gap-2">
+        <div
+          className={cn(
+            "flex flex-col items-center gap-2 transition-all duration-500",
+            isOpen
+              ? "translate-y-0 opacity-100"
+              : "pointer-events-none translate-y-8 opacity-0",
+          )}
+          style={{
+            transitionDelay: isOpen
+              ? `${(NAV_LINKS.length + 2) * 80 + 120}ms`
+              : "0ms",
+          }}
+        >
           <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">
             Resume
           </span>
@@ -159,7 +172,19 @@ export function MobileMenu({
         </div>
 
         {/* Contact */}
-        <div className="flex flex-col items-center gap-2">
+        <div
+          className={cn(
+            "flex flex-col items-center gap-2 transition-all duration-500",
+            isOpen
+              ? "translate-y-0 opacity-100"
+              : "pointer-events-none translate-y-8 opacity-0",
+          )}
+          style={{
+            transitionDelay: isOpen
+              ? `${(NAV_LINKS.length + 3) * 80 + 120}ms`
+              : "0ms",
+          }}
+        >
           <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">
             Contact
           </span>
