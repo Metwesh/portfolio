@@ -115,11 +115,13 @@ function TechConstellation({
     _techDrag.velY *= dragFriction;
     _techDrag.velX *= dragFriction;
 
-    // Scroll-driven spin + idle auto-spin — paused while a box is selected or hovered
+    // Scroll-driven spin + idle auto-spin — paused while a box is selected,
+    // hovered, or under reduced motion (idle spin is a continuous loop with
+    // no discrete end, exactly what reduced-motion should suppress).
     const rawDelta = scrollStore.raw - prevRawRef.current;
     prevRawRef.current = scrollStore.raw;
     const dragging = _techDrag.active;
-    if (inView && !selected && !hovered && !dragging) {
+    if (inView && !selected && !hovered && !dragging && !prefersReducedMotion) {
       scrollVelRef.current += rawDelta * 0.00008;
       scrollVelRef.current += 0.00009; // idle auto-spin
     }
@@ -239,20 +241,6 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
   const mouse = useRef({ x: 0, y: 0 });
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const [isTabHidden, setIsTabHidden] = useState(document.hidden);
-
-  // Stop the render loop entirely while the tab is backgrounded — rAF still
-  // fires (throttled) in most browsers, so this saves real GPU/battery cost.
-  useEffect(() => {
-    const controller = new AbortController();
-    const { signal } = controller;
-    document.addEventListener(
-      "visibilitychange",
-      () => setIsTabHidden(document.hidden),
-      { signal },
-    );
-    return () => controller.abort();
-  }, []);
 
   // Mouse parallax for camera
   useEffect(() => {
@@ -370,13 +358,15 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
         // only ever adds a forced-layout task ~50ms after scrolling stops,
         // which is exactly when a user pauses on a focused gallery card.
         resize={{ scroll: false }}
-        frameloop={
-          // "never": rendering is driven manually by advance() from the same
-          // gsap.ticker callback that drives Lenis + ScrollTrigger, so scroll
-          // and camera share one clock instead of racing two independent
-          // rAF loops (R3F's default "always" loop vs GSAP's ticker).
-          isTabHidden ? "never" : prefersReducedMotion ? "demand" : "never"
-        }
+        // "never": rendering is driven manually by advance() from the same
+        // gsap.ticker callback that drives Lenis + ScrollTrigger, so scroll
+        // and camera share one clock instead of racing two independent rAF
+        // loops (R3F's default "always" loop vs GSAP's ticker). Tab-hidden
+        // pause and reduced-motion throttling both live in that ticker
+        // callback (see useLenisScroll) rather than here — flipping this
+        // prop's string at runtime resets R3F's internal clock, which
+        // produced a one-frame delta spike on every tab switch.
+        frameloop="never"
         performance={{ min: 0.5 }}
       >
         <Suspense fallback={null}>

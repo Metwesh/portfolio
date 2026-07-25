@@ -10,12 +10,20 @@ export function useIsMobile(): boolean {
 
   useEffect(() => {
     const controller = new AbortController();
-    window.addEventListener(
-      "resize",
-      debounce(() => setIsMobile(window.innerWidth < BREAKPOINTS.mobile), 150),
-      { signal: controller.signal },
+    const handleResize = debounce(
+      () => setIsMobile(window.innerWidth < BREAKPOINTS.mobile),
+      150,
     );
-    return () => controller.abort();
+    window.addEventListener("resize", handleResize, {
+      signal: controller.signal,
+    });
+    return () => {
+      controller.abort();
+      // AbortController only removes the listener — a resize fired just
+      // before unmount can still have a pending debounce timeout in
+      // flight, which would call setIsMobile after unmount.
+      handleResize.cancel();
+    };
   }, []);
 
   return isMobile;

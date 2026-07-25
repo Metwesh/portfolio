@@ -507,6 +507,10 @@ export function ProjectsSection() {
       }
       if (_wheelLockTimer) clearTimeout(_wheelLockTimer);
       _wheelLock = null;
+      _touchLock = null;
+      _touchStartX = 0;
+      _touchStartY = 0;
+      _touchLastX = 0;
       section.style.height = "";
       scrollStore.projectProgress = 0;
       scrollStore.projectSectionActive = false;

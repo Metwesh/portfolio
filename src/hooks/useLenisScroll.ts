@@ -53,15 +53,38 @@ export function useLenisScroll() {
     // its own "catch-up" delta-time correction after any frame hiccup,
     // which otherwise shows up as the same kind of stutter.
     gsap.ticker.lagSmoothing(0);
+    // Reduced-motion render cap — throttled here rather than via Canvas's
+    // `frameloop` prop: R3F's advance() renders unconditionally regardless
+    // of `frameloop` (it only gates R3F's own internal auto-loop), and
+    // flipping the `frameloop` prop string at runtime resets R3F's
+    // clock.elapsedTime to 0 — the next advance() then computes a huge
+    // one-tick delta against that stale 0. Gating the call itself avoids
+    // touching frameloop at all, so the clock never resets.
+    const reducedMotionQuery = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+    const REDUCED_MOTION_FRAME_INTERVAL_MS = 1000 / 30;
+    let lastAdvanceMs = 0;
     // R3F's Canvas runs frameloop="never" (see UniverseCanvas) and is
     // advanced right here too, so the 3D scene's clock is the same tick as
     // Lenis/ScrollTrigger's — one rAF loop instead of two racing ones.
     const tickerCallback = (time: number) => {
       lenis.raf(time * 1000);
+      // Tab backgrounded — skip rendering entirely (rAF still fires,
+      // throttled, in most browsers, but nothing needs to render).
+      if (document.hidden) return;
+      const now = performance.now();
+      if (
+        reducedMotionQuery.matches &&
+        now - lastAdvanceMs < REDUCED_MOTION_FRAME_INTERVAL_MS
+      ) {
+        return;
+      }
+      lastAdvanceMs = now;
       // R3F's Clock.elapsedTime is tracked in seconds — advance() in
       // frameloop="never" mode stamps it directly from this timestamp, so
       // it must be seconds too, not performance.now()'s milliseconds.
-      advance(performance.now() / 1000);
+      advance(now / 1000);
     };
     gsap.ticker.add(tickerCallback);
 

@@ -10,6 +10,7 @@ import {
   ShapeGeometry,
 } from "three";
 import { PROJECTS } from "../constants/projects";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { scrollStore } from "../stores/scrollStore";
 import { damp } from "../utils/damp";
 
@@ -128,6 +129,7 @@ function ProjectCard3D({ index, texture, color, posX, onMount }: CardProps) {
 
 // ─── Gallery group — single useFrame drives all card + group animation ────────
 function GalleryCards() {
+  const reducedMotion = useReducedMotion();
   const imageUrls = PROJECTS.map((p) => p.image);
   const textures = useTexture(imageUrls);
   const groupRef = useRef<THREE.Group>(null);
@@ -288,7 +290,7 @@ function GalleryCards() {
         delta,
       );
 
-      const targetPosY = Math.sin(t) * 0.08 * (1 - band1);
+      const targetPosY = reducedMotion ? 0 : Math.sin(t) * 0.08 * (1 - band1);
       mesh.current.position.y = damp(
         mesh.current.position.y,
         targetPosY,
