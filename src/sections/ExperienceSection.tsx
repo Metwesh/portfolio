@@ -37,10 +37,25 @@ export function ExperienceSection() {
       return;
     }
 
+    let cancelled = false;
     let lineTween: ReturnType<typeof gsap.fromTo> | null = null;
     let cardTweens: ReturnType<typeof gsap.fromTo>[] = [];
 
+    // Cached in a ResizeObserver rather than read inside onUpdate — the
+    // dot's vertical offset only needs the track's pixel height to convert
+    // scroll progress into a `transform` (compositor-only), instead of
+    // writing `top: N%` every scroll tick (a layout property, forces
+    // reflow). Observed instead of read-once so it still tracks any
+    // reflow (responsive breakpoint change, font load) the old % approach
+    // got for free.
+    let trackHeight = line.getBoundingClientRect().height;
+    const trackObserver = new ResizeObserver(() => {
+      trackHeight = line.getBoundingClientRect().height;
+    });
+    trackObserver.observe(line);
+
     import("gsap/ScrollTrigger").then(({ ScrollTrigger: ST }) => {
+      if (cancelled) return;
       gsap.registerPlugin(ST);
 
       lineTween = gsap.fromTo(
@@ -65,7 +80,7 @@ export function ExperienceSection() {
                 EXPERIENCES.length - 1,
               );
               const color = EXPERIENCES[idx].color;
-              dot.style.top = `${p * 100}%`;
+              dot.style.transform = `translate(-50%, calc(-50% + ${p * trackHeight}px))`;
               dot.style.background = color;
               dot.style.boxShadow = `0 0 16px 6px ${color}90`;
             },
@@ -96,6 +111,8 @@ export function ExperienceSection() {
     });
 
     return () => {
+      cancelled = true;
+      trackObserver.disconnect();
       lineTween?.scrollTrigger?.kill();
       lineTween?.kill();
       for (const t of cardTweens) {
@@ -208,6 +225,8 @@ export function ExperienceSection() {
                       <img
                         src={experience.icon}
                         alt={`${experience.company} logo`}
+                        width={48}
+                        height={48}
                         loading="lazy"
                         decoding="async"
                         className="h-full w-full object-contain p-1.5"

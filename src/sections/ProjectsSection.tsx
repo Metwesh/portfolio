@@ -6,6 +6,7 @@ import { SectionHeading } from "../components/SectionHeading";
 import { TagsPopover } from "../components/TagsPopover";
 import { PROJECTS } from "../constants/projects";
 import { useIsMobile } from "../hooks/useIsMobile";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { lenisInstance } from "../lib/lenisInstance";
 import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
@@ -81,6 +82,15 @@ let _wheelLockTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function ProjectsSection() {
   const isMobile = useIsMobile();
+  const reducedMotion = useReducedMotion();
+  // Read from the ticker (updateOverlay), which lives inside the mount-only
+  // effect below — a ref keeps it reading the latest value without forcing
+  // that whole effect (ScrollTrigger + listener setup) to re-run every time
+  // the OS-level reduced-motion preference changes.
+  const reducedMotionRef = useRef(reducedMotion);
+  useEffect(() => {
+    reducedMotionRef.current = reducedMotion;
+  }, [reducedMotion]);
   const sectionRef = useRef<HTMLElement>(null);
   const odometerRef = useRef<OdometerHandle>(null);
   // Wrapper rows — one per row type, fade as a group on pin enter/leave.
@@ -337,6 +347,10 @@ export function ProjectsSection() {
     function updateOverlay() {
       const activeF = scrollStore.projectProgress * (PROJECTS.length - 1);
       const dt = gsap.ticker.deltaRatio() / 60;
+      // Under reduced motion, rows cross-fade in place instead of sliding —
+      // zeroing the slide distance keeps the same damp/opacity timing (so
+      // it doesn't feel broken), it just drops the large parallax sweep.
+      const slideMult = reducedMotionRef.current ? 0 : 1;
       // Damp toward the nearest whole card, not the raw fractional scroll
       // position — this scroll model doesn't snap (the 3D cards themselves
       // can rest anywhere), so without rounding, stopping between two cards
@@ -391,7 +405,7 @@ export function ProjectsSection() {
             tEl.style.opacity = String(
               1 - smoothstep(OPACITY_PLATEAU, OPACITY_FADE_END, ad),
             );
-            tEl.style.transform = `translateX(${-d * TITLE_SLIDE_PX}px)`;
+            tEl.style.transform = `translateX(${-d * TITLE_SLIDE_PX * slideMult}px)`;
           } else if (tEl.style.opacity !== "0") {
             tEl.style.opacity = "0";
           }
@@ -405,7 +419,7 @@ export function ProjectsSection() {
             dEl.style.opacity = String(
               1 - smoothstep(OPACITY_PLATEAU, OPACITY_FADE_END, ad),
             );
-            dEl.style.transform = `translateX(${d * DESC_SLIDE_PX}px)`;
+            dEl.style.transform = `translateX(${d * DESC_SLIDE_PX * slideMult}px)`;
           } else if (dEl.style.opacity !== "0") {
             dEl.style.opacity = "0";
           }
@@ -423,7 +437,7 @@ export function ProjectsSection() {
             // Opposite sign from the description row above — the two
             // horizontal rows slide in from different sides instead of
             // moving as one matched block.
-            aEl.style.transform = `translateX(${-d * ACTIONS_SLIDE_PX}px)`;
+            aEl.style.transform = `translateX(${-d * ACTIONS_SLIDE_PX * slideMult}px)`;
             aEl.style.pointerEvents = isNear ? "auto" : "none";
           } else {
             if (aEl.style.opacity !== "0") aEl.style.opacity = "0";
@@ -506,6 +520,23 @@ export function ProjectsSection() {
       aria-labelledby="projects-heading"
       className="relative z-10"
     >
+      {/* Screen-reader fallback — the 15 cards are pure Three.js meshes in
+          UniverseCanvas's <canvas>, no DOM/ARIA representation of their
+          own. Same pattern as TechStacksSection's sr-only tech list. */}
+      <ul className="sr-only">
+        {PROJECTS.map((project) => (
+          <li key={project.name}>
+            {project.link ? (
+              <a href={project.link} target="_blank" rel="noopener noreferrer">
+                {project.name}
+              </a>
+            ) : (
+              project.name
+            )}
+          </li>
+        ))}
+      </ul>
+
       {/* Sticky viewport */}
       <div className="sticky top-0 h-svh overflow-hidden">
         {/* Section label + counter */}
@@ -567,7 +598,11 @@ export function ProjectsSection() {
                     >
                       <img
                         src={project.logo}
-                        alt={`${project.name} logo`}
+                        alt=""
+                        width={36}
+                        height={36}
+                        loading="lazy"
+                        decoding="async"
                         className="h-full w-full object-contain"
                       />
                     </div>

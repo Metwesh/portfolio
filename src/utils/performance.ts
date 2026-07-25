@@ -69,27 +69,3 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
     }
   };
 }
-
-/**
- * Request idle callback with fallback for browsers that don't support it
- */
-export const requestIdleCallback =
-  window.requestIdleCallback ||
-  ((cb: IdleRequestCallback) => {
-    const start = Date.now();
-    return setTimeout(() => {
-      cb({
-        didTimeout: false,
-        timeRemaining: () => Math.max(0, 50 - (Date.now() - start)),
-      });
-    }, 1);
-  });
-
-/**
- * Cancel idle callback with fallback
- */
-export const cancelIdleCallback =
-  window.cancelIdleCallback ||
-  ((id: number) => {
-    clearTimeout(id);
-  });

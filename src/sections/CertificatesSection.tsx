@@ -242,6 +242,8 @@ function CertCard({
             <img
               src={cert.icon}
               alt={`${cert.title} icon`}
+              width={64}
+              height={64}
               loading="lazy"
               decoding="async"
               className="relative h-full w-full rounded-xl object-contain"

@@ -221,12 +221,21 @@ export function MLogo() {
     for (let i = 0; i < 3; i++) {
       if (!ringRefsArrRef.current[i].current) continue;
       const uniforms = ringUniformsRef.current[i];
-      // Per-ring opacity pulse at different frequencies + phases
-      const pulse = 0.72 + Math.sin(t * (1.0 + i * 0.35) + i * 2.09) * 0.28;
+      // Per-ring opacity pulse + hue drift, both driven directly by elapsed
+      // clock time — the one continuous idle animation in this component
+      // not otherwise gated by reducedMotion (ring spin/rotation below IS,
+      // via the early return a few lines down). Static base values instead
+      // of the sin(t * ...) oscillation under reduced motion; the
+      // selection-driven fade (glow/ringFade, from `drama`) still comes
+      // through since that's a discrete transition, not an idle loop.
+      const pulse = reducedMotion
+        ? 1
+        : 0.72 + Math.sin(t * (1.0 + i * 0.35) + i * 2.09) * 0.28;
       const newOpacity = Math.min(1, RING_BASES[i] * glow * ringFade * pulse);
-      // Slow hue drift
-      const hShift = Math.sin(t * 0.25 + i * 1.57) * 0.04;
-      const lum = 0.7 + Math.sin(t * 0.6 + i * 1.0) * 0.12;
+      const hShift = reducedMotion ? 0 : Math.sin(t * 0.25 + i * 1.57) * 0.04;
+      const lum = reducedMotion
+        ? 0.7
+        : 0.7 + Math.sin(t * 0.6 + i * 1.0) * 0.12;
       uniforms.uColor.value
         .setHSL(RING_HUES[i] + hShift, RING_SATS[i], lum)
         .multiplyScalar(newOpacity);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { BREAKPOINTS } from "../constants/misc";
+import { debounce } from "../utils/performance";
 
 /** Returns true when the viewport width is below the mobile breakpoint, and updates on resize. */
 export function useIsMobile(): boolean {
@@ -11,7 +12,7 @@ export function useIsMobile(): boolean {
     const controller = new AbortController();
     window.addEventListener(
       "resize",
-      () => setIsMobile(window.innerWidth < BREAKPOINTS.mobile),
+      debounce(() => setIsMobile(window.innerWidth < BREAKPOINTS.mobile), 150),
       { signal: controller.signal },
     );
     return () => controller.abort();

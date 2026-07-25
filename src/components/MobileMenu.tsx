@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { NAV_LINKS, SOCIAL_LINKS } from "../constants/misc";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { cn } from "../lib/utils";
 
 interface MobileMenuProps {
@@ -15,6 +16,10 @@ export function MobileMenu({
   activeHref,
 }: MobileMenuProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const reducedMotion = useReducedMotion();
+  const durationClass = reducedMotion ? "duration-0" : "duration-500";
+  const staggerDelay = (ms: number) =>
+    isOpen && !reducedMotion ? `${ms}ms` : "0ms";
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -65,7 +70,8 @@ export function MobileMenu({
       aria-modal="true"
       aria-label="Mobile navigation menu"
       className={cn(
-        "fixed inset-0 z-10 m-0 flex h-svh max-h-none w-screen max-w-none flex-col items-center justify-center gap-8 border-0 bg-black/80 p-0 font-bold text-2xl text-white transition-[opacity,transform,backdrop-filter] duration-500 md:hidden",
+        "fixed inset-0 z-10 m-0 flex h-svh max-h-none w-screen max-w-none flex-col items-center justify-center gap-8 border-0 bg-black/80 p-0 font-bold text-2xl text-white transition-[opacity,transform,backdrop-filter] md:hidden",
+        durationClass,
         isOpen
           ? "pointer-events-auto opacity-100 backdrop-blur-xl"
           : "pointer-events-none opacity-0 backdrop-blur-[0px]",
@@ -79,14 +85,15 @@ export function MobileMenu({
           onClick={onNavClick}
           aria-current={activeHref === link.href ? "location" : undefined}
           className={cn(
-            "focus rounded transition-all duration-500 hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2",
+            "focus rounded transition-all hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2",
+            durationClass,
             activeHref === link.href && "text-cyan-400",
             isOpen
               ? "translate-y-0 opacity-100"
               : "pointer-events-none translate-y-8 opacity-0",
           )}
           style={{
-            transitionDelay: isOpen ? `${index * 80 + 120}ms` : "0ms",
+            transitionDelay: staggerDelay(index * 80 + 120),
           }}
           tabIndex={isOpen ? 0 : -1}
         >
@@ -97,13 +104,14 @@ export function MobileMenu({
       {/* Divider */}
       <div
         className={cn(
-          "h-px w-32 bg-linear-to-r from-transparent via-white/30 to-transparent transition-all duration-500",
+          "h-px w-32 bg-linear-to-r from-transparent via-white/30 to-transparent transition-all",
+          durationClass,
           isOpen
             ? "translate-y-0 opacity-100"
             : "pointer-events-none translate-y-8 opacity-0",
         )}
         style={{
-          transitionDelay: isOpen ? `${NAV_LINKS.length * 80 + 120}ms` : "0ms",
+          transitionDelay: staggerDelay(NAV_LINKS.length * 80 + 120),
         }}
       />
 
@@ -113,15 +121,14 @@ export function MobileMenu({
         {/* Socials */}
         <div
           className={cn(
-            "flex flex-col items-center gap-2 transition-all duration-500",
+            "flex flex-col items-center gap-2 transition-all",
+            durationClass,
             isOpen
               ? "translate-y-0 opacity-100"
               : "pointer-events-none translate-y-8 opacity-0",
           )}
           style={{
-            transitionDelay: isOpen
-              ? `${(NAV_LINKS.length + 1) * 80 + 120}ms`
-              : "0ms",
+            transitionDelay: staggerDelay((NAV_LINKS.length + 1) * 80 + 120),
           }}
         >
           <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">
@@ -145,15 +152,14 @@ export function MobileMenu({
         {/* Resume */}
         <div
           className={cn(
-            "flex flex-col items-center gap-2 transition-all duration-500",
+            "flex flex-col items-center gap-2 transition-all",
+            durationClass,
             isOpen
               ? "translate-y-0 opacity-100"
               : "pointer-events-none translate-y-8 opacity-0",
           )}
           style={{
-            transitionDelay: isOpen
-              ? `${(NAV_LINKS.length + 2) * 80 + 120}ms`
-              : "0ms",
+            transitionDelay: staggerDelay((NAV_LINKS.length + 2) * 80 + 120),
           }}
         >
           <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">
@@ -174,15 +180,14 @@ export function MobileMenu({
         {/* Contact */}
         <div
           className={cn(
-            "flex flex-col items-center gap-2 transition-all duration-500",
+            "flex flex-col items-center gap-2 transition-all",
+            durationClass,
             isOpen
               ? "translate-y-0 opacity-100"
               : "pointer-events-none translate-y-8 opacity-0",
           )}
           style={{
-            transitionDelay: isOpen
-              ? `${(NAV_LINKS.length + 3) * 80 + 120}ms`
-              : "0ms",
+            transitionDelay: staggerDelay((NAV_LINKS.length + 3) * 80 + 120),
           }}
         >
           <span className="mb-1 text-white/50 text-xs uppercase tracking-widest">

@@ -357,6 +357,7 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
     <div
       ref={wrapperRef}
       data-universe-canvas
+      aria-hidden="true"
       className="fade-in pointer-events-none fixed inset-0 z-0 h-svh animate-in duration-1000"
     >
       <Canvas
