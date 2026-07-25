@@ -149,6 +149,23 @@ export function ProjectsSection() {
     };
     setHeight();
 
+    // Mirrors TechStacksSection's "universe:interactive" handling exactly:
+    // #main-content (App.tsx) is a `relative z-10` ancestor of every
+    // section, including this one — its own box still covers the viewport
+    // while pinned regardless of this section's or the sticky child's own
+    // pointer-events, so clicks never reached the canvas (z-0) behind it
+    // until main-content itself stops capturing them. Opens the canvas
+    // wrapper's pointer-events too, so clicks can reach the 3D project
+    // cards, only while this section is actually pinned/active.
+    function setProjectsActive(active: boolean) {
+      scrollStore.projectSectionActive = active;
+      const mainEl = document.getElementById("main-content");
+      if (mainEl) mainEl.style.pointerEvents = active ? "none" : "";
+      document.dispatchEvent(
+        new CustomEvent("universe:projectsinteractive", { detail: { active } }),
+      );
+    }
+
     const tween = gsap.to(
       {},
       {
@@ -168,7 +185,7 @@ export function ProjectsSection() {
           onRefresh: setHeight,
           onEnter: () => {
             attachActiveListeners();
-            scrollStore.projectSectionActive = true;
+            setProjectsActive(true);
             gsap.to(
               [
                 titleWrapRef.current,
@@ -186,7 +203,7 @@ export function ProjectsSection() {
           },
           onLeave: () => {
             detachActiveListeners();
-            scrollStore.projectSectionActive = false;
+            setProjectsActive(false);
             const els = [
               titleWrapRef.current,
               descWrapRef.current,
@@ -203,7 +220,7 @@ export function ProjectsSection() {
           },
           onEnterBack: () => {
             attachActiveListeners();
-            scrollStore.projectSectionActive = true;
+            setProjectsActive(true);
             gsap.to(
               [
                 titleWrapRef.current,
@@ -221,7 +238,7 @@ export function ProjectsSection() {
           },
           onLeaveBack: () => {
             detachActiveListeners();
-            scrollStore.projectSectionActive = false;
+            setProjectsActive(false);
             const els = [
               titleWrapRef.current,
               descWrapRef.current,
@@ -259,6 +276,26 @@ export function ProjectsSection() {
 
     const handleLoad = () => ScrollTrigger.refresh();
     window.addEventListener("load", handleLoad);
+
+    // Clicking a 3D card (see ProjectGallery) swipes it to dead center —
+    // converts the target card index back into an absolute page-scroll
+    // position within this section's pin range (inverse of onUpdate above),
+    // then hands it to Lenis so the same smooth-scroll engine driving every
+    // other scroll interaction on the site drives this one too. The card
+    // itself doesn't need to move by hand: once the real scroll position
+    // changes, ScrollTrigger's onUpdate → scrollStore.projectProgress →
+    // GalleryCards' existing damped follow does the rest.
+    function handleCardClick(e: Event) {
+      const { index } = (e as CustomEvent<{ index: number }>).detail;
+      const st = tween.scrollTrigger;
+      const lenis = lenisInstance.current;
+      if (!st || !lenis) return;
+      const activeProgress = index / (PROJECTS.length - 1);
+      const rawProgress =
+        activeProgress * (1 - 2 * edgeStickFraction) + edgeStickFraction;
+      lenis.scrollTo(st.start + rawProgress * (st.end - st.start));
+    }
+    document.addEventListener("projectgallery:cardclick", handleCardClick);
 
     // Earlier versions of this handler read deltaX itself and drove
     // lenis.scrollTo(..., { immediate: true }) manually to convert
@@ -501,6 +538,7 @@ export function ProjectsSection() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("projectgallery:cardclick", handleCardClick);
       gsap.ticker.remove(updateOverlay);
       if (lenisInstance.current) {
         lenisInstance.current.options.gestureOrientation = "vertical";
@@ -513,7 +551,7 @@ export function ProjectsSection() {
       _touchLastX = 0;
       section.style.height = "";
       scrollStore.projectProgress = 0;
-      scrollStore.projectSectionActive = false;
+      setProjectsActive(false);
     };
   }, []);
 
@@ -522,7 +560,13 @@ export function ProjectsSection() {
       ref={sectionRef}
       id="projects"
       aria-labelledby="projects-heading"
-      className="relative z-10"
+      // pointer-events-none for the same reason as the sticky child inside:
+      // this element is a pure scroll-height spacer + positioning context,
+      // 11115px tall while pinned, so its own box still covers the viewport
+      // even once the sticky div stops intercepting. Every real interactive
+      // element inside (Visit link, tags popover, and the 3D cards behind
+      // via the canvas) already opts back into pointer-events itself.
+      className="pointer-events-none relative z-10"
     >
       {/* Screen-reader fallback — the 15 cards are pure Three.js meshes in
           UniverseCanvas's <canvas>, no DOM/ARIA representation of their
@@ -541,8 +585,12 @@ export function ProjectsSection() {
         ))}
       </ul>
 
-      {/* Sticky viewport */}
-      <div className="sticky top-0 h-svh overflow-hidden">
+      {/* Sticky viewport — pointer-events-none so clicks pass through to the
+          3D cards in the canvas behind it (z-0, toggled interactive while
+          this section is active); the label/counter and overlay children
+          below already opt back into pointer-events for their own
+          interactive bits (Visit link, tags popover). */}
+      <div className="pointer-events-none sticky top-0 h-svh overflow-hidden">
         {/* Section label + counter */}
         <div className="pointer-events-none absolute top-30 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 md:top-20">
           <SectionHeading

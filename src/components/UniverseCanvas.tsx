@@ -264,24 +264,51 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
     return () => controller.abort();
   }, [prefersReducedMotion]);
 
-  // Canvas wrapper pointer events toggle when tech section activates
+  // Canvas wrapper pointer events toggle — off by default so the fixed
+  // full-viewport canvas doesn't block clicks on ordinary DOM content
+  // elsewhere on the page; opened while either the tech sphere or the
+  // projects gallery is the active section, since both need real pointer
+  // events reaching their 3D meshes (drag-to-rotate / click-to-center).
+  // touchAction stays tech-only — that's a pinch/drag gesture concern;
+  // the projects gallery already runs its own non-passive touch handlers
+  // (see ProjectsSection) that don't need the CSS touch-action override.
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{ active: boolean }>).detail;
-      if (wrapperRef.current) {
-        wrapperRef.current.style.pointerEvents = detail.active
-          ? "auto"
-          : "none";
-        const isTouch = window.matchMedia("(pointer: coarse)").matches;
-        wrapperRef.current.style.touchAction = detail.active
-          ? isTouch
-            ? "pan-y"
-            : "none"
-          : "";
-      }
+    let techActive = false;
+    let projectsActive = false;
+    const applyPointerEvents = () => {
+      if (!wrapperRef.current) return;
+      wrapperRef.current.style.pointerEvents =
+        techActive || projectsActive ? "auto" : "none";
+      const isTouch = window.matchMedia("(pointer: coarse)").matches;
+      wrapperRef.current.style.touchAction = techActive
+        ? isTouch
+          ? "pan-y"
+          : "none"
+        : "";
     };
-    document.addEventListener("universe:interactive", handler);
-    return () => document.removeEventListener("universe:interactive", handler);
+    const handleTechInteractive = (e: Event) => {
+      techActive = (e as CustomEvent<{ active: boolean }>).detail.active;
+      applyPointerEvents();
+    };
+    const handleProjectsInteractive = (e: Event) => {
+      projectsActive = (e as CustomEvent<{ active: boolean }>).detail.active;
+      applyPointerEvents();
+    };
+    document.addEventListener("universe:interactive", handleTechInteractive);
+    document.addEventListener(
+      "universe:projectsinteractive",
+      handleProjectsInteractive,
+    );
+    return () => {
+      document.removeEventListener(
+        "universe:interactive",
+        handleTechInteractive,
+      );
+      document.removeEventListener(
+        "universe:projectsinteractive",
+        handleProjectsInteractive,
+      );
+    };
   }, []);
 
   // Globe drag — handled at DOM level so R3F raycasting for TechBox clicks is

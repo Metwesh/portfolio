@@ -433,7 +433,6 @@ export const PROJECTS: readonly Project[] = [
     darkLogo: true,
     image: beltoneHolding,
     color: ACCENT_COLORS.yellow,
-    link: "https://www.beltoneholding.com/",
   },
   {
     name: "D'Art Space Art Store",
