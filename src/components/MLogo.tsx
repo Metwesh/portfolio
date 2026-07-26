@@ -9,6 +9,7 @@ import {
   type Group as ThreeGroup,
   type Mesh as ThreeMesh,
   MeshMatcapMaterial as ThreeMeshMatcapMaterial,
+  Vector2,
 } from "three";
 import { CENTERPIECE_PATH } from "../constants/misc";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -32,11 +33,18 @@ const RING_SATS = [0.0, 0.85, 1.0] as const;
 // all 3 rings (identical shader source), and a second scalar uniform on that
 // shared program was silently failing to reach the GPU across instances;
 // folding fade into the already-working vec3 color sidesteps it.
+// uParams is vec2, not two separate floats — a prior float uniform on this
+// same shared-program setup silently failed to reach the GPU per-instance;
+// packing scalars into a vector uniform sidesteps that, mirroring the
+// already-working vec3 uColor below.
 const RING_VERTEX_SHADER = /* glsl */ `
   varying vec3 vNormal;
   varying vec3 vViewPosition;
+  varying vec2 vUv;
+  uniform vec2 uParams; // x: time phase (frozen under reduced motion), y: random flare glow
   void main() {
     vNormal = normalize(normalMatrix * normal);
+    vUv = uv;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     vViewPosition = -mvPosition.xyz;
     gl_Position = projectionMatrix * mvPosition;
@@ -45,11 +53,16 @@ const RING_VERTEX_SHADER = /* glsl */ `
 const RING_FRAGMENT_SHADER = /* glsl */ `
   varying vec3 vNormal;
   varying vec3 vViewPosition;
+  varying vec2 vUv;
   uniform vec3 uColor;
+  uniform vec2 uParams;
   void main() {
     vec3 viewDir = normalize(vViewPosition);
     float rim = pow(1.0 - abs(dot(viewDir, normalize(vNormal))), 2.4);
-    float intensity = 0.4 + rim * 1.6;
+    // Traveling brightness pulse around the ring path — doubles as a
+    // comet-style gradient since it's never flat at any single instant.
+    float pathWave = 0.78 + 0.22 * sin(vUv.x * 12.566 - uParams.x * 1.6);
+    float intensity = (0.4 + rim * 1.6) * pathWave + uParams.y * 1.8;
     gl_FragColor = vec4(uColor * intensity, 1.0);
   }
 `;
@@ -144,12 +157,38 @@ export function MLogo() {
   const ring3Ref = useRef<ThreeMesh>(null);
   // Stable array — avoids allocating [ring1Ref, ring2Ref, ring3Ref] every frame
   const ringRefsArrRef = useRef([ring1Ref, ring2Ref, ring3Ref]);
-  // Stable shader uniforms — one {uColor} per ring, mutated in-place each
-  // frame. Fade/pulse is baked into the color's magnitude (see shader consts).
+  // Stable shader uniforms — one {uColor, uParams} per ring, mutated in-place
+  // each frame. Fade/pulse is baked into the color's magnitude (see shader consts).
   const ringUniformsRef = useRef([
-    { uColor: { value: new Color() } },
-    { uColor: { value: new Color() } },
-    { uColor: { value: new Color() } },
+    { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
+    { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
+    { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
+  ]);
+
+  // Afterimage echoes — 2 trailing tubes per ring (tier 0 = closer/brighter,
+  // tier 1 = further/dimmer), only shown once selection spin-up makes the
+  // lag readable.
+  const ring1EchoRef = useRef<ThreeMesh>(null);
+  const ring2EchoRef = useRef<ThreeMesh>(null);
+  const ring3EchoRef = useRef<ThreeMesh>(null);
+  const ring1Echo2Ref = useRef<ThreeMesh>(null);
+  const ring2Echo2Ref = useRef<ThreeMesh>(null);
+  const ring3Echo2Ref = useRef<ThreeMesh>(null);
+  const ringEchoRefsArrRef = useRef([
+    [ring1EchoRef, ring2EchoRef, ring3EchoRef],
+    [ring1Echo2Ref, ring2Echo2Ref, ring3Echo2Ref],
+  ]);
+  const ringEchoUniformsRef = useRef([
+    [
+      { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
+      { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
+      { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
+    ],
+    [
+      { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
+      { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
+      { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
+    ],
   ]);
 
   // Ring animation state
@@ -160,6 +199,15 @@ export function MLogo() {
   const ring3SpinRef = useRef(0); // accumulated y-spin
   const ringDramaRef = useRef(0); // 0→1 when box selected
   const ringTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Random flare timer per ring — replaces pointer-proximity glow with an
+  // autonomous flare on a randomized interval. 0 = counting down to next
+  // flare, >0 = mid-flare (elapsed seconds within the pulse envelope).
+  const ringGlowCountdownRef = useRef([
+    2 + Math.random() * 4,
+    2 + Math.random() * 4,
+    2 + Math.random() * 4,
+  ]);
+  const ringGlowPhaseRef = useRef([0, 0, 0]);
 
   // Fire the entrance animation only after the loader finishes sliding out
   useEffect(() => {
@@ -218,6 +266,7 @@ export function MLogo() {
     // this dips mid-transition then swells back up — capped well under full
     // opacity so the glow doesn't dominate the view once selected.
     const ringFade = Math.max(op, drama) * 0.65;
+
     for (let i = 0; i < 3; i++) {
       if (!ringRefsArrRef.current[i].current) continue;
       const uniforms = ringUniformsRef.current[i];
@@ -239,6 +288,34 @@ export function MLogo() {
       uniforms.uColor.value
         .setHSL(RING_HUES[i] + hShift, RING_SATS[i], lum)
         .multiplyScalar(newOpacity);
+
+      // uParams.x: wave/wobble time driver — frozen to a static per-ring
+      // offset under reduced motion (same convention as hShift/lum above).
+      const wavePhase = reducedMotion ? i * 2.1 : t * (1.4 + i * 0.2) + i * 2.1;
+
+      // uParams.y: random flare — same glow the hover version drove, but
+      // fired autonomously on a random per-ring timer instead of by pointer
+      // proximity. Skipped under reduced motion (sudden brightness swings
+      // are exactly what that setting exists to avoid).
+      let flareGlow = 0;
+      if (!reducedMotion) {
+        if (ringGlowPhaseRef.current[i] > 0) {
+          ringGlowPhaseRef.current[i] += delta;
+          const dur = 1.1;
+          if (ringGlowPhaseRef.current[i] >= dur) {
+            ringGlowPhaseRef.current[i] = 0;
+            ringGlowCountdownRef.current[i] = 3 + Math.random() * 5;
+          } else {
+            flareGlow = Math.sin((ringGlowPhaseRef.current[i] / dur) * Math.PI);
+          }
+        } else {
+          ringGlowCountdownRef.current[i] -= delta;
+          if (ringGlowCountdownRef.current[i] <= 0) {
+            ringGlowPhaseRef.current[i] = 0.0001;
+          }
+        }
+      }
+      uniforms.uParams.value.set(wavePhase, flareGlow);
     }
 
     if (reducedMotion || !group.current) return;
@@ -327,6 +404,40 @@ export function MLogo() {
       ring3Ref.current.rotation.z = raw * 0.00015 * (1 - drama);
       const breathe3 = 1 + Math.sin(t * 1.1 + 4.2) * 0.04;
       ring3Ref.current.scale.setScalar(ringScale * breathe3);
+    }
+
+    // Afterimage echoes — 2 trailing tubes per ring, lagging behind each
+    // ring's live spin at increasing distance. Only worth drawing once the
+    // selection spin-up (drama) makes the lag visible; otherwise hidden to
+    // avoid idle clutter.
+    // ring2's spin ref DECREASES (see ring2SpinRef above) while ring1/ring3's
+    // INCREASE — lag must subtract in the direction of travel, so ring2's
+    // sign flips, or the "trailing" echo ends up leading instead.
+    const echoVisible = drama > 0.02;
+    const SPIN_SIGN = [1, -1, 1] as const;
+    for (let tier = 0; tier < 2; tier++) {
+      const lagMult = tier === 0 ? 1 : 2;
+      const dimMult = tier === 0 ? 0.4 : 0.2;
+      for (let i = 0; i < 3; i++) {
+        const echo = ringEchoRefsArrRef.current[tier][i].current;
+        const main = ringRefsArrRef.current[i].current;
+        if (!echo) continue;
+        echo.visible = echoVisible;
+        if (!echoVisible || !main) continue;
+        echo.rotation.copy(main.rotation);
+        echo.scale.copy(main.scale);
+        const lag = 0.35 * drama * lagMult * SPIN_SIGN[i];
+        if (i === 0) echo.rotation.z -= lag;
+        else if (i === 1) echo.rotation.x -= lag;
+        else echo.rotation.y -= lag;
+        const echoUniforms = ringEchoUniformsRef.current[tier][i];
+        echoUniforms.uColor.value
+          .copy(ringUniformsRef.current[i].uColor.value)
+          .multiplyScalar(dimMult * drama);
+        echoUniforms.uParams.value.copy(
+          ringUniformsRef.current[i].uParams.value,
+        );
+      }
     }
   });
 
@@ -421,6 +532,94 @@ export function MLogo() {
           <torusGeometry args={[2.4, 0.038, 16, 80]} />
           <shaderMaterial
             uniforms={ringUniformsRef.current[2]}
+            vertexShader={RING_VERTEX_SHADER}
+            fragmentShader={RING_FRAGMENT_SHADER}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {/* Afterimage echoes — 2 per ring, hidden until selection spin-up
+            makes the lag readable (see useFrame). Same tube, dimmer trailing
+            color, tier 1 further behind + dimmer than tier 0. */}
+        <mesh ref={ring1EchoRef} rotation={[Math.PI / 2, 0, 0]} visible={false}>
+          <torusGeometry args={[2.8, 0.042, 16, 80]} />
+          <shaderMaterial
+            uniforms={ringEchoUniformsRef.current[0][0]}
+            vertexShader={RING_VERTEX_SHADER}
+            fragmentShader={RING_FRAGMENT_SHADER}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        <mesh ref={ring2EchoRef} rotation={[Math.PI / 2, 0, 0]} visible={false}>
+          <torusGeometry args={[3.2, 0.034, 16, 80]} />
+          <shaderMaterial
+            uniforms={ringEchoUniformsRef.current[0][1]}
+            vertexShader={RING_VERTEX_SHADER}
+            fragmentShader={RING_FRAGMENT_SHADER}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        <mesh ref={ring3EchoRef} rotation={[Math.PI / 2, 0, 0]} visible={false}>
+          <torusGeometry args={[2.4, 0.038, 16, 80]} />
+          <shaderMaterial
+            uniforms={ringEchoUniformsRef.current[0][2]}
+            vertexShader={RING_VERTEX_SHADER}
+            fragmentShader={RING_FRAGMENT_SHADER}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        <mesh
+          ref={ring1Echo2Ref}
+          rotation={[Math.PI / 2, 0, 0]}
+          visible={false}
+        >
+          <torusGeometry args={[2.8, 0.042, 16, 80]} />
+          <shaderMaterial
+            uniforms={ringEchoUniformsRef.current[1][0]}
+            vertexShader={RING_VERTEX_SHADER}
+            fragmentShader={RING_FRAGMENT_SHADER}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        <mesh
+          ref={ring2Echo2Ref}
+          rotation={[Math.PI / 2, 0, 0]}
+          visible={false}
+        >
+          <torusGeometry args={[3.2, 0.034, 16, 80]} />
+          <shaderMaterial
+            uniforms={ringEchoUniformsRef.current[1][1]}
+            vertexShader={RING_VERTEX_SHADER}
+            fragmentShader={RING_FRAGMENT_SHADER}
+            transparent
+            toneMapped={false}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        <mesh
+          ref={ring3Echo2Ref}
+          rotation={[Math.PI / 2, 0, 0]}
+          visible={false}
+        >
+          <torusGeometry args={[2.4, 0.038, 16, 80]} />
+          <shaderMaterial
+            uniforms={ringEchoUniformsRef.current[1][2]}
             vertexShader={RING_VERTEX_SHADER}
             fragmentShader={RING_FRAGMENT_SHADER}
             transparent
