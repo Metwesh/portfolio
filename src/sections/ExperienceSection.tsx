@@ -162,7 +162,7 @@ export function ExperienceSection() {
         <div
           ref={glowDotRef}
           aria-hidden="true"
-          className="absolute top-0 left-4 z-10 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full sm:left-8"
+          className="absolute top-0 left-4 z-10 h-2 w-2 translate-x-0 -translate-y-1/2 rounded-full sm:left-8"
           style={{
             background: EXPERIENCES[0].color,
             boxShadow: `0 0 16px 6px ${EXPERIENCES[0].color}90`,
