@@ -185,7 +185,6 @@ function CertCard({
       href={cert.link}
       target="_blank"
       rel="noopener noreferrer"
-      data-magnetic
       className={cn(
         GLASS_CARD_CLASS,
         "group relative flex min-h-52 flex-col overflow-hidden p-6 will-change-transform md:p-8",

@@ -99,12 +99,7 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
     >
       <div className="relative z-40 flex items-center justify-between max-md:w-full">
         {/* Logo + name */}
-        <a
-          className="group flex items-center gap-3"
-          href="#"
-          aria-label="Home"
-          data-magnetic
-        >
+        <a className="group flex items-center gap-3" href="#" aria-label="Home">
           <svg
             viewBox="0 0 478 478"
             fill="none"
@@ -182,7 +177,6 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
             <a
               key={link.href}
               href={link.href}
-              data-magnetic
               aria-current={activeHref === link.href ? "location" : undefined}
               className={cn(
                 "transition-colors hover:text-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-offset-2 max-lg:text-base",

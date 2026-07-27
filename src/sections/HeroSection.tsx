@@ -25,6 +25,7 @@ export function HeroSection() {
   );
   const eyebrowLoopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const restartTypewriterRef = useRef<(() => void) | null>(null);
+  const weightTweenRef = useRef<gsap.core.Tween | null>(null);
 
   // Entrance: wait for loader to finish sliding out, then reveal
   useEffect(() => {
@@ -103,6 +104,34 @@ export function HeroSection() {
         },
       );
 
+      // Kinetic weight — Google Sans Flex is a real variable font (wght
+      // 1-1000, opsz 6-144; see index.html's font @import). Full thin↔bold
+      // range, but breathes back and forth very slowly (long duration) — a
+      // slow idle ambience, not a fast entrance snap. GSAP's CSSPlugin can't
+      // parse the "'wght' N" shorthand as a tweenable value directly, so a
+      // proxy object + onUpdate drives it.
+      const weightState = { wght: 800, opsz: 144 };
+      const applyFontVariation = () => {
+        const settings = `'wght' ${weightState.wght.toFixed(0)}, 'opsz' ${weightState.opsz.toFixed(0)}`;
+        for (const el of lines) {
+          if (el) el.style.fontVariationSettings = settings;
+        }
+      };
+      applyFontVariation();
+      // Breathes back and forth forever (not a one-shot settle) — paused
+      // while Hero is scrolled out of view, same gate as the eyebrow
+      // typewriter below, so it's not animating forever off-screen.
+      weightTweenRef.current = gsap.to(weightState, {
+        wght: 200,
+        opsz: 20,
+        duration: 9,
+        ease: "sine.inOut",
+        delay: 0.1,
+        repeat: -1,
+        yoyo: true,
+        onUpdate: applyFontVariation,
+      });
+
       gsap.fromTo(
         [subtitleRef.current, scrollCueRef.current],
         { opacity: 0, y: 24 },
@@ -122,21 +151,23 @@ export function HeroSection() {
       document.removeEventListener("app:ready", start);
       if (eyebrowIntervalRef.current) clearInterval(eyebrowIntervalRef.current);
       if (eyebrowLoopRef.current) clearTimeout(eyebrowLoopRef.current);
+      weightTweenRef.current?.kill();
     };
   }, [prefersReducedMotion]);
 
-  // Pause the eyebrow typewriter while Hero is scrolled out of view; resume
-  // from the top of the phrase cycle when it re-enters. No-ops until the
-  // initial app:ready boot has started the loop at least once. The one-shot
-  // headline/subtitle entrance reveal above is untouched — only the eyebrow
-  // interval/timeout chain is gated here.
+  // Pause the eyebrow typewriter (and the headline's breathing font-weight
+  // loop) while Hero is scrolled out of view; resume when it re-enters.
+  // No-ops until the initial app:ready boot has started the loop at least
+  // once. The one-shot headline/subtitle entrance reveal above is untouched.
   useEffect(() => {
     if (!restartTypewriterRef.current) return;
     if (isIntersecting) {
       restartTypewriterRef.current();
+      weightTweenRef.current?.resume();
     } else {
       if (eyebrowIntervalRef.current) clearInterval(eyebrowIntervalRef.current);
       if (eyebrowLoopRef.current) clearTimeout(eyebrowLoopRef.current);
+      weightTweenRef.current?.pause();
     }
   }, [isIntersecting]);
 

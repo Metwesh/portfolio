@@ -82,6 +82,12 @@ function TechConstellation({
 
   useEffect(() => {
     scrollStore.techBoxSelected = selectedIndex !== null;
+    // Selecting/deselecting jumps the box's scale+position away from the
+    // cursor without a follow-up pointermove, so the mesh never fires
+    // pointerleave — clear the stale hover flag here or scroll-driven spin
+    // (gated on !techBoxHovered in TechConstellation's useFrame) stays
+    // frozen forever after the first click.
+    scrollStore.techBoxHovered = false;
     document.dispatchEvent(
       new CustomEvent("universe:boxselected", {
         detail: { selected: selectedIndex !== null },
