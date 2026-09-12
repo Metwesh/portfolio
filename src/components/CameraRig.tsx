@@ -3,6 +3,7 @@ import { useRef } from "react";
 import type { PerspectiveCamera as ThreePerspectiveCamera } from "three";
 import { Vector3 } from "three";
 import { CAMERA_WAYPOINTS } from "../constants/cameraWaypoints";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { scrollStore } from "../stores/scrollStore";
 import { damp, dampAlpha } from "../utils/damp";
 
@@ -25,6 +26,7 @@ function smoothstep(t: number) {
 export function CameraRig({ mouse }: CameraRigProps) {
   const { camera } = useThree();
   const cam = camera as ThreePerspectiveCamera;
+  const reducedMotion = useReducedMotion();
 
   // Smooth weight for the projects-section camera lock (0 = free, 1 = locked).
   const projectLockRef = useRef(0);
@@ -55,14 +57,13 @@ export function CameraRig({ mouse }: CameraRigProps) {
     _targetPos.lerpVectors(prev.position, next.position, t);
     _targetLookAt.lerpVectors(prev.lookAt, next.lookAt, t);
 
-    // Smooth-lock camera to the projects view while the gallery is pinned.
+    // Smooth-lock camera to the projects view while the gallery is pinned —
+    // snapped directly under reduced motion instead of eased, same
+    // convention as every other selection/state ramp in the scene.
     const wantsLock = scrollStore.projectSectionActive ? 1 : 0;
-    projectLockRef.current = damp(
-      projectLockRef.current,
-      wantsLock,
-      0.08,
-      delta,
-    );
+    projectLockRef.current = reducedMotion
+      ? wantsLock
+      : damp(projectLockRef.current, wantsLock, 0.08, delta);
     const lw = projectLockRef.current;
     if (lw > 0.001) {
       _targetPos.z = _targetPos.z * (1 - lw) + 14 * lw;
@@ -76,19 +77,33 @@ export function CameraRig({ mouse }: CameraRigProps) {
     // Target FOV
     const targetFov = prev.fov + (next.fov - prev.fov) * t;
 
-    // Normal cinematic lag: smooth position chases target
-    _smoothPos.lerp(_targetPos, dampAlpha(0.06, delta));
-    cam.position.copy(_smoothPos);
+    if (reducedMotion) {
+      // No cinematic lag — the eased chase below keeps the camera drifting
+      // for a beat after scroll input stops, which reads as autonomous
+      // motion. Track the waypoint target 1:1 instead.
+      _smoothPos.copy(_targetPos);
+      cam.position.copy(_smoothPos);
+      _currentLookAt.copy(_targetLookAt);
+      cam.lookAt(_currentLookAt);
+      if (cam.fov !== targetFov) {
+        cam.fov = targetFov;
+        cam.updateProjectionMatrix();
+      }
+    } else {
+      // Normal cinematic lag: smooth position chases target
+      _smoothPos.lerp(_targetPos, dampAlpha(0.06, delta));
+      cam.position.copy(_smoothPos);
 
-    // Smooth lookAt transition
-    _currentLookAt.lerp(_targetLookAt, dampAlpha(0.06, delta));
-    cam.lookAt(_currentLookAt);
+      // Smooth lookAt transition
+      _currentLookAt.lerp(_targetLookAt, dampAlpha(0.06, delta));
+      cam.lookAt(_currentLookAt);
 
-    // FOV lerp — skip matrix rebuild when converged
-    const dampedFov = damp(cam.fov, targetFov, 0.05, delta);
-    if (Math.abs(dampedFov - cam.fov) > 0.001) {
-      cam.fov = dampedFov;
-      cam.updateProjectionMatrix();
+      // FOV lerp — skip matrix rebuild when converged
+      const dampedFov = damp(cam.fov, targetFov, 0.05, delta);
+      if (Math.abs(dampedFov - cam.fov) > 0.001) {
+        cam.fov = dampedFov;
+        cam.updateProjectionMatrix();
+      }
     }
   });
 

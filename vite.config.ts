@@ -42,7 +42,7 @@ export default defineConfig(async ({ mode }) => ({
   base: getBasePath(mode),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
     dedupe: ["three"],
   },
@@ -68,6 +68,9 @@ export default defineConfig(async ({ mode }) => ({
       },
     },
     sourcemap: mode === "development",
+    // three/@react-three chunk is already lazy-loaded on demand; silence the
+    // default 500kb warning for this known, unavoidable vendor bundle.
+    chunkSizeWarningLimit: 1300,
   },
   plugins: [
     react(),

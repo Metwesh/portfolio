@@ -1,6 +1,6 @@
 import { a, useSpring } from "@react-spring/three";
 import { useGLTF } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
   AdditiveBlending,
@@ -10,6 +10,7 @@ import {
   type Mesh as ThreeMesh,
   MeshMatcapMaterial as ThreeMeshMatcapMaterial,
   Vector2,
+  Vector3,
 } from "three";
 import { CENTERPIECE_PATH } from "../constants/misc";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -18,6 +19,19 @@ import { scrollStore } from "../stores/scrollStore";
 
 // Module-level constants — no allocation inside useFrame
 const _lerpVal = (a: number, b: number, t: number) => a + (b - a) * t;
+// Reusable scratch vectors for the reduced-motion camera-lock below —
+// allocated once at module scope, mutated per frame, never replaced.
+const _camForward = new Vector3();
+const _camLockedPos = new Vector3();
+// Distance in front of the camera the M is pinned to under reduced motion —
+// matches the M's actual distance from the camera at the hero waypoint
+// (camera z=10, M z=-3) so switching into reduced motion doesn't change its
+// apparent size.
+const REDUCED_MOTION_CAM_LOCK_DISTANCE = 13;
+// The rings still get a scroll-linked nudge under reduced motion (explicitly
+// requested), just scaled way down from the normal-motion nudge below — a
+// barely-perceptible drift, not the M's own kind of motion.
+const REDUCED_MOTION_RING_SCROLL_MULT = 0.05;
 const RING_BASES = [0.95, 0.8, 0.65] as const;
 // Ordered center-out by ring radius (ring3=2.4 innermost, ring1=2.8, ring2=3.2 outermost):
 // cyan -> white -> purple
@@ -130,6 +144,7 @@ function createMatcapTexture(): CanvasTexture {
 
 export function MLogo() {
   const reducedMotion = useReducedMotion();
+  const { camera } = useThree();
   const { scene } = useGLTF(CENTERPIECE_PATH);
   const group = useRef<ThreeGroup>(null);
   const isMobile = useIsMobile();
@@ -142,7 +157,12 @@ export function MLogo() {
 
   const [{ scale, position }, springApi] = useSpring(() => ({
     scale: reducedMotion ? [1.5, 1.5, 1.5] : [0, 0, 0],
-    position: reducedMotion ? [10, -5, -8] : [0, 0, 0],
+    // Only the reducedMotion branch's position is ever actually applied (see
+    // JSX below) and only its x component matters — y/z get overwritten every
+    // frame in useFrame regardless. x was previously 10 (off to the side,
+    // effectively off-screen) with nothing to ever bring it back to center
+    // since the reducedMotion entrance effect below never runs.
+    position: reducedMotion ? [0, -5, -8] : [0, 0, 0],
     immediate: true,
   }));
 
@@ -209,10 +229,17 @@ export function MLogo() {
   ]);
   const ringGlowPhaseRef = useRef([0, 0, 0]);
 
-  // Fire the entrance animation only after the loader finishes sliding out
+  // Fire the entrance animation only after the loader finishes sliding out.
+  // ringReadyRef must still get set under reduced motion — it's the only
+  // place that ever sets it, and downstream (useFrame below) it's what lets
+  // the rings fan out from their flat pose at all. Only the spring animation
+  // and the artificial fan-out delay are reduced-motion-suppressed here.
   useEffect(() => {
-    if (reducedMotion) return;
     const start = () => {
+      if (reducedMotion) {
+        ringReadyRef.current = true;
+        return;
+      }
       springApi.start({
         scale: [2.2, 2.2, 2.2],
         position: [0, 0, 0],
@@ -235,15 +262,25 @@ export function MLogo() {
     const isSelected = scrollStore.techBoxSelected;
     const t = state.clock.getElapsedTime();
 
-    // M opacity + Z drift — quadratic curve keeps M bright longer then drops fast
+    // M opacity + Z drift — quadratic curve keeps M bright longer then drops fast.
+    // Snapped directly to target under reduced motion instead of eased —
+    // same convention as the scroll-smoothing block below.
     const targetOpacity = isSelected ? 0 : 1;
-    selectOpacityRef.current +=
-      (targetOpacity - selectOpacityRef.current) * 0.05;
+    if (reducedMotion) {
+      selectOpacityRef.current = targetOpacity;
+    } else {
+      selectOpacityRef.current +=
+        (targetOpacity - selectOpacityRef.current) * 0.05;
+    }
     const op = selectOpacityRef.current * selectOpacityRef.current;
 
     if (outerRef.current) {
       const targetZ = isSelected ? -18 : 0;
-      selectZRef.current += (targetZ - selectZRef.current) * 0.05;
+      if (reducedMotion) {
+        selectZRef.current = targetZ;
+      } else {
+        selectZRef.current += (targetZ - selectZRef.current) * 0.05;
+      }
       outerRef.current.position.z = selectZRef.current;
 
       for (const mat of mMaterialsRef.current) {
@@ -258,8 +295,15 @@ export function MLogo() {
 
     // Ring drama: spin up + expand + flatten on selection, glow through
     // (capped, not full-bright) instead of fading away with the retreating M.
-    ringDramaRef.current +=
-      ((isSelected ? 1 : 0) - ringDramaRef.current) * 0.05;
+    // Snapped directly under reduced motion — this single ramp also drives
+    // the glow swell, ringFade, and ring expand-on-selection scale below, so
+    // freezing it here removes the animated transition from all three too.
+    if (reducedMotion) {
+      ringDramaRef.current = isSelected ? 1 : 0;
+    } else {
+      ringDramaRef.current +=
+        ((isSelected ? 1 : 0) - ringDramaRef.current) * 0.05;
+    }
     const drama = ringDramaRef.current;
     const glow = drama > 0 ? 1 + Math.sin(drama * Math.PI) * 0.5 : 1;
     // op == (1-drama)^2 always (both driven by the same isSelected lerp), so
@@ -318,29 +362,57 @@ export function MLogo() {
       uniforms.uParams.value.set(wavePhase, flareGlow);
     }
 
-    if (reducedMotion || !group.current) return;
+    if (!group.current) return;
 
     const raw = scrollStore.raw;
 
-    const damping = 0.08;
-    smoothScrollRef.current.y +=
-      (Math.max(raw * -0.003, -4) - smoothScrollRef.current.y) * damping;
-    const zMax = isMobile ? -8 : -12;
-    // Monotonic push-back: M moves away steadily as user scrolls (no sin oscillation that
-    // would stutter when sin cycles back toward 0 around the tech-stack section)
-    const zT = 1 - Math.exp(-raw * 0.0003);
-    const zTarget = zMax * zT;
-    smoothScrollRef.current.z +=
-      (zTarget - smoothScrollRef.current.z) * damping;
-    smoothScrollRef.current.rot +=
-      (raw * 0.002 - smoothScrollRef.current.rot) * damping;
+    let posX: number;
+    let posY: number;
+    let posZ: number;
 
-    group.current.rotation.y =
-      Math.sin(t * 0.7) * 0.7 + smoothScrollRef.current.rot;
-    group.current.rotation.x = Math.cos(t * 0.5) * 0.2;
-    const posY = Math.sin(t * 1.2) * 0.2 + smoothScrollRef.current.y;
-    // Offset 3 units back so the orbital rings clear the project gallery planes (z=3)
-    const posZ = smoothScrollRef.current.z - 3;
+    if (reducedMotion) {
+      // CameraRig still tracks scroll under reduced motion (ambient drift,
+      // lag removed but not the tracking itself — see CameraRig), so a
+      // world-space-fixed M would still visually grow/shrink/drift as the
+      // camera moves through its waypoints, even though the M "itself"
+      // never animates. Pin it a constant distance directly in front of the
+      // camera's current view instead — same apparent size and screen
+      // position no matter where the camera's scroll journey takes it.
+      camera.getWorldDirection(_camForward);
+      _camLockedPos
+        .copy(camera.position)
+        .addScaledVector(_camForward, REDUCED_MOTION_CAM_LOCK_DISTANCE);
+      posX = _camLockedPos.x;
+      posY = _camLockedPos.y;
+      posZ = _camLockedPos.z;
+      group.current.rotation.y = 0;
+      group.current.rotation.x = 0;
+    } else {
+      const damping = 0.08;
+      const smoothYTarget = Math.max(raw * -0.003, -4);
+      const zMax = isMobile ? -8 : -12;
+      // Monotonic push-back: M moves away steadily as user scrolls (no sin oscillation that
+      // would stutter when sin cycles back toward 0 around the tech-stack section)
+      const zT = 1 - Math.exp(-raw * 0.0003);
+      const zTarget = zMax * zT;
+      const rotTarget = raw * 0.002;
+      smoothScrollRef.current.y +=
+        (smoothYTarget - smoothScrollRef.current.y) * damping;
+      smoothScrollRef.current.z +=
+        (zTarget - smoothScrollRef.current.z) * damping;
+      smoothScrollRef.current.rot +=
+        (rotTarget - smoothScrollRef.current.rot) * damping;
+
+      group.current.rotation.y =
+        Math.sin(t * 0.7) * 0.7 + smoothScrollRef.current.rot;
+      group.current.rotation.x = Math.cos(t * 0.5) * 0.2;
+      posX = 0;
+      posY = Math.sin(t * 1.2) * 0.2 + smoothScrollRef.current.y;
+      // Offset 3 units back so the orbital rings clear the project gallery planes (z=3)
+      posZ = smoothScrollRef.current.z - 3;
+    }
+
+    group.current.position.x = posX;
     group.current.position.y = posY;
     group.current.position.z = posZ;
 
@@ -348,61 +420,84 @@ export function MLogo() {
     // — applied to outerRef, an ANCESTOR of group so it stays a straight
     // world-space offset unaffected by group's own rotation above — never
     // reaches them. Mirror the same rotation/position here so rings still
-    // co-move with the M during normal (non-selected) motion.
+    // co-move with the M (camera-locked or scroll-driven, whichever above).
     if (ringGroupRef.current) {
       ringGroupRef.current.rotation.y = group.current.rotation.y;
       ringGroupRef.current.rotation.x = group.current.rotation.x;
+      ringGroupRef.current.position.x = posX;
       ringGroupRef.current.position.y = posY;
       ringGroupRef.current.position.z = posZ;
     }
 
-    // Publish for TechConstellation to co-locate on the M
+    // Publish for TechConstellation to co-locate on the M (only relevant
+    // when !reducedMotion — TechConstellation doesn't mount otherwise).
     scrollStore.mLogoY = posY;
     scrollStore.mLogoZ = posZ;
 
     // ─── Ring animations ──────────────────────────────────────────────────────
-    // Enter: lerp tilt 0 (all-flat saturn) → 1 (orb) on app:ready
+    // Enter: lerp tilt 0 (all-flat saturn) → 1 (orb) on app:ready — snapped
+    // under reduced motion instead of eased, same as the other ramps above.
     const tiltTarget = ringReadyRef.current ? 1 : 0;
-    ringTiltRef.current += (tiltTarget - ringTiltRef.current) * 0.028;
+    if (reducedMotion) {
+      ringTiltRef.current = tiltTarget;
+    } else {
+      ringTiltRef.current += (tiltTarget - ringTiltRef.current) * 0.028;
+    }
 
     const spinMult = 1 + drama * 5; // spin up to 6× on selection
-    // Flatten rings back toward saturn as M retreats
-    const et = ringTiltRef.current * (1 - drama * 0.85);
+    // Flatten rings back toward saturn as M retreats — held at the resting
+    // (unselected) tilt under reduced motion instead, so selecting a box
+    // doesn't snap the rings into a different shape/orientation.
+    const et = reducedMotion
+      ? ringTiltRef.current
+      : ringTiltRef.current * (1 - drama * 0.85);
 
-    // Accumulated spins (each ring spins on its primary axis)
-    ring1SpinRef.current += delta * 0.4 * spinMult;
-    ring2SpinRef.current -= delta * 0.28 * spinMult;
-    ring3SpinRef.current += delta * 0.18 * spinMult;
+    // Accumulated spins (each ring spins on its primary axis) — this was
+    // never gated by reducedMotion, unlike every other idle loop in this
+    // component, so the rings kept spinning continuously regardless.
+    if (!reducedMotion) {
+      ring1SpinRef.current += delta * 0.4 * spinMult;
+      ring2SpinRef.current -= delta * 0.28 * spinMult;
+      ring3SpinRef.current += delta * 0.18 * spinMult;
+    }
 
     // Expand outward on selection — a modest 1.8x, framing the selected box
     // close-up rather than trying to reach the full flung-out sphere shell
-    // (which would put the ring right up against the camera).
-    const ringScale = 1 + drama * 0.8;
+    // (which would put the ring right up against the camera). Held at 1
+    // (no expansion) under reduced motion — same reasoning as `et` above.
+    const ringScale = reducedMotion ? 1 : 1 + drama * 0.8;
+
+    // Scroll-linked nudge multiplier — full strength normally; scaled down
+    // to a barely-perceptible drift under reduced motion instead of zeroed
+    // outright (the M itself stays perfectly still above; the rings are
+    // allowed this one infinitesimally small, scroll-tied exception).
+    const ringScrollMult = reducedMotion ? REDUCED_MOTION_RING_SCROLL_MULT : 1;
 
     if (ring1Ref.current) {
       // ring1 target tilt = [PI/2, 0, 0] = same as flat, so it just spins on z
       ring1Ref.current.rotation.x = Math.PI / 2;
       ring1Ref.current.rotation.y = 0;
       ring1Ref.current.rotation.z =
-        ring1SpinRef.current + raw * 0.0003 * (1 - drama);
-      const breathe1 = 1 + Math.sin(t * 0.9 + 0.0) * 0.04;
+        ring1SpinRef.current + raw * 0.0003 * (1 - drama) * ringScrollMult;
+      const breathe1 = reducedMotion ? 1 : 1 + Math.sin(t * 0.9 + 0.0) * 0.04;
       ring1Ref.current.scale.setScalar(ringScale * breathe1);
     }
     if (ring2Ref.current) {
       // ring2 target tilt: x→0.4, z→0.3; spins on x
       ring2Ref.current.rotation.x =
         _lerpVal(Math.PI / 2, 0.4, et) + ring2SpinRef.current;
-      ring2Ref.current.rotation.y = raw * 0.0002 * (1 - drama);
+      ring2Ref.current.rotation.y = raw * 0.0002 * (1 - drama) * ringScrollMult;
       ring2Ref.current.rotation.z = _lerpVal(0, 0.3, et);
-      const breathe2 = 1 + Math.sin(t * 0.7 + 2.1) * 0.04;
+      const breathe2 = reducedMotion ? 1 : 1 + Math.sin(t * 0.7 + 2.1) * 0.04;
       ring2Ref.current.scale.setScalar(ringScale * breathe2);
     }
     if (ring3Ref.current) {
       // ring3 target tilt: x→1.1, y→0.6; spins on y
       ring3Ref.current.rotation.x = _lerpVal(Math.PI / 2, 1.1, et);
       ring3Ref.current.rotation.y = _lerpVal(0, 0.6, et) + ring3SpinRef.current;
-      ring3Ref.current.rotation.z = raw * 0.00015 * (1 - drama);
-      const breathe3 = 1 + Math.sin(t * 1.1 + 4.2) * 0.04;
+      ring3Ref.current.rotation.z =
+        raw * 0.00015 * (1 - drama) * ringScrollMult;
+      const breathe3 = reducedMotion ? 1 : 1 + Math.sin(t * 1.1 + 4.2) * 0.04;
       ring3Ref.current.scale.setScalar(ringScale * breathe3);
     }
 

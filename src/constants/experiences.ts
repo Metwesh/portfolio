@@ -189,3 +189,6 @@ export const EXPERIENCES = [
     ],
   },
 ];
+
+export const LINEAR_GRADIENT =
+  `linear-gradient(to bottom, ${EXPERIENCES.map((e) => e.color).join(", ")})` as const;

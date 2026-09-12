@@ -30,30 +30,16 @@ export function CustomCursor() {
 
     const dot = dotRef.current;
     if (!dot) return;
-
-    // Reduced motion: keep a minimal position-tracking dot only — no ring, no
-    // elementFromPoint hit-testing, no hover affordance. The alternative
-    // (rendering nothing here) leaves these users with zero visible cursor,
-    // since native cursor is also suppressed by the global cursor:none rule.
-    if (prefersReducedMotion) {
-      const handleMouseMoveStatic = (e: MouseEvent) => {
-        dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-      };
-      window.addEventListener("mousemove", handleMouseMoveStatic, {
-        passive: true,
-      });
-      return () =>
-        window.removeEventListener("mousemove", handleMouseMoveStatic);
-    }
-
+    // Read once, not required — the refractive ring may not have attached
+    // its ref yet on this render; dot-tracking and hover detection must
+    // keep working regardless, same as before the ring existed at all.
     const ring = ringRef.current;
-    if (!ring) return;
 
     let mouseX = 0;
     let mouseY = 0;
     let ringX = 0;
     let ringY = 0;
-    let rafId: number;
+    let rafId: number | undefined;
     let isPointer = false;
     let canvas3dHovered = false;
     let ticking = false;
@@ -62,6 +48,7 @@ export function CustomCursor() {
       if (next === isPointer) return;
       isPointer = next;
       dot.style.opacity = `${isPointer ? 0 : 1}`;
+      if (!ring) return;
       ring.style.borderColor = isPointer
         ? "rgba(255,255,255,0.95)"
         : "rgba(255,255,255,0.4)";
@@ -87,6 +74,12 @@ export function CustomCursor() {
       mouseX = e.clientX;
       mouseY = e.clientY;
       dot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+      // Reduced motion: ring tracks the cursor 1:1, same as the dot — no
+      // trailing catch-up (that's the tick() lerp loop below, skipped
+      // entirely in this case).
+      if (prefersReducedMotion && ring) {
+        ring.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+      }
 
       // elementFromPoint forces a layout hit-test — cap it to once per frame
       // instead of once per raw mousemove event.
@@ -102,21 +95,23 @@ export function CustomCursor() {
       }
     };
 
-    const tick = () => {
-      ringX += (mouseX - ringX) * 0.12;
-      ringY += (mouseY - ringY) * 0.12;
-      ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
-      rafId = requestAnimationFrame(tick);
-    };
-
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    rafId = requestAnimationFrame(tick);
+
+    if (!prefersReducedMotion && ring) {
+      const tick = () => {
+        ringX += (mouseX - ringX) * 0.12;
+        ringY += (mouseY - ringY) * 0.12;
+        ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
+        rafId = requestAnimationFrame(tick);
+      };
+      rafId = requestAnimationFrame(tick);
+    }
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("techbox:pointerenter", handle3dEnter);
       window.removeEventListener("techbox:pointerleave", handle3dLeave);
-      cancelAnimationFrame(rafId);
+      if (rafId !== undefined) cancelAnimationFrame(rafId);
     };
   }, [isMobile, prefersReducedMotion]);
 
@@ -130,23 +125,21 @@ export function CustomCursor() {
         style={{ transition: "opacity 150ms ease" }}
         className="pointer-events-none fixed top-0 left-0 z-9999 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
       />
-      {!prefersReducedMotion && (
-        <refractive.div
-          ref={ringRef}
-          aria-hidden="true"
-          style={{
-            transition: "border-color 200ms ease, box-shadow 200ms ease",
-          }}
-          refraction={{
-            blur: 0.5,
-            radius: 16,
-            glassThickness: 16,
-            bezelWidth: 32,
-            refractiveIndex: 3,
-          }}
-          className="pointer-events-none fixed top-0 left-0 z-9998 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40"
-        />
-      )}
+      <refractive.div
+        ref={ringRef}
+        aria-hidden="true"
+        style={{
+          transition: "border-color 200ms ease, box-shadow 200ms ease",
+        }}
+        refraction={{
+          blur: 0.5,
+          radius: 16,
+          glassThickness: 16,
+          bezelWidth: 32,
+          refractiveIndex: 3,
+        }}
+        className="pointer-events-none fixed top-0 left-0 z-9998 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40"
+      />
     </>
   );
 }

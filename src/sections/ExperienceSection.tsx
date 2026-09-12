@@ -2,7 +2,7 @@ import gsap from "gsap";
 import { useEffect, useRef } from "react";
 import { SectionHeading } from "../components/SectionHeading";
 import { INTERSECTION_OBSERVER_CONFIG } from "../constants/animations";
-import { EXPERIENCES } from "../constants/experiences";
+import { EXPERIENCES, LINEAR_GRADIENT } from "../constants/experiences";
 import { GLASS_CARD_CLASS } from "../constants/misc";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useReducedMotion } from "../hooks/useReducedMotion";
@@ -143,7 +143,7 @@ export function ExperienceSection() {
         <div
           className="absolute top-0 left-4 z-0 h-full w-px rounded-full opacity-20 sm:left-8"
           style={{
-            backgroundImage: `linear-gradient(to bottom, ${EXPERIENCES.map((e) => e.color).join(", ")})`,
+            backgroundImage: LINEAR_GRADIENT,
           }}
         />
 
@@ -154,7 +154,7 @@ export function ExperienceSection() {
           ref={timelineRef}
           className="absolute top-0 left-4 z-0 h-full w-px rounded-full [clip-path:inset(0_0_100%_0)] sm:left-8"
           style={{
-            backgroundImage: `linear-gradient(to bottom, ${EXPERIENCES.map((e) => e.color).join(", ")})`,
+            backgroundImage: LINEAR_GRADIENT,
           }}
         />
 
@@ -162,7 +162,7 @@ export function ExperienceSection() {
         <div
           ref={glowDotRef}
           aria-hidden="true"
-          className="absolute top-0 left-4 z-10 h-2 w-2 translate-x-0 -translate-y-1/2 rounded-full sm:left-8"
+          className="absolute top-0 left-4 z-10 h-2 w-2 translate-x-0 -translate-y-1/2 rounded-full motion-reduce:hidden sm:left-8"
           style={{
             background: EXPERIENCES[0].color,
             boxShadow: `0 0 16px 6px ${EXPERIENCES[0].color}90`,
@@ -191,7 +191,14 @@ export function ExperienceSection() {
                 }}
                 className={cn(
                   GLASS_CARD_CLASS,
-                  "relative overflow-hidden transition-transform duration-500 group-hover:-translate-y-1",
+                  "relative overflow-hidden",
+                  // Card lift on hover — kept fully static under reduced
+                  // motion instead of letting the global CSS rule (which
+                  // zeroes transition-duration, not the transform itself)
+                  // snap it to -translate-y-1 the instant the cursor drifts
+                  // over the card while scrolling.
+                  !prefersReducedMotion &&
+                    "transition-transform duration-500 group-hover:-translate-y-1",
                 )}
                 style={{ opacity: 0 }}
               >
@@ -263,8 +270,24 @@ export function ExperienceSection() {
                     {experience.points.map((point, pointIndex) => (
                       <li
                         key={`point-${point.title}`}
-                        className="flex gap-2 transition-transform duration-300 group-hover:translate-x-1"
-                        style={{ transitionDelay: `${pointIndex * 25}ms` }}
+                        className={cn(
+                          "flex gap-2",
+                          // Staggered translate-x on hover — the same
+                          // instant-snap-per-item problem as the card lift
+                          // above, just worse: each bullet still carries its
+                          // own transitionDelay, so under reduced motion
+                          // (transition-duration forced to ~0, delay left
+                          // alone) the whole list visibly popped into place
+                          // one item after another instead of easing —
+                          // exactly the reported stutter. Kept static.
+                          !prefersReducedMotion &&
+                            "transition-transform duration-300 group-hover:translate-x-1",
+                        )}
+                        style={
+                          prefersReducedMotion
+                            ? undefined
+                            : { transitionDelay: `${pointIndex * 25}ms` }
+                        }
                       >
                         <span
                           className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"

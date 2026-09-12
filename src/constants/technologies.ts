@@ -149,7 +149,6 @@ export const TECHNOLOGIES = [
   {
     icon: ArtificialIntelligence,
     name: "Artificial Intelligence",
-    wip: true,
   },
   {
     icon: DataStructures,

@@ -1,13 +1,48 @@
 import { useEffect, useState } from "react";
 import { ScrollHelper } from "../components";
 import { SectionHeading } from "../components/SectionHeading";
+import { TechIconsFallback } from "../components/TechIconsFallback";
 import { NAV_LINKS, SKILL_CATEGORIES } from "../constants/misc";
 import { TECHNOLOGIES } from "../constants/technologies";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
 
-export function TechStacksSection() {
+// Reduced-motion users get a plain static grid instead of the 3D sphere —
+// no pinned scroll, no drag/rotate, no canvas wiring at all.
+function TechStacksSectionStatic() {
+  return (
+    <section
+      id="tech-stacks"
+      aria-labelledby="tech-stacks-heading"
+      className="relative z-10 flex flex-col items-center gap-10 px-gutter py-32 sm:px-12 md:px-20 lg:px-32"
+    >
+      <SectionHeading id="tech-stacks-heading" isIntersecting>
+        Tech Stacks
+      </SectionHeading>
+
+      <p className="text-center text-sm text-white/60 uppercase tracking-widest">
+        {TECHNOLOGIES.length} tools
+      </p>
+
+      <TechIconsFallback />
+
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-medium text-white/60 text-xs uppercase tracking-widest">
+        {SKILL_CATEGORIES.map((cat, i, arr) => (
+          <span key={cat} className="flex items-center gap-6">
+            {cat}
+            {i < arr.length - 1 && (
+              <span className="h-px w-4 bg-white/20" aria-hidden="true" />
+            )}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function TechStacksSectionAnimated() {
   const { targetRef: sentinelRef, isIntersecting } = useIntersectionObserver({
     threshold: 0.2,
     rootMargin: "0px",
@@ -187,4 +222,10 @@ export function TechStacksSection() {
       </div>
     </section>
   );
+}
+
+export function TechStacksSection() {
+  const reducedMotion = useReducedMotion();
+  if (reducedMotion) return <TechStacksSectionStatic />;
+  return <TechStacksSectionAnimated />;
 }

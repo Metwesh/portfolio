@@ -6,6 +6,7 @@ import { CustomCursor } from "./components/CustomCursor";
 import { UniverseCanvas } from "./components/UniverseCanvas";
 import { CENTERPIECE_PATH } from "./constants/misc";
 import { useLenisScroll } from "./hooks/useLenisScroll";
+import { useReducedMotion } from "./hooks/useReducedMotion";
 
 // Preload the model
 useGLTF.preload(CENTERPIECE_PATH);
@@ -41,12 +42,13 @@ const CertificatesSection = lazy(() =>
 
 export default function App() {
   const { scrollY } = useLenisScroll();
+  const prefersReducedMotion = useReducedMotion();
 
   const handleCanvasReady = () => {
     const loadingScreen = document.getElementById("loading-screen");
     if (!loadingScreen) return;
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (prefersReducedMotion) {
       loadingScreen.remove();
       document.dispatchEvent(new CustomEvent("app:ready"));
       return;
@@ -136,24 +138,24 @@ export default function App() {
         tabIndex={-1}
         className="relative z-10 max-w-screen"
       >
-        <Suspense fallback={null}>
+        <Suspense>
           <HeroSection />
         </Suspense>
 
-        <Suspense fallback={null}>
+        <Suspense>
           <ProjectsSection />
         </Suspense>
 
-        <Suspense fallback={null}>
+        <Suspense>
           <ExperienceSection />
         </Suspense>
 
-        <Suspense fallback={null}>
+        <Suspense>
           <TechStacksSection />
         </Suspense>
 
         <div className="relative z-10 bg-linear-to-b from-black/0 to-black">
-          <Suspense fallback={null}>
+          <Suspense>
             <CertificatesSection />
           </Suspense>
 

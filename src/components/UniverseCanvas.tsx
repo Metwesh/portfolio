@@ -1,7 +1,7 @@
 import { Environment, Html, PerspectiveCamera } from "@react-three/drei";
-
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
+  lazy,
   type PointerEvent as ReactPointerEvent,
   Suspense,
   useEffect,
@@ -23,6 +23,10 @@ import { ProjectGallery } from "./ProjectGallery";
 import { TechBox } from "./TechBox";
 import { TechTooltip } from "./TechTooltip";
 
+const Stats = lazy(() =>
+  import("@react-three/drei").then((mod) => ({ default: mod.Stats })),
+);
+
 // Quality-derived constants — stable for the session
 // Cap DPR per tier: still well under a phone's native 2-3x to keep fill-rate
 // in check, but no longer flattened to a flat 1x on "low" — that was the
@@ -42,11 +46,9 @@ const _techDrag = {
 };
 
 // ─── Tech Constellation ──────────────────────────────────────────────────────
-function TechConstellation({
-  prefersReducedMotion,
-}: {
-  prefersReducedMotion: boolean;
-}) {
+// Only ever mounted when !prefersReducedMotion (see UniverseCanvas below) —
+// reduced-motion users get TechIconsFallback instead.
+function TechConstellation() {
   // React state mirror — forces re-render so TechBox.isInView animates in.
   const [isActive, setIsActive] = useState(false);
   useEffect(() => {
@@ -102,12 +104,27 @@ function TechConstellation({
   const rotXRef = useRef(0);
   const scrollVelRef = useRef(0);
 
-  useFrame(() => {
+  useFrame((state) => {
     if (!groupRef.current) return;
     const inView = scrollStore.techSectionActive;
     // Fast both ways — matches the staggered box entry/exit cascade timing.
     visibilityRef.current += ((inView ? 1 : 0) - visibilityRef.current) * 0.05;
-    groupRef.current.scale.setScalar(visibilityRef.current);
+
+    // Idle "breathing" — same technique as MLogo's ring breathe
+    // (MLogo.tsx: `1 + Math.sin(t * freq) * amp`), but MLogo gets its
+    // organic feel from 3 separate rings each breathing at a different
+    // freq/phase — one sphere has no such second voice, and a single clean
+    // sine here just reads as a metronome. Superposing two incommensurate
+    // frequencies (0.8 and 1.37 share no small common period) breaks that
+    // regularity: the combined peak drifts in timing and depth cycle to
+    // cycle instead of repeating identically forever. Reads as "alive and
+    // waiting" while at rest, distinct from the scroll-driven spin below so
+    // scrolling feels like a separate, causal kick instead of blending into
+    // ambient motion.
+    const t = state.clock.getElapsedTime();
+    const breathe =
+      1 + (Math.sin(t * 0.8) * 0.6 + Math.sin(t * 1.37 + 1.7) * 0.4) * 0.035;
+    groupRef.current.scale.setScalar(visibilityRef.current * breathe);
     groupRef.current.position.y = scrollStore.mLogoY;
     groupRef.current.position.z = scrollStore.mLogoZ;
 
@@ -121,15 +138,18 @@ function TechConstellation({
     _techDrag.velY *= dragFriction;
     _techDrag.velX *= dragFriction;
 
-    // Scroll-driven spin + idle auto-spin — paused while a box is selected,
-    // hovered, or under reduced motion (idle spin is a continuous loop with
-    // no discrete end, exactly what reduced-motion should suppress).
+    // Scroll-driven spin only — a flywheel, not idle auto-spin: scrolling
+    // winds the sphere up and it coasts back down (decay below), rather
+    // than spinning at a constant rate regardless of scroll. That constant
+    // used to run at the same order of magnitude as the scroll-linked
+    // nudge, so the two were indistinguishable and scrolling never read as
+    // the cause of anything. Paused while a box is selected, hovered, or
+    // dragging.
     const rawDelta = scrollStore.raw - prevRawRef.current;
     prevRawRef.current = scrollStore.raw;
     const dragging = _techDrag.active;
-    if (inView && !selected && !hovered && !dragging && !prefersReducedMotion) {
-      scrollVelRef.current += rawDelta * 0.00008;
-      scrollVelRef.current += 0.00009; // idle auto-spin
+    if (inView && !selected && !hovered && !dragging) {
+      scrollVelRef.current += rawDelta * 0.00032;
     }
     scrollVelRef.current *= selected || hovered || dragging ? 0.93 : 0.97;
     rotYRef.current += scrollVelRef.current;
@@ -142,6 +162,8 @@ function TechConstellation({
   });
 
   const getBoxPosition = (originalPos: ThreeVector3, index: number) => {
+    // Non-selected boxes scatter outward to 2x their sphere radius when a
+    // box is selected — an "explosion" burst around the focused box.
     const scale =
       selectedIndex === null ? 1 : selectedIndex === index ? 0.3 : 2;
     return originalPos.clone().multiplyScalar(scale);
@@ -199,7 +221,6 @@ function TechConstellation({
               isInView={isActive}
               animateTo={targetPosition}
               isSelected={isSelected}
-              reducedMotion={prefersReducedMotion}
             />
           );
         })}
@@ -402,6 +423,7 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
         frameloop="never"
         performance={{ min: 0.5 }}
       >
+        {import.meta.env.DEV && <Stats />}
         <Suspense fallback={null}>
           <PerspectiveCamera
             makeDefault
@@ -409,7 +431,12 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
             fov={60}
             ref={cameraRef}
           />
-          {!prefersReducedMotion && <CameraRig mouse={mouse} />}
+          {/* Scroll-progress driven (plus mouse parallax, already neutralized
+              under reduced motion since the mousemove listener above never
+              updates `mouse` in that case) — always mounted, or the camera
+              never leaves its mount position and never frames later
+              sections (e.g. the tech sphere) correctly. */}
+          <CameraRig mouse={mouse} />
 
           <ambientLight intensity={0.7} />
           <directionalLight position={[5, 10, 5]} intensity={1.2} />
@@ -429,12 +456,15 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
 
           <AnimatedStars />
           <MLogo />
-          <TechConstellation prefersReducedMotion={prefersReducedMotion} />
+          {/* Reduced-motion users get TechIconsFallback/ProjectCardsFallback
+              (static HTML) instead of these two — the heaviest, most
+              animation-centric pieces of the scene. */}
+          {!prefersReducedMotion && <TechConstellation />}
           <SceneReadySignal onReady={onReady} />
         </Suspense>
 
         <Suspense fallback={null}>
-          <ProjectGallery />
+          {!prefersReducedMotion && <ProjectGallery />}
         </Suspense>
       </Canvas>
     </div>

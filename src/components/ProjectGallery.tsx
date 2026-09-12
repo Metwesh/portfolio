@@ -10,7 +10,6 @@ import {
 import type * as THREE from "three";
 import { MathUtils, type MeshBasicMaterial, Shape, ShapeGeometry } from "three";
 import { PROJECTS } from "../constants/projects";
-import { useReducedMotion } from "../hooks/useReducedMotion";
 import { scrollStore } from "../stores/scrollStore";
 import { damp } from "../utils/damp";
 
@@ -169,6 +168,13 @@ function ProjectCard3D({
     const dy = Math.abs(e.clientY - down.y);
     const dt = Date.now() - down.time;
     if (dx >= 10 || dy >= 10 || dt >= 300) return;
+    // Cards are always mounted and raycastable, and fly into their resting
+    // position well before the section is actually "active" (see the
+    // approach logic in GalleryCards' useFrame) — without this guard, a
+    // click aimed at, say, a tech sphere box can land on an overlapping
+    // card here instead and scroll the page into the Projects section.
+    // Same guard as this section's own handleWheel/handleTouchStart.
+    if (!scrollStore.projectSectionActive) return;
     e.stopPropagation();
 
     // Clicking the already-active (centered) card has nothing left to
@@ -227,7 +233,6 @@ function ProjectCard3D({
 
 // ─── Gallery group — single useFrame drives all card + group animation ────────
 function GalleryCards() {
-  const reducedMotion = useReducedMotion();
   const imageUrls = PROJECTS.map((p) => p.image);
   const textures = useTexture(imageUrls);
   const groupRef = useRef<THREE.Group>(null);
@@ -362,13 +367,9 @@ function GalleryCards() {
         continue;
       }
 
+      // Hover boost — scale, brighten, and a slight pop toward the camera.
       const isHovered = hoveredIndexRef.current === i;
 
-      // Hover boost — scale, brighten, and a slight pop toward the camera.
-      // A discrete on/off state driven by the pointer, not a continuous
-      // idle loop, so (like MLogo's selection glow) this stays active
-      // under reduced motion rather than being zeroed like the sine bob
-      // below.
       const targetScale =
         MathUtils.lerp(MathUtils.lerp(1.0, 0.88, band1), 0.75, band2) *
         (isHovered ? 1.06 : 1);
@@ -386,22 +387,28 @@ function GalleryCards() {
         0.25,
         band2,
       );
+      const targetOpacityFinal = isHovered
+        ? MathUtils.lerp(targetOpacity, 1, 0.6)
+        : targetOpacity;
       mat.current.opacity = damp(
         mat.current.opacity,
-        isHovered ? MathUtils.lerp(targetOpacity, 1, 0.6) : targetOpacity,
+        targetOpacityFinal,
         0.1,
         delta,
       );
 
       const targetBorder = MathUtils.lerp(0.22, 0.04, band1);
+      const targetBorderFinal = isHovered
+        ? Math.max(targetBorder, 0.4)
+        : targetBorder;
       borderMat.current.opacity = damp(
         borderMat.current.opacity,
-        isHovered ? Math.max(targetBorder, 0.4) : targetBorder,
+        targetBorderFinal,
         0.1,
         delta,
       );
 
-      const targetPosY = reducedMotion ? 0 : Math.sin(t) * 0.08 * (1 - band1);
+      const targetPosY = Math.sin(t) * 0.08 * (1 - band1);
       mesh.current.position.y = damp(
         mesh.current.position.y,
         targetPosY,

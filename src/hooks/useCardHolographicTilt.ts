@@ -10,7 +10,17 @@ export function useCardHolographicTilt<T extends HTMLElement>() {
 
   useEffect(() => {
     const card = cardRef.current;
-    if (!card || reducedMotion) return;
+    if (!card) return;
+
+    // The entrance state (opacity:0, scaled down, offset) is baked into the
+    // card's JSX inline style — gsap.fromTo below is the only thing that
+    // ever un-hides it. Reduced motion skipped straight past that with no
+    // fallback, leaving every card permanently invisible. Reveal it in
+    // place instead, then bail before the animated/hover-tilt logic below.
+    if (reducedMotion) {
+      gsap.set(card, { opacity: 1, scale: 1, y: 0 });
+      return;
+    }
 
     gsap.fromTo(
       card,

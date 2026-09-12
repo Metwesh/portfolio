@@ -20,10 +20,16 @@ export function AnimatedStars() {
   const group = useRef<ThreeGroup>(null);
 
   useFrame(() => {
-    if (!group.current || reducedMotion) return;
-    // Read directly from scrollStore — no prop, no re-render
-    group.current.position.z = -scrollStore.raw * 0.02;
-    group.current.position.y = -scrollStore.raw * 0.005;
+    if (!group.current) return;
+    // Parallax-follow-scroll is a continuous, no-discrete-end effect — freeze
+    // just this update under reduced motion rather than early-returning the
+    // whole callback (a future addition below an unconditional early return
+    // would otherwise silently never run for reduced-motion users).
+    if (!reducedMotion) {
+      // Read directly from scrollStore — no prop, no re-render
+      group.current.position.z = -scrollStore.raw * 0.02;
+      group.current.position.y = -scrollStore.raw * 0.005;
+    }
   });
 
   return (

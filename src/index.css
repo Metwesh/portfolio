@@ -26,6 +26,7 @@
   --animate-card-glow: cardGlow 4s ease-in-out infinite;
   --animate-button-shine: buttonShine 2s ease-in-out infinite;
   --animate-status-pulse: statusPulse 2s ease-in-out infinite;
+  --animate-caret-blink: caret-blink 1s step-start infinite;
 }
 
 :root {
@@ -240,10 +241,6 @@
     100% {
       opacity: 0;
     }
-  }
-
-  .animate-caret-blink {
-    animation: caret-blink 1s step-start infinite;
   }
 
   @keyframes cardFloat {

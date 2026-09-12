@@ -238,7 +238,7 @@ export function HeroSection() {
           <span className="block overflow-hidden">
             <span
               ref={line3Ref}
-              className="block animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-fuchsia-400 via-blue-400 to-cyan-300 bg-clip-text pb-2 text-transparent opacity-0 motion-reduce:animate-none motion-reduce:opacity-100"
+              className="block animate-header-gradient-move bg-linear-to-r bg-size-[200%_200%] from-fuchsia-400 via-blue-400 to-cyan-300 bg-clip-text pb-2.5 text-transparent opacity-0 motion-reduce:animate-none motion-reduce:opacity-100"
             >
               builds things.
             </span>

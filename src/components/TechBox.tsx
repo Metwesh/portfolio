@@ -40,7 +40,6 @@ interface TechBoxProps {
   isInView: boolean;
   isSelected?: boolean;
   index: number;
-  reducedMotion?: boolean;
 }
 
 export function TechBox({
@@ -52,7 +51,6 @@ export function TechBox({
   isInView,
   isSelected,
   index,
-  reducedMotion,
 }: TechBoxProps) {
   const [meshRotation] = useState(
     () => new ThreeEuler(Math.random(), Math.random(), Math.random()),
@@ -122,13 +120,20 @@ export function TechBox({
     pointerDown.current = null;
   };
 
-  const handlePointerEnter = () => {
+  const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
+    // Boxes overlap along the ray (dense sphere layout) — without stopping
+    // propagation here, R3F walks every intersection nearest-to-farthest and
+    // fires onPointerEnter on each one, hovering boxes behind the one under
+    // the cursor. Only the nearest hit should light up.
+    if (e.intersections[0]?.object !== meshRef.current) return;
+    e.stopPropagation();
     setIsHovered(true);
     scrollStore.techBoxHovered = true;
     window.dispatchEvent(new Event("techbox:pointerenter"));
   };
 
-  const handlePointerLeave = () => {
+  const handlePointerLeave = (e: ThreeEvent<PointerEvent>) => {
+    e.stopPropagation();
     setIsHovered(false);
     scrollStore.techBoxHovered = false;
     window.dispatchEvent(new Event("techbox:pointerleave"));
@@ -138,7 +143,8 @@ export function TechBox({
     if (!meshRef.current) return;
 
     if (isInView) {
-      // Rotate with camera movement — distanceTo avoids a Vector3 allocation per frame
+      // Rotate with camera movement — distanceTo avoids a Vector3 allocation
+      // per frame.
       rotationSpeed.current =
         camera.position.distanceTo(prevCameraPosition.current) * 0.1;
       meshRef.current.rotation.x += rotationSpeed.current;
@@ -146,24 +152,29 @@ export function TechBox({
 
       const targetPos = animateTo || position;
 
-      // Scales boxes up to custom scale if provided, else hover bump, else default 1
+      // Scales boxes up to custom scale if provided, else hover bump, else default 1.
       const scaleValue =
         isSelected && isHovered
           ? (scale ?? 1) * 0.88
           : (scale ?? (isHovered ? 1.18 : 1));
 
-      const entryDelayS = reducedMotion
-        ? 0
-        : (index % TRANSITION_STAGGER_MOD) * TRANSITION_STAGGER_S;
+      const entryDelayS =
+        (index % TRANSITION_STAGGER_MOD) * TRANSITION_STAGGER_S;
       const entryDone =
-        reducedMotion ||
         entryElapsedRef.current - entryDelayS >= TRANSITION_TRAVEL_S;
 
       if (!entryDone) {
-        // On the first frame in view, snapshot wherever the box currently sits
-        // as the fly-in start point (origin on first mount, exit position on re-entry).
+        // Fly in from far out along the same radial direction the exit
+        // cascade pushes to (see EXIT_DISTANCE_MULTIPLIER below) — always,
+        // not just on re-entry. Previously this snapshotted whatever the
+        // mesh's actual position happened to be, which meant the very first
+        // entry (before any exit has ever run) started from Three.js's
+        // default (0,0,0) instead of outer space — boxes grew from the
+        // center instead of flying in, unlike every subsequent entry.
         if (entryElapsedRef.current === 0) {
-          entryStartPosRef.current.copy(meshRef.current.position);
+          entryStartPosRef.current
+            .copy(targetPos)
+            .multiplyScalar(EXIT_DISTANCE_MULTIPLIER);
         }
         entryElapsedRef.current += delta;
 
@@ -194,18 +205,16 @@ export function TechBox({
         meshRef.current.scale.lerp(targetScaleRef.current, 0.08);
       }
 
-      // Self-rotation
+      // Self-rotation — a continuous idle spin.
       meshRef.current.rotation.x += delta * SELF_ROTATION_SPEED;
       meshRef.current.rotation.y -= delta * SELF_ROTATION_SPEED;
     } else {
       // Reset entry cascade so the next time this box comes into view it replays.
       entryElapsedRef.current = 0;
 
-      const exitDelayS = reducedMotion
-        ? 0
-        : (index % TRANSITION_STAGGER_MOD) * TRANSITION_STAGGER_S;
+      const exitDelayS =
+        (index % TRANSITION_STAGGER_MOD) * TRANSITION_STAGGER_S;
       const exitDone =
-        reducedMotion ||
         exitElapsedRef.current - exitDelayS >= TRANSITION_TRAVEL_S;
 
       if (!exitDone) {

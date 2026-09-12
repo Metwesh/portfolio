@@ -6,6 +6,16 @@ interface UseIntersectionObserverOptions {
   root?: Element | null;
   rootMargin?: string;
   enabled?: boolean;
+  /**
+   * When true (default), reduced-motion users get `isIntersecting: true`
+   * immediately instead of waiting for the real observer — fine for a
+   * one-shot "fade in now instead of on scroll" reveal. Set false for
+   * consumers that use `isIntersecting` as an ongoing "is this section
+   * actually in view" signal (e.g. driving 3D scene activity/pointer
+   * events) — those need the real, live intersection state regardless of
+   * motion preference.
+   */
+  respectReducedMotion?: boolean;
 }
 
 /**
@@ -21,8 +31,10 @@ export function useIntersectionObserver(
     root = null,
     rootMargin = "0px",
     enabled = true,
+    respectReducedMotion = true,
   } = options;
   const prefersReducedMotion = useReducedMotion();
+  const bypassForReducedMotion = respectReducedMotion && prefersReducedMotion;
   const [observerIntersecting, setObserverIntersecting] = useState(false);
   const targetRef = useRef<HTMLDivElement>(null);
 
@@ -34,7 +46,7 @@ export function useIntersectionObserver(
     }
 
     // Skip observer if user prefers reduced motion
-    if (prefersReducedMotion) return;
+    if (bypassForReducedMotion) return;
 
     const target = targetRef.current;
     if (!target) return;
@@ -51,11 +63,12 @@ export function useIntersectionObserver(
     return () => {
       observer.disconnect();
     };
-  }, [threshold, root, rootMargin, prefersReducedMotion, enabled]);
+  }, [threshold, root, rootMargin, bypassForReducedMotion, enabled]);
 
-  // Derive final value: always true for reduced motion or disabled, otherwise use observer
+  // Derive final value: always true for reduced motion (unless opted out) or
+  // disabled, otherwise use observer
   return {
     targetRef,
-    isIntersecting: !enabled || prefersReducedMotion || observerIntersecting,
+    isIntersecting: !enabled || bypassForReducedMotion || observerIntersecting,
   };
 }

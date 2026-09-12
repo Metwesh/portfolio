@@ -1,8 +1,9 @@
 import gsap from "gsap";
-import { useEffect, useId, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import type { ProjectTag } from "../constants/projects";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { cn } from "../lib/utils";
+import TagsPopoverPortal from "./TagsPopoverPortal";
 
 interface TagsPopoverProps {
   tags: ProjectTag[];
@@ -13,12 +14,32 @@ interface TagsPopoverProps {
 // Gap (px) between the trigger's top edge and the popover's bottom edge.
 const POPOVER_GAP = 10;
 
+// Resolves the site's `--spacing-gutter` custom property to actual pixels,
+// via a throwaway probe element rather than parsing the raw string
+// ourselves — getComputedStyle returns custom properties verbatim as
+// authored ("1rem"), not resolved to px, and a hardcoded rem→px conversion
+// would get the wrong answer under browser zoom or OS text-size settings
+// that change the root font size. Used as the popover's minimum distance
+// from the viewport edge, so it never sits closer to the edge than the
+// page's own side gutter does.
+function getGutterPx(): number {
+  const probe = document.createElement("div");
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  probe.style.width = "var(--spacing-gutter)";
+  document.body.appendChild(probe);
+  const px = probe.getBoundingClientRect().width;
+  probe.remove();
+  return px;
+}
+
 export function TagsPopover({
   tags,
   visibleCount = 4,
   projectColor,
 }: TagsPopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
   const triggerWrapRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -29,7 +50,15 @@ export function TagsPopover({
   const visibleTags = tags.slice(0, visibleCount);
   const hiddenTags = tags.slice(visibleCount);
 
-  useEffect(() => {
+  // useLayoutEffect, not useEffect: this measures and repositions a live
+  // DOM element synchronously before the browser paints. useEffect only
+  // defers to *after* paint, which on a busy first interaction (page still
+  // settling right after load — other lazy sections initializing, images
+  // decoding) can leave a real, visible frame with `el` still at its
+  // default `left:0, top:0` from the JSX before this runs — the flash at
+  // the top-left corner. Subsequent opens don't show it because by then
+  // the gap between commit and effect is imperceptibly small.
+  useLayoutEffect(() => {
     const el = popoverRef.current;
     if (!el) return;
 
@@ -53,50 +82,76 @@ export function TagsPopover({
       // property in this version — two independent transform sources that
       // don't reliably combine, which was landing the popover on top of
       // the trigger instead of above it.
-      const trigger = triggerWrapRef.current;
-      if (trigger) {
+      const position = () => {
+        const trigger = triggerWrapRef.current;
+        if (!trigger) return;
+
+        // Clamp baked directly into `left` — centered on the trigger, then
+        // pulled in so it never sits closer than the site's own
+        // `--spacing-gutter` to either viewport edge. No separate margin
+        // nudge on `content`: that coupled `content`'s own margin to
+        // `el`'s width (an unconstrained shrink-to-fit box around it), so
+        // writing the margin here changed `el`'s size on the next reflow —
+        // the actual cause of the flicker this used to have when a size
+        // observer reacted to that same write.
+        const edgeMargin = getGutterPx();
         const triggerRect = trigger.getBoundingClientRect();
         const popRect = el.getBoundingClientRect();
-        el.style.left = `${triggerRect.left + triggerRect.width / 2 - popRect.width / 2}px`;
-        el.style.top = `${triggerRect.top - POPOVER_GAP - popRect.height}px`;
-      }
+        const idealLeft =
+          triggerRect.left + triggerRect.width / 2 - popRect.width / 2;
+        const maxLeft = window.innerWidth - edgeMargin - popRect.width;
+        const clampedLeft = Math.min(Math.max(idealLeft, edgeMargin), maxLeft);
 
-      // Clamp to viewport: the popover is centered on its trigger by
-      // default, which can push it off-screen near the left/right edges
-      // on narrow viewports. Shift the content box back into view via
-      // margin (not transform, which GSAP owns below).
-      const content = contentRef.current;
-      if (content) {
-        content.style.marginLeft = "0px";
-        const crect = content.getBoundingClientRect();
-        const edgeMargin = 8;
-        let shift = 0;
-        if (crect.left < edgeMargin) {
-          shift = edgeMargin - crect.left;
-        } else if (crect.right > window.innerWidth - edgeMargin) {
-          shift = window.innerWidth - edgeMargin - crect.right;
-        }
-        if (shift !== 0) content.style.marginLeft = `${shift}px`;
-      }
+        el.style.left = `${clampedLeft}px`;
+        el.style.top = `${triggerRect.top - POPOVER_GAP - popRect.height}px`;
+      };
+
+      position();
+
+      // Re-run once, non-reactively, if the layout wasn't fully settled at
+      // the instant this opened — e.g. the tag labels' webfont (loaded
+      // async, `font-display: optional`) still swapping in, which changes
+      // the measured width before `position()` runs but not after. A
+      // plain rAF follow-up covers "one frame not enough time to lay out
+      // yet"; `document.fonts.ready` covers the font specifically, however
+      // long it actually takes to arrive. Both fire at most once — since
+      // `position()` now only ever writes `left`/`top` (never anything
+      // that changes `el`'s own size), there's nothing here for either
+      // callback to retrigger itself with, unlike the margin approach above.
+      const rafId = requestAnimationFrame(position);
+      let cancelled = false;
+      document.fonts?.ready.then(() => {
+        if (!cancelled) position();
+      });
 
       gsap.set(el, { pointerEvents: "auto" });
       gsap.fromTo(
         el,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: -4, duration: 0.2, ease: "power2.out" },
+        { opacity: 0, y: prefersReducedMotion ? 0 : 10 },
+        {
+          opacity: 1,
+          y: -4,
+          duration: prefersReducedMotion ? 0 : 0.2,
+          ease: "power2.out",
+        },
       );
+
+      return () => {
+        cancelled = true;
+        cancelAnimationFrame(rafId);
+      };
     } else {
       gsap.to(el, {
         opacity: 0,
-        y: 10,
-        duration: 0.15,
+        y: prefersReducedMotion ? 0 : 10,
+        duration: prefersReducedMotion ? 0 : 0.15,
         ease: "power2.in",
         onComplete: () => {
           gsap.set(el, { pointerEvents: "none" });
         },
       });
     }
-  }, [isOpen]);
+  }, [isOpen, prefersReducedMotion]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLButtonElement>) {
     if (e.key === "Enter" || e.key === " ") {
@@ -151,37 +206,13 @@ export function TagsPopover({
 
           {/* Popover — portaled to body, positioned via inline left/top set
               in the effect above (see comment there for why). */}
-          {createPortal(
-            <div
-              ref={popoverRef}
-              id={popoverId}
-              role="tooltip"
-              className="fixed z-100 rounded-xl opacity-0"
-              style={{ pointerEvents: "none", left: 0, top: 0 }}
-            >
-              {/* Arrow */}
-              <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-white/10 border-r border-b bg-black/60" />
-
-              {/* Content */}
-              <div
-                ref={contentRef}
-                className="relative min-w-60 rounded-xl border border-white/10 bg-black/96 p-3"
-                style={{
-                  boxShadow:
-                    "0 8px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06)",
-                }}
-              >
-                <div className="relative flex flex-wrap gap-2">
-                  {hiddenTags.map((tag) => (
-                    <span key={tag.name} className={tagClass}>
-                      {tag.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>,
-            document.body,
-          )}
+          <TagsPopoverPortal
+            popoverRef={popoverRef}
+            popoverId={popoverId}
+            contentRef={contentRef}
+            hiddenTags={hiddenTags}
+            tagClass={tagClass}
+          />
         </div>
       )}
     </div>
