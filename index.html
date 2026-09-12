@@ -158,210 +158,7 @@
         ]
       }
     </script>
-    <style>
-      body:has(#loading-screen) {
-        overflow: hidden;
-      }
-
-      #loading-screen {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        background: #04040d;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      /* ── Star field ── */
-      .ls-stars {
-        position: absolute;
-        inset: 0;
-        overflow: hidden;
-      }
-
-      .ls-star {
-        position: absolute;
-        border-radius: 50%;
-        background: #fff;
-        animation: ls-twinkle var(--d) ease-in-out infinite var(--delay);
-      }
-
-      @keyframes ls-twinkle {
-        0%,
-        100% {
-          opacity: var(--min-op);
-          transform: scale(1);
-        }
-
-        50% {
-          opacity: 1;
-          transform: scale(1.6);
-        }
-      }
-
-      /* ── Orbital rings ── */
-      .ls-rings {
-        position: relative;
-        width: 180px;
-        height: 180px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .ls-ring {
-        position: absolute;
-        border-radius: 50%;
-        border: 1px solid transparent;
-        animation: ls-orbit var(--spd) linear infinite;
-      }
-
-      .ls-ring-1 {
-        width: 180px;
-        height: 180px;
-        border-color: rgba(168, 85, 247, 0.2);
-        border-top-color: #a855f7;
-        --spd: 2.4s;
-      }
-
-      .ls-ring-2 {
-        width: 140px;
-        height: 140px;
-        border-color: rgba(255, 255, 255, 0.1);
-        border-right-color: rgba(255, 255, 255, 0.6);
-        --spd: 1.8s;
-        animation-direction: reverse;
-      }
-
-      .ls-ring-3 {
-        width: 100px;
-        height: 100px;
-        border-color: rgba(0, 238, 255, 0.25);
-        border-bottom-color: #00eeff;
-        --spd: 3.2s;
-      }
-
-      @keyframes ls-orbit {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      /* ── M svg ── */
-      .ls-m {
-        position: relative;
-        z-index: 1;
-        width: 64px;
-        height: 64px;
-        animation: ls-breathe 2.4s ease-in-out infinite;
-      }
-
-      @keyframes ls-breathe {
-        0%,
-        100% {
-          opacity: 0.7;
-          filter: drop-shadow(0 0 8px rgba(0, 238, 255, 0.3));
-        }
-
-        50% {
-          opacity: 1;
-          filter: drop-shadow(0 0 18px rgba(0, 238, 255, 0.7));
-        }
-      }
-
-      /* ── Glow beneath ── */
-      .ls-glow {
-        position: absolute;
-        width: 220px;
-        height: 220px;
-        border-radius: 50%;
-        background: radial-gradient(
-          circle,
-          rgba(0, 238, 255, 0.08) 0%,
-          rgba(168, 85, 247, 0.06) 50%,
-          transparent 70%
-        );
-        animation: ls-pulse-glow 2.4s ease-in-out infinite;
-      }
-
-      @keyframes ls-pulse-glow {
-        0%,
-        100% {
-          transform: scale(0.9);
-          opacity: 0.6;
-        }
-
-        50% {
-          transform: scale(1.1);
-          opacity: 1;
-        }
-      }
-
-      /* ── Label ── */
-      .ls-label {
-        margin-top: 2.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-family: "Google Sans Flex", system-ui, sans-serif;
-        font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.3);
-      }
-
-      .ls-dot {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: #00eeff;
-        animation: ls-dot-pulse 1.2s ease-in-out infinite;
-      }
-
-      @keyframes ls-dot-pulse {
-        0%,
-        100% {
-          opacity: 0.3;
-          transform: scale(0.8);
-        }
-
-        50% {
-          opacity: 1;
-          transform: scale(1.2);
-        }
-      }
-
-      /* Loading screen is otherwise excluded from the app's global
-         reduced-motion kill-switch (it unmounts before React can react
-         to the preference), so opt it out of motion here directly. */
-      @media (prefers-reduced-motion: reduce) {
-        .ls-star,
-        .ls-ring,
-        .ls-m,
-        .ls-glow,
-        .ls-dot {
-          /* biome-ignore lint/complexity/noImportantStyles: overrides each element's own infinite keyframe animation set above */
-          animation: none !important;
-        }
-
-        .ls-m {
-          opacity: 1;
-          filter: drop-shadow(0 0 12px rgba(0, 238, 255, 0.5));
-        }
-
-        .ls-glow {
-          transform: scale(1);
-          opacity: 0.8;
-        }
-
-        .ls-dot {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-    </style>
+    <style>body:has(#loading-screen){overflow:hidden}#loading-screen{z-index:9999;background:#04040d;justify-content:center;align-items:center;display:flex;position:fixed;inset:0}.ls-stars{position:absolute;inset:0;overflow:hidden}.ls-star{animation:ls-twinkle var(--d) ease-in-out infinite var(--delay);background:#fff;border-radius:50%;position:absolute}@keyframes ls-twinkle{0%,to{opacity:var(--min-op);transform:scale(1)}50%{opacity:1;transform:scale(1.6)}}.ls-rings{justify-content:center;align-items:center;width:180px;height:180px;display:flex;position:relative}.ls-ring{animation:ls-orbit var(--spd) linear infinite;border:1px solid #0000;border-radius:50%;position:absolute}.ls-ring-1{--spd:2.4s;border-color:#a855f7 #a855f733 #a855f733;width:180px;height:180px}.ls-ring-2{--spd:1.8s;border-color:#ffffff1a #fff9 #ffffff1a #ffffff1a;width:140px;height:140px;animation-direction:reverse}.ls-ring-3{--spd:3.2s;border-color:#00eeff40 #00eeff40 #0ef;width:100px;height:100px}@keyframes ls-orbit{to{transform:rotate(360deg)}}.ls-m{z-index:1;width:64px;height:64px;animation:2.4s ease-in-out infinite ls-breathe;position:relative}@keyframes ls-breathe{0%,to{opacity:.7;filter:drop-shadow(0 0 8px #00eeff4d)}50%{opacity:1;filter:drop-shadow(0 0 18px #00eeffb3)}}.ls-glow{background:radial-gradient(circle,#00eeff14 0%,#a855f70f 50%,#0000 70%);border-radius:50%;width:220px;height:220px;animation:2.4s ease-in-out infinite ls-pulse-glow;position:absolute}@keyframes ls-pulse-glow{0%,to{opacity:.6;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}.ls-label{letter-spacing:.22em;text-transform:uppercase;color:#ffffff4d;align-items:center;gap:.5rem;margin-top:2.5rem;font-family:Google Sans Flex,system-ui,sans-serif;font-size:.7rem;font-weight:600;display:flex}.ls-dot{background:#0ef;border-radius:50%;width:5px;height:5px;animation:1.2s ease-in-out infinite ls-dot-pulse}@keyframes ls-dot-pulse{0%,to{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}@media (prefers-reduced-motion:reduce){.ls-star,.ls-ring,.ls-m,.ls-glow,.ls-dot{animation:none!important}.ls-m{opacity:1;filter:drop-shadow(0 0 12px #00eeff80)}.ls-glow{opacity:.8;transform:scale(1)}.ls-dot{opacity:1;transform:scale(1)}}</style>
 
     <!-- Cloudflare Web Analytics -->
     <script
@@ -370,13 +167,17 @@
       data-cf-beacon='{"token": "c80cb0d259a84112baa059247f9c018d"}'
     ></script>
     <!-- End Cloudflare Web Analytics -->
-    <script type="module" crossorigin src="/portfolio/assets/index-BlUB6BI9.js"></script>
-    <link rel="modulepreload" crossorigin href="/portfolio/assets/rolldown-runtime-QTnfLwEv.js">
-    <link rel="modulepreload" crossorigin href="/portfolio/assets/gsap-4xAIs3z5.js">
-    <link rel="modulepreload" crossorigin href="/portfolio/assets/three-C8sNiPl7.js">
-    <link rel="modulepreload" crossorigin href="/portfolio/assets/vendor-B4Z4vw0x.js">
-    <link rel="modulepreload" crossorigin href="/portfolio/assets/lenis-DMKdRRDk.js">
-    <link rel="stylesheet" crossorigin href="/portfolio/assets/index-D10IG0Wk.css">
+    <script type="module" crossorigin src="/portfolio/assets/index-wj6wUPv1.js"></script>
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/rolldown-runtime-hePW80VL.js">
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/gsap-Dl3PLTwz.js">
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/three-BS3gCDi9.js">
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/vendor-CcM8wnYf.js">
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/preload-helper-DxlT0kCj.js">
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/SectionHeading-JW06TGvW.js">
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/TAH-DAyK2fQ8.js">
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/projects-C3Nh2MCq.js">
+    <link rel="modulepreload" crossorigin href="/portfolio/assets/lenis-ae3I5b_-.js">
+    <link rel="stylesheet" crossorigin href="/portfolio/assets/index-CFUyn81w.css">
   </head>
 
   <body>
