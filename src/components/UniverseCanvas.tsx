@@ -18,7 +18,7 @@ import { useReducedMotion } from "../hooks/useReducedMotion";
 import { LIGHT_ARGUMENTS } from "../shaders/FogArguments";
 import { scrollStore } from "../stores/scrollStore";
 import { damp, dampAlpha } from "../utils/damp";
-import { qualityTier } from "../utils/performance";
+import { QualityTierEnum, qualityTier } from "../utils/performance";
 import { AnimatedStars } from "./AnimatedStars";
 import { CameraRig } from "./CameraRig";
 import { MLogo } from "./MLogo";
@@ -35,7 +35,11 @@ const Stats = lazy(() =>
 // in check, but no longer flattened to a flat 1x on "low" — that was the
 // biggest contributor to a visibly blocky/pixelated canvas on Retina phones.
 const MAX_DPR =
-  qualityTier === "high" ? 2 : qualityTier === "medium" ? 1.75 : 1.5;
+  qualityTier === QualityTierEnum.High
+    ? 2
+    : qualityTier === QualityTierEnum.Medium
+      ? 1.75
+      : 1.5;
 
 const SPHERE_RADIUS = 8;
 
@@ -606,7 +610,7 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
       className="fade-in pointer-events-none fixed inset-0 z-0 h-svh animate-in duration-1000"
     >
       <Canvas
-        gl={{ antialias: qualityTier !== "low" }}
+        gl={{ antialias: qualityTier !== QualityTierEnum.Low }}
         dpr={[1, MAX_DPR]}
         // R3F's default useMeasure config re-measures the container on
         // native "scroll" events (debounced 50ms) in case a scrolled-into-

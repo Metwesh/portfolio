@@ -17,6 +17,12 @@
  */
 export type QualityTier = "low" | "medium" | "high";
 
+export enum QualityTierEnum {
+  Low = "low",
+  Medium = "medium",
+  High = "high",
+}
+
 export const qualityTier: QualityTier = (() => {
   const mem = (navigator as { deviceMemory?: number }).deviceMemory ?? 4;
   const cores = navigator.hardwareConcurrency ?? 4;
@@ -24,10 +30,10 @@ export const qualityTier: QualityTier = (() => {
     /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ||
     (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
   if (mem <= 2 || cores <= 2 || (isMobile && (mem <= 4 || cores <= 4))) {
-    return "low";
+    return QualityTierEnum.Low;
   }
-  if (mem <= 4 || cores <= 4) return "medium";
-  return "high";
+  if (mem <= 4 || cores <= 4) return QualityTierEnum.Medium;
+  return QualityTierEnum.High;
 })();
 
 /**
