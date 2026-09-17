@@ -2,6 +2,7 @@ import { useGLTF } from "@react-three/drei";
 import gsap from "gsap";
 import { lazy, Suspense } from "react";
 import { Footer, Header } from "./components";
+import { ClickRipple } from "./components/ClickRipple";
 import { CustomCursor } from "./components/CustomCursor";
 import { UniverseCanvas } from "./components/UniverseCanvas";
 import { CENTERPIECE_PATH } from "./constants/misc";
@@ -127,6 +128,7 @@ export default function App() {
       </a>
 
       <CustomCursor />
+      <ClickRipple />
 
       {/* Single unified 3D universe — fixed behind everything */}
       <UniverseCanvas onReady={handleCanvasReady} />

@@ -9,6 +9,7 @@ import { PROJECTS } from "../constants/projects";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { lenisInstance } from "../lib/lenisInstance";
+import { DEFAULT_THEME_COLOR, setThemeColor } from "../lib/themeColor";
 import { cn } from "../lib/utils";
 import { scrollStore } from "../stores/scrollStore";
 import { damp } from "../utils/damp";
@@ -153,6 +154,10 @@ function ProjectsSectionAnimated() {
     // cards, only while this section is actually pinned/active.
     function setProjectsActive(active: boolean) {
       scrollStore.projectSectionActive = active;
+      // The per-project accent (set below in onUpdate, as the active card
+      // changes) only makes sense while the section is actually pinned —
+      // revert to the site default the moment it isn't.
+      if (!active) setThemeColor(DEFAULT_THEME_COLOR);
       const mainEl = document.getElementById("main-content");
       if (mainEl) mainEl.style.pointerEvents = active ? "none" : "";
       document.dispatchEvent(
@@ -262,6 +267,7 @@ function ProjectsSectionAnimated() {
             if (idx !== prevIndexRef.current) {
               prevIndexRef.current = idx;
               odometerRef.current?.setValue(idx + 1);
+              setThemeColor(PROJECTS[idx].color);
             }
           },
         },

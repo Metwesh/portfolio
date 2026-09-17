@@ -100,10 +100,8 @@ function TechStacksSectionAnimated() {
           className="pointer-events-none absolute inset-0 flex items-center justify-center"
         >
           <div
-            className="h-175 w-175 rounded-full transition-all duration-1000"
+            className="h-175 w-175 rounded-full bg-[radial-gradient(circle,rgba(0,238,255,0.07)_0%,rgba(168,85,247,0.05)_45%,transparent_70%)] transition-all duration-1000"
             style={{
-              background:
-                "radial-gradient(circle, rgba(0,238,255,0.07) 0%, rgba(168,85,247,0.05) 45%, transparent 70%)",
               opacity: isIntersecting ? 1 : 0,
               transform: isIntersecting ? "scale(1)" : "scale(0.6)",
             }}
@@ -143,9 +141,8 @@ function TechStacksSectionAnimated() {
           {/* Count — decorative watermark; sr-only list above covers the content for assistive tech */}
           <p
             aria-hidden="true"
-            className="font-bold text-4xl tracking-[-0.04em] transition-all duration-700 sm:text-5xl"
+            className="font-bold text-4xl text-[rgba(255,255,255,0.08)] tracking-[-0.04em] transition-all duration-700 sm:text-5xl"
             style={{
-              color: "rgba(255,255,255,0.08)",
               opacity: isIntersecting ? 1 : 0,
               transform: isIntersecting ? "translateY(0)" : "translateY(20px)",
             }}
@@ -156,9 +153,8 @@ function TechStacksSectionAnimated() {
           {/* Drag hint */}
           <div className="relative h-6 w-full">
             <p
-              className="absolute inset-0 text-center text-white/60 text-xs uppercase tracking-widest transition-all duration-700"
+              className="absolute inset-0 text-center text-white/60 text-xs uppercase tracking-widest transition-all delay-150 duration-700"
               style={{
-                transitionDelay: "150ms",
                 opacity: isIntersecting && !sphereRotated ? 1 : 0,
                 transform:
                   isIntersecting && !sphereRotated
@@ -169,9 +165,8 @@ function TechStacksSectionAnimated() {
               Drag the sphere to explore
             </p>
             <p
-              className="absolute inset-0 text-center text-white/60 text-xs uppercase tracking-widest transition-all duration-700"
+              className="absolute inset-0 text-center text-white/60 text-xs uppercase tracking-widest transition-all delay-150 duration-700"
               style={{
-                transitionDelay: "150ms",
                 opacity:
                   isIntersecting && sphereRotated && !boxEverSelected ? 1 : 0,
                 transform:

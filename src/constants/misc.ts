@@ -59,8 +59,11 @@ const ACCENT_COLORS = {
 
 const CENTERPIECE_PATH = "./m-logo/main-logo.gltf";
 
-// Shared cyan → blue → violet gradient used across the logo mark
-// (Header, CertificatesSection fan + main logo).
+// Shared "M" logo mark — path + gradient used across Header, CertificatesSection
+// (fan + main logo card), and any future spot needing the mark.
+const LOGO_PATH =
+  "M39 39C69 109 69 319 39 399C79.6667 397 164.5 399 119 439C137 439 159 406 159 359C159 279 150.5 275 99 275C109 255 109 219 99 199C119 209 159 209 179 199L239 419L299 199C319 209 359 209 379 199C369 219 369 255 379 275C327.5 275 319 279 319 359C319 406 341 439 359 439C313.5 399 398.333 397 439 399C409 319 409 109 439 39C418.5 52.5 311.4 71.4 279 39L239 199L199 39C166.6 71.4 59.5 52.5 39 39Z";
+
 const LOGO_GRADIENT_STOPS = [
   { offset: undefined, color: "#22D3EE" },
   { offset: "0.5", color: "#3B82F6" },
@@ -87,6 +90,7 @@ export {
   CENTERPIECE_PATH,
   GLASS_CARD_CLASS,
   LOGO_GRADIENT_STOPS,
+  LOGO_PATH,
   NAV_LINKS,
   SKILL_CATEGORIES,
   SOCIAL_LINKS,

@@ -6,6 +6,13 @@ export interface CameraWaypoint {
   position: Vector3;
   lookAt: Vector3;
   fov: number;
+  /**
+   * Optional mobile-only override for position.z / fov. Applied live in
+   * CameraRig via useIsMobile() rather than baked into `position`/`fov`
+   * directly — a `window.innerWidth` check here would only ever run once,
+   * at module import, and never react to a resize or orientation change.
+   */
+  mobile?: { z: number; fov: number };
 }
 
 /**
@@ -32,10 +39,12 @@ export const CAMERA_WAYPOINTS: CameraWaypoint[] = [
   {
     progress: 0.45,
     // Tech constellation — sphere radius 8 centred at z=-6.
-    // Desktop gets a closer camera; mobile is already well-framed at z=16.
-    position: new Vector3(0, -2, window.innerWidth >= 768 ? 13 : 16),
+    // Desktop gets a closer camera; mobile is already well-framed at z=16
+    // (see `mobile` override above, applied live by CameraRig).
+    position: new Vector3(0, -2, 13),
     lookAt: new Vector3(0, -3, -8),
-    fov: window.innerWidth >= 768 ? 60 : 65,
+    fov: 60,
+    mobile: { z: 16, fov: 65 },
   },
   {
     progress: 0.7,

@@ -44,12 +44,8 @@ export function TechTooltip({
           <>
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 opacity-20"
-              style={{
-                backgroundImage: `url(${WIP})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
+              className="pointer-events-none absolute inset-0 bg-center bg-cover opacity-20"
+              style={{ backgroundImage: `url(${WIP})` }}
             />
             <div className="absolute top-0 right-0 rounded-es-lg bg-yellow-400/90 px-2 py-1 font-semibold text-black text-xs uppercase tracking-wider">
               Work in Progress

@@ -4,6 +4,7 @@ import {
   lazy,
   type PointerEvent as ReactPointerEvent,
   Suspense,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -12,9 +13,11 @@ import {
 import type * as THREE from "three";
 import { Vector3 as ThreeVector3 } from "three";
 import { TECHNOLOGIES } from "../constants/technologies";
+import { useLazyRef } from "../hooks/useLazyRef";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { LIGHT_ARGUMENTS } from "../shaders/FogArguments";
 import { scrollStore } from "../stores/scrollStore";
+import { damp, dampAlpha } from "../utils/damp";
 import { qualityTier } from "../utils/performance";
 import { AnimatedStars } from "./AnimatedStars";
 import { CameraRig } from "./CameraRig";
@@ -45,15 +48,37 @@ const _techDrag = {
   active: false, // true while a grab-drag gesture is in progress
 };
 
+// ─── TechBox batched-animation constants ─────────────────────────────────────
+// Entrance/exit: boxes fly in from (or out to) wherever they last were,
+// staggered by index so the sphere visibly assembles/disperses instead of
+// fading as a rigid blob. Same timing shape both directions. Durations are
+// in seconds (accumulated from useFrame's delta) rather than frame counts —
+// every other animated piece in the scene (CameraRig, MLogo, ProjectGallery)
+// is delta-scaled, so a frame-count timer here would visibly run faster on
+// a 120Hz display and slower under frame drops. Values below preserve the
+// original feel, which was tuned at a 60fps baseline (26 frames, 3 frames).
+const TECHBOX_TRANSITION_TRAVEL_S = 26 / 60;
+const TECHBOX_TRANSITION_STAGGER_S = 3 / 60;
+const TECHBOX_TRANSITION_STAGGER_MOD = 14;
+// Self-rotation speed, radians/second (was a flat +=0.002/frame, i.e. *60).
+const TECHBOX_SELF_ROTATION_SPEED = 0.002 * 60;
+const TECHBOX_MIN_SCALE = 0.05;
+// Exit target = current sphere position pushed further out along the same
+// radial direction — away from the centerpiece, into open space.
+const TECHBOX_EXIT_DISTANCE_MULTIPLIER = 3;
+
 // ─── Tech Constellation ──────────────────────────────────────────────────────
 // Only ever mounted when !prefersReducedMotion (see UniverseCanvas below) —
 // reduced-motion users get TechIconsFallback instead.
 function TechConstellation() {
-  // React state mirror — forces re-render so TechBox.isInView animates in.
-  const [isActive, setIsActive] = useState(false);
+  // Only ever read inside this component's own useFrame closure below — a
+  // ref avoids re-rendering (and reconciling all 43 TechBox children) on
+  // every tech-section enter/leave.
+  const isActiveRef = useRef(false);
   useEffect(() => {
     const handler = (e: Event) => {
-      setIsActive((e as CustomEvent<{ active: boolean }>).detail.active);
+      isActiveRef.current = (e as CustomEvent<{ active: boolean }>).detail
+        .active;
     };
     document.addEventListener("universe:interactive", handler);
     return () => document.removeEventListener("universe:interactive", handler);
@@ -104,11 +129,66 @@ function TechConstellation() {
   const rotXRef = useRef(0);
   const scrollVelRef = useRef(0);
 
-  useFrame((state) => {
+  // ─── TechBox batched animation state ─────────────────────────────────────
+  // All 43 boxes are driven from this single useFrame below instead of each
+  // mounting its own (see TechBox.tsx and ProjectGallery's GalleryCards for
+  // the same "one loop, N refs" pattern).
+  const boxRefsRef = useRef<Array<React.RefObject<THREE.Mesh | null> | null>>(
+    Array(TECHNOLOGIES.length).fill(null),
+  );
+  const registerBox = useCallback(
+    (index: number, meshRef: React.RefObject<THREE.Mesh | null>) => {
+      boxRefsRef.current[index] = meshRef;
+    },
+    [],
+  );
+  // Singular, like ProjectGallery's hoveredIndexRef — only the nearest hit
+  // ever calls this (TechBox stops propagation on enter/leave).
+  const hoveredIndexRef = useRef<number | null>(null);
+  const prevCamPosRef = useLazyRef(() => new ThreeVector3());
+  const scratchScaleVecRef = useLazyRef(() => new ThreeVector3());
+  const entryElapsedRef = useLazyRef<number[]>(() =>
+    Array(TECHNOLOGIES.length).fill(0),
+  );
+  const entryStartPosRef = useLazyRef(() =>
+    Array.from({ length: TECHNOLOGIES.length }, () => new ThreeVector3()),
+  );
+  const exitElapsedRef = useLazyRef<number[]>(() =>
+    Array(TECHNOLOGIES.length).fill(0),
+  );
+  const exitStartPosRef = useLazyRef(() =>
+    Array.from({ length: TECHNOLOGIES.length }, () => new ThreeVector3()),
+  );
+  const exitTargetPosRef = useLazyRef(() =>
+    Array.from({ length: TECHNOLOGIES.length }, () => new ThreeVector3()),
+  );
+  const exitStartScaleRef = useLazyRef<number[]>(() =>
+    Array(TECHNOLOGIES.length).fill(1),
+  );
+  // Per-box resting target position — mutated in place (never reallocated)
+  // whenever selection changes, instead of recomputing a fresh Vector3 per
+  // box on every render like the old getBoxPosition() did.
+  const targetPositionsRef = useLazyRef(() => points.map((p) => p.clone()));
+
+  useEffect(() => {
+    for (let i = 0; i < points.length; i++) {
+      // Non-selected boxes scatter outward to 2x their sphere radius when a
+      // box is selected — an "explosion" burst around the focused box.
+      const scale = selectedIndex === null ? 1 : selectedIndex === i ? 0.3 : 2;
+      targetPositionsRef.current[i].copy(points[i]).multiplyScalar(scale);
+    }
+  }, [selectedIndex, points]);
+
+  useFrame((state, delta) => {
     if (!groupRef.current) return;
     const inView = scrollStore.techSectionActive;
     // Fast both ways — matches the staggered box entry/exit cascade timing.
-    visibilityRef.current += ((inView ? 1 : 0) - visibilityRef.current) * 0.05;
+    visibilityRef.current = damp(
+      visibilityRef.current,
+      inView ? 1 : 0,
+      0.05,
+      delta,
+    );
 
     // Idle "breathing" — same technique as MLogo's ring breathe
     // (MLogo.tsx: `1 + Math.sin(t * freq) * amp`), but MLogo gets its
@@ -151,7 +231,11 @@ function TechConstellation() {
     if (inView && !selected && !hovered && !dragging) {
       scrollVelRef.current += rawDelta * 0.00032;
     }
-    scrollVelRef.current *= selected || hovered || dragging ? 0.93 : 0.97;
+    // Decay factor tuned at a 60fps baseline (dampAlpha(factor, 1/60) ===
+    // factor) — damp() keeps the same feel at any frame rate instead of
+    // decaying faster on high-refresh displays.
+    const decayFactor = selected || hovered || dragging ? 0.07 : 0.03;
+    scrollVelRef.current = damp(scrollVelRef.current, 0, decayFactor, delta);
     rotYRef.current += scrollVelRef.current;
 
     // Clamp X tilt so the sphere never flips completely upside-down
@@ -159,15 +243,138 @@ function TechConstellation() {
 
     groupRef.current.rotation.y = rotYRef.current;
     groupRef.current.rotation.x = rotXRef.current;
-  });
 
-  const getBoxPosition = (originalPos: ThreeVector3, index: number) => {
-    // Non-selected boxes scatter outward to 2x their sphere radius when a
-    // box is selected — an "explosion" burst around the focused box.
-    const scale =
-      selectedIndex === null ? 1 : selectedIndex === index ? 0.3 : 2;
-    return originalPos.clone().multiplyScalar(scale);
-  };
+    // ─── Batched TechBox animation ─────────────────────────────────────────
+    // Camera-movement rotation speed only depends on how far the camera
+    // moved since last frame — identical for every box, so it's computed
+    // once here instead of 43 times (each box previously tracked its own
+    // redundant copy of the same camera.position comparison).
+    const camDelta = state.camera.position.distanceTo(prevCamPosRef.current);
+    prevCamPosRef.current.copy(state.camera.position);
+    const rotationSpeed = camDelta * 0.1;
+
+    for (let i = 0; i < TECHNOLOGIES.length; i++) {
+      const mesh = boxRefsRef.current[i]?.current;
+      if (!mesh) continue;
+
+      if (isActiveRef.current) {
+        mesh.rotation.x += rotationSpeed;
+        mesh.rotation.y += rotationSpeed;
+
+        const targetPos = targetPositionsRef.current[i];
+        const boxSelected = selectedIndex === i;
+        const boxHovered = hoveredIndexRef.current === i;
+        // Scales boxes up to a custom scale when selected, else hover bump,
+        // else default 1 — mirrors TechBox's original scale/hover prop math.
+        const scaleValue =
+          boxSelected && boxHovered
+            ? 6 * 0.88
+            : boxSelected
+              ? 6
+              : boxHovered
+                ? 1.18
+                : 1;
+
+        const entryDelayS =
+          (i % TECHBOX_TRANSITION_STAGGER_MOD) * TECHBOX_TRANSITION_STAGGER_S;
+        const entryDone =
+          entryElapsedRef.current[i] - entryDelayS >=
+          TECHBOX_TRANSITION_TRAVEL_S;
+
+        if (!entryDone) {
+          // Fly in from far out along the same radial direction the exit
+          // cascade pushes to — always, not just on re-entry, so the very
+          // first entry (before any exit has run) also starts from outer
+          // space instead of growing from the origin.
+          if (entryElapsedRef.current[i] === 0) {
+            entryStartPosRef.current[i]
+              .copy(targetPos)
+              .multiplyScalar(TECHBOX_EXIT_DISTANCE_MULTIPLIER);
+          }
+          entryElapsedRef.current[i] += delta;
+
+          const t = Math.max(
+            0,
+            Math.min(
+              1,
+              (entryElapsedRef.current[i] - entryDelayS) /
+                TECHBOX_TRANSITION_TRAVEL_S,
+            ),
+          );
+          // Ease-out cubic — fast start, gentle settle into place
+          const eased = 1 - (1 - t) ** 3;
+
+          mesh.position.lerpVectors(
+            entryStartPosRef.current[i],
+            targetPos,
+            eased,
+          );
+          const currentScale =
+            TECHBOX_MIN_SCALE + (scaleValue - TECHBOX_MIN_SCALE) * eased;
+          mesh.scale.setScalar(currentScale);
+        } else {
+          // Exit cascade replays fresh on the next out-of-view stretch.
+          exitElapsedRef.current[i] = 0;
+
+          // Steady state: smooth follow for target position/scale changes
+          // (e.g. selection) — delta-scaled so the chase speed doesn't vary
+          // with frame rate (see damp.ts).
+          mesh.position.lerp(targetPos, dampAlpha(0.15, delta));
+          scratchScaleVecRef.current.set(scaleValue, scaleValue, scaleValue);
+          mesh.scale.lerp(scratchScaleVecRef.current, dampAlpha(0.08, delta));
+        }
+
+        // Self-rotation — a continuous idle spin.
+        mesh.rotation.x += delta * TECHBOX_SELF_ROTATION_SPEED;
+        mesh.rotation.y -= delta * TECHBOX_SELF_ROTATION_SPEED;
+      } else {
+        // Reset entry cascade so the next time this box comes into view it replays.
+        entryElapsedRef.current[i] = 0;
+
+        const exitDelayS =
+          (i % TECHBOX_TRANSITION_STAGGER_MOD) * TECHBOX_TRANSITION_STAGGER_S;
+        const exitDone =
+          exitElapsedRef.current[i] - exitDelayS >= TECHBOX_TRANSITION_TRAVEL_S;
+
+        if (!exitDone) {
+          // On the first frame of exit, snapshot start pos/scale and push
+          // the target further out along the same radial direction — away
+          // from the centerpiece into open space, not back toward it.
+          if (exitElapsedRef.current[i] === 0) {
+            exitStartPosRef.current[i].copy(mesh.position);
+            exitTargetPosRef.current[i]
+              .copy(mesh.position)
+              .multiplyScalar(TECHBOX_EXIT_DISTANCE_MULTIPLIER);
+            exitStartScaleRef.current[i] = mesh.scale.x;
+          }
+          exitElapsedRef.current[i] += delta;
+
+          const t = Math.max(
+            0,
+            Math.min(
+              1,
+              (exitElapsedRef.current[i] - exitDelayS) /
+                TECHBOX_TRANSITION_TRAVEL_S,
+            ),
+          );
+          // Ease-out cubic — same snappy feel as the entrance, mirrored outward
+          const eased = 1 - (1 - t) ** 3;
+
+          mesh.position.lerpVectors(
+            exitStartPosRef.current[i],
+            exitTargetPosRef.current[i],
+            eased,
+          );
+          const currentScale =
+            exitStartScaleRef.current[i] +
+            (TECHBOX_MIN_SCALE - exitStartScaleRef.current[i]) * eased;
+          mesh.scale.setScalar(currentScale);
+        }
+        // Once done, the box sits parked offscreen — no further work needed
+        // until it re-enters view.
+      }
+    }
+  });
 
   const buttonPointerDown = useRef<{
     x: number;
@@ -205,32 +412,27 @@ function TechConstellation() {
           color={LIGHT_ARGUMENTS.color}
           position={LIGHT_ARGUMENTS.position}
         />
-        {points.map((pos, index) => {
-          const targetPosition = getBoxPosition(pos, index);
-          const isSelected = selectedIndex === index;
-          return (
-            <TechBox
-              key={`${TECHNOLOGIES[index].name}-${index}`}
-              index={index}
-              position={targetPosition}
-              data={TECHNOLOGIES[index]}
-              onClick={() =>
-                setSelectedIndex(selectedIndex === index ? null : index)
-              }
-              scale={isSelected ? 6 : undefined}
-              isInView={isActive}
-              animateTo={targetPosition}
-              isSelected={isSelected}
-            />
-          );
-        })}
+        {points.map((_, index) => (
+          <TechBox
+            key={`${TECHNOLOGIES[index].name}-${index}`}
+            index={index}
+            data={TECHNOLOGIES[index]}
+            onClick={() =>
+              setSelectedIndex(selectedIndex === index ? null : index)
+            }
+            isSelected={selectedIndex === index}
+            onMount={registerBox}
+            hoveredIndexRef={hoveredIndexRef}
+          />
+        ))}
       </group>
       {selectedIndex !== null && (
         <Html
           center
           position={[0, -6, 0]}
           zIndexRange={[100, 0]}
-          style={{ pointerEvents: "auto", userSelect: "none" }}
+          pointerEvents="auto"
+          className="select-none"
         >
           <TechTooltip
             technologyName={TECHNOLOGIES[selectedIndex].name}

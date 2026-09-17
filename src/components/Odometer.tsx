@@ -1,5 +1,6 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { cn } from "../lib/utils";
 
 export interface OdometerHandle {
   setValue: (value: number) => void;
@@ -81,15 +82,14 @@ export const Odometer = forwardRef<OdometerHandle, OdometerProps>(
     }));
 
     return (
-      <span className={className} style={{ display: "inline-flex" }}>
-        {Array.from({ length: digits }).map((_, index) => (
+      <span className={cn("inline-flex", className)}>
+        {[...Array(digits)].map((_, index) => (
           <span
             key={`digit-${index}`}
+            className="inline-block overflow-hidden"
             style={{
-              display: "inline-block",
               height: `${ROW_EM}em`,
               lineHeight: `${ROW_EM}em`,
-              overflow: "hidden",
             }}
           >
             <div

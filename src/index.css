@@ -26,7 +26,12 @@
   --animate-card-glow: cardGlow 4s ease-in-out infinite;
   --animate-button-shine: buttonShine 2s ease-in-out infinite;
   --animate-status-pulse: statusPulse 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s infinite;
+  --animate-border-flow: borderFlow 3s ease infinite;
+  --animate-logo-gradient-shift: logo-gradient-shift 4s ease-in-out infinite;
   --animate-caret-blink: caret-blink 1s step-start infinite;
+  --animate-click-ripple: click-ripple 1500ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
 }
 
 :root {
@@ -232,6 +237,20 @@
     }
   }
 
+  /* Single expanding ring — a restrained "sonar ping" from the click point,
+     not a particle scatter. Matches the site's existing ring motifs
+     (CustomCursor's refractive ring, MLogo's orbital rings) instead of
+     reading as confetti. */
+  @keyframes click-ripple {
+    0% {
+      transform: translate(-50%, -50%) scale(0.4);
+      opacity: 0.125;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(5);
+      opacity: 0;
+    }
+  }
   @keyframes caret-blink {
     0%,
     49% {

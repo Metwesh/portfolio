@@ -6,6 +6,7 @@ import { EXPERIENCES, LINEAR_GRADIENT } from "../constants/experiences";
 import { GLASS_CARD_CLASS } from "../constants/misc";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { DEFAULT_THEME_COLOR, setThemeColor } from "../lib/themeColor";
 import { cn } from "../lib/utils";
 
 export function ExperienceSection() {
@@ -72,6 +73,8 @@ export function ExperienceSection() {
             // position, so a numeric scrub double-lags on top of that.
             // scrub: true tracks progress immediately instead.
             scrub: true,
+            onLeave: () => setThemeColor(DEFAULT_THEME_COLOR),
+            onLeaveBack: () => setThemeColor(DEFAULT_THEME_COLOR),
             onUpdate: (self) => {
               if (!dot) return;
               const p = self.progress;
@@ -83,6 +86,7 @@ export function ExperienceSection() {
               dot.style.transform = `translate(-50%, calc(-50% + ${p * trackHeight}px))`;
               dot.style.background = color;
               dot.style.boxShadow = `0 0 16px 6px ${color}90`;
+              setThemeColor(color);
             },
           },
         },
@@ -191,7 +195,7 @@ export function ExperienceSection() {
                 }}
                 className={cn(
                   GLASS_CARD_CLASS,
-                  "relative overflow-hidden",
+                  "relative overflow-hidden opacity-0",
                   // Card lift on hover — kept fully static under reduced
                   // motion instead of letting the global CSS rule (which
                   // zeroes transition-duration, not the transform itself)
@@ -200,7 +204,6 @@ export function ExperienceSection() {
                   !prefersReducedMotion &&
                     "transition-transform duration-500 group-hover:-translate-y-1",
                 )}
-                style={{ opacity: 0 }}
               >
                 {/* Giant watermark — clipped to card bounds by overflow-hidden */}
                 <span

@@ -1,9 +1,15 @@
+import { useEffect } from "react";
 import { SectionHeading } from "../components/SectionHeading";
 import { INTERSECTION_OBSERVER_CONFIG } from "../constants/animations";
 import { CERTIFICATES } from "../constants/certificates";
-import { GLASS_CARD_CLASS, LOGO_GRADIENT_STOPS } from "../constants/misc";
+import {
+  GLASS_CARD_CLASS,
+  LOGO_GRADIENT_STOPS,
+  LOGO_PATH,
+} from "../constants/misc";
 import { useCardHolographicTilt } from "../hooks/useCardHolographicTilt";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
+import { DEFAULT_THEME_COLOR, setThemeColor } from "../lib/themeColor";
 import { cn } from "../lib/utils";
 
 const logoFanIds = Array.from({ length: 5 }, (_, i) => `logo-fan-${i}`);
@@ -18,9 +24,6 @@ const tunnelRings = Array.from({ length: 8 }, (_, i) => ({
   hueRotate: i * 15,
 }));
 
-const LOGO_PATH =
-  "M39 39C69 109 69 319 39 399C79.6667 397 164.5 399 119 439C137 439 159 406 159 359C159 279 150.5 275 99 275C109 255 109 219 99 199C119 209 159 209 179 199L239 419L299 199C319 209 359 209 379 199C369 219 369 255 379 275C327.5 275 319 279 319 359C319 406 341 439 359 439C313.5 399 398.333 397 439 399C409 319 409 109 439 39C418.5 52.5 311.4 71.4 279 39L239 199L199 39C166.6 71.4 59.5 52.5 39 39Z";
-
 function MLLogoCard() {
   const { cardRef, shimmerRef } = useCardHolographicTilt<HTMLDivElement>();
 
@@ -33,9 +36,8 @@ function MLLogoCard() {
         ref={cardRef}
         className={cn(
           GLASS_CARD_CLASS,
-          "relative flex h-full min-h-52 flex-col items-center justify-center overflow-hidden transition-[border-color,box-shadow] duration-500 will-change-transform group-hover:border-white/20 group-hover:shadow-2xl",
+          "relative flex h-full min-h-52 flex-col items-center justify-center overflow-hidden opacity-0 transition-[border-color,box-shadow] duration-500 will-change-transform group-hover:border-white/20 group-hover:shadow-2xl",
         )}
-        style={{ opacity: 0 }}
       >
         {/* Ambient gradient blobs */}
         <div className="pointer-events-none absolute inset-0 opacity-40">
@@ -44,14 +46,7 @@ function MLLogoCard() {
         </div>
 
         {/* Animated border flow */}
-        <div
-          className="absolute inset-0 rounded-2xl bg-size-[200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-          style={{
-            backgroundImage:
-              "linear-gradient(135deg, rgba(0,211,242,0.4), transparent 50%, rgba(168,85,247,0.4))",
-            animation: "borderFlow 3s ease infinite",
-          }}
-        />
+        <div className="absolute inset-0 animate-border-flow rounded-2xl bg-[linear-gradient(135deg,rgba(0,211,242,0.4),transparent_50%,rgba(168,85,247,0.4))] bg-size-[200%_200%] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
         {/* Tunnel rings — visible on hover */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-700 group-hover:opacity-100">
@@ -126,8 +121,7 @@ function MLLogoCard() {
             height="120"
             viewBox="0 0 478 478"
             fill="none"
-            className="relative transition-transform duration-500 group-hover:scale-110"
-            style={{ animation: "logo-gradient-shift 4s ease-in-out infinite" }}
+            className="relative animate-logo-gradient-shift transition-transform duration-500 group-hover:scale-110"
           >
             <path d={LOGO_PATH} fill="url(#logo-grad-main)" />
             <defs>
@@ -154,12 +148,7 @@ function MLLogoCard() {
         {/* Shimmer */}
         <div
           ref={shimmerRef}
-          className="pointer-events-none absolute inset-0 bg-size-[200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100"
-          style={{
-            backgroundImage:
-              "linear-gradient(110deg, transparent 25%, rgba(34,211,238,0.15) 50%, transparent 75%)",
-            animation: "shimmer 2s infinite",
-          }}
+          className="pointer-events-none absolute inset-0 animate-shimmer bg-[linear-gradient(110deg,transparent_25%,rgba(34,211,238,0.15)_50%,transparent_75%)] bg-size-[200%_100%] opacity-0 transition-opacity duration-700 group-hover:opacity-100"
         />
 
         {/* Corner accents */}
@@ -187,13 +176,10 @@ function CertCard({
       rel="noopener noreferrer"
       className={cn(
         GLASS_CARD_CLASS,
-        "group relative flex min-h-52 flex-col overflow-hidden p-6 will-change-transform md:p-8",
+        "group relative flex min-h-52 flex-col overflow-hidden p-6 opacity-0 will-change-transform md:p-8",
         isFeatured ? "md:col-span-2" : "md:col-span-1",
       )}
-      style={{
-        opacity: 0,
-        boxShadow: `0 8px 32px -10px ${cert.color}30`,
-      }}
+      style={{ boxShadow: `0 8px 32px -10px ${cert.color}30` }}
     >
       {/* Ambient glow blobs */}
       <div className="pointer-events-none absolute inset-0 opacity-30">
@@ -307,6 +293,35 @@ export function CertificatesSection() {
     threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
     rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
   });
+
+  // Section-synced theme-color — a plain, independent observer on the same
+  // element rather than reusing `isIntersecting` above: that one bypasses
+  // straight to `true` under reduced motion (it drives the heading's one-
+  // shot reveal, see the hook's own `respectReducedMotion` doc comment),
+  // which would pin the theme color from mount regardless of actual scroll
+  // position. This needs the real, live intersection state instead.
+  useEffect(() => {
+    const el = targetRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setThemeColor(
+          entry.isIntersecting
+            ? LOGO_GRADIENT_STOPS[2].color
+            : DEFAULT_THEME_COLOR,
+        );
+      },
+      {
+        threshold: INTERSECTION_OBSERVER_CONFIG.DEFAULT_THRESHOLD,
+        rootMargin: INTERSECTION_OBSERVER_CONFIG.DEFAULT_ROOT_MARGIN,
+      },
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      setThemeColor(DEFAULT_THEME_COLOR);
+    };
+  }, [targetRef]);
 
   return (
     <section

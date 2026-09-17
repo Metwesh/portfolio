@@ -2,6 +2,7 @@ import { refractive } from "@hashintel/refractive";
 import { useEffect, useRef } from "react";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { damp } from "../utils/damp";
 
 function isInteractiveTarget(el: Element | null): boolean {
   let node = el;
@@ -98,9 +99,17 @@ export function CustomCursor() {
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
 
     if (!prefersReducedMotion && ring) {
-      const tick = () => {
-        ringX += (mouseX - ringX) * 0.12;
-        ringY += (mouseY - ringY) * 0.12;
+      // Own rAF loop (not the shared gsap.ticker) — this is a pure DOM
+      // cursor-follow with no scroll/3D sync requirement, so it doesn't need
+      // to share Lenis/R3F's clock (see useLenisScroll). delta is still
+      // derived from consecutive rAF timestamps so the chase speed stays
+      // consistent across refresh rates, same as every other damp() site.
+      let lastTime: number | null = null;
+      const tick = (time: number) => {
+        const delta = lastTime === null ? 1 / 60 : (time - lastTime) / 1000;
+        lastTime = time;
+        ringX = damp(ringX, mouseX, 0.12, delta);
+        ringY = damp(ringY, mouseY, 0.12, delta);
         ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
         rafId = requestAnimationFrame(tick);
       };
@@ -122,15 +131,12 @@ export function CustomCursor() {
       <div
         ref={dotRef}
         aria-hidden="true"
-        style={{ transition: "opacity 150ms ease" }}
-        className="pointer-events-none fixed top-0 left-0 z-9999 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
+        className="pointer-events-none fixed top-0 left-0 z-9999 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white [transition:opacity_150ms_ease]"
       />
       <refractive.div
         ref={ringRef}
         aria-hidden="true"
-        style={{
-          transition: "border-color 200ms ease, box-shadow 200ms ease",
-        }}
+        className="pointer-events-none fixed top-0 left-0 z-9998 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40 [transition:border-color_200ms_ease,box-shadow_200ms_ease]"
         refraction={{
           blur: 0.5,
           radius: 16,
@@ -138,7 +144,6 @@ export function CustomCursor() {
           bezelWidth: 32,
           refractiveIndex: 3,
         }}
-        className="pointer-events-none fixed top-0 left-0 z-9998 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40"
       />
     </>
   );

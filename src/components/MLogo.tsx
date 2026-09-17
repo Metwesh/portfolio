@@ -14,8 +14,10 @@ import {
 } from "three";
 import { CENTERPIECE_PATH } from "../constants/misc";
 import { useIsMobile } from "../hooks/useIsMobile";
+import { useLazyRef } from "../hooks/useLazyRef";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { scrollStore } from "../stores/scrollStore";
+import { damp } from "../utils/damp";
 
 // Module-level constants — no allocation inside useFrame
 const _lerpVal = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -32,6 +34,12 @@ const REDUCED_MOTION_CAM_LOCK_DISTANCE = 13;
 // requested), just scaled way down from the normal-motion nudge below — a
 // barely-perceptible drift, not the M's own kind of motion.
 const REDUCED_MOTION_RING_SCROLL_MULT = 0.05;
+// Idle easter-egg: how long (seconds) with no interaction before the rings
+// flourish (see idleTimerRef). Only fires near the top of the page — see the
+// `scrollStore.progress` check where this is used — so it doesn't compete
+// for attention once the user has scrolled into later sections.
+const IDLE_FLOURISH_THRESHOLD_S = 13;
+const IDLE_FLOURISH_SCROLL_CUTOFF = 0.12;
 const RING_BASES = [0.95, 0.8, 0.65] as const;
 // Ordered center-out by ring radius (ring3=2.4 innermost, ring1=2.8, ring2=3.2 outermost):
 // cyan -> white -> purple
@@ -198,7 +206,7 @@ export function MLogo() {
     [ring1EchoRef, ring2EchoRef, ring3EchoRef],
     [ring1Echo2Ref, ring2Echo2Ref, ring3Echo2Ref],
   ]);
-  const ringEchoUniformsRef = useRef([
+  const ringEchoUniformsRef = useLazyRef(() => [
     [
       { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
       { uColor: { value: new Color() }, uParams: { value: new Vector2() } },
@@ -222,12 +230,40 @@ export function MLogo() {
   // Random flare timer per ring — replaces pointer-proximity glow with an
   // autonomous flare on a randomized interval. 0 = counting down to next
   // flare, >0 = mid-flare (elapsed seconds within the pulse envelope).
-  const ringGlowCountdownRef = useRef([
+  const ringGlowCountdownRef = useLazyRef(() => [
     2 + Math.random() * 4,
     2 + Math.random() * 4,
     2 + Math.random() * 4,
   ]);
   const ringGlowPhaseRef = useRef([0, 0, 0]);
+
+  // Idle easter-egg — after a stretch of no user interaction near the top of
+  // the page, synchronize all 3 rings' autonomous flares (normally random
+  // and independent per-ring, see ringGlowCountdownRef above) into one
+  // simultaneous pulse with a brief spin-up, reusing that existing flare
+  // envelope rather than a parallel animation system. idleTimerRef only
+  // accumulates while nothing resets it (see the interaction listener
+  // below); idleSpinBoostRef decays back to 0 via damp() after each trigger.
+  const idleTimerRef = useRef(0);
+  const idleSpinBoostRef = useRef(0);
+
+  // Reset the idle timer on any real interaction. A plain ref write, not
+  // React state — this runs on every pointermove, so it must stay outside
+  // the render cycle entirely (same reasoning as scrollStore elsewhere).
+  useEffect(() => {
+    if (reducedMotion) return;
+    const controller = new AbortController();
+    const resetIdle = () => {
+      idleTimerRef.current = 0;
+    };
+    const opts = { passive: true, signal: controller.signal } as const;
+    window.addEventListener("pointermove", resetIdle, opts);
+    window.addEventListener("pointerdown", resetIdle, opts);
+    window.addEventListener("wheel", resetIdle, opts);
+    window.addEventListener("touchmove", resetIdle, opts);
+    window.addEventListener("keydown", resetIdle, opts);
+    return () => controller.abort();
+  }, [reducedMotion]);
 
   // Fire the entrance animation only after the loader finishes sliding out.
   // ringReadyRef must still get set under reduced motion — it's the only
@@ -269,8 +305,12 @@ export function MLogo() {
     if (reducedMotion) {
       selectOpacityRef.current = targetOpacity;
     } else {
-      selectOpacityRef.current +=
-        (targetOpacity - selectOpacityRef.current) * 0.05;
+      selectOpacityRef.current = damp(
+        selectOpacityRef.current,
+        targetOpacity,
+        0.05,
+        delta,
+      );
     }
     const op = selectOpacityRef.current * selectOpacityRef.current;
 
@@ -279,7 +319,7 @@ export function MLogo() {
       if (reducedMotion) {
         selectZRef.current = targetZ;
       } else {
-        selectZRef.current += (targetZ - selectZRef.current) * 0.05;
+        selectZRef.current = damp(selectZRef.current, targetZ, 0.05, delta);
       }
       outerRef.current.position.z = selectZRef.current;
 
@@ -301,8 +341,12 @@ export function MLogo() {
     if (reducedMotion) {
       ringDramaRef.current = isSelected ? 1 : 0;
     } else {
-      ringDramaRef.current +=
-        ((isSelected ? 1 : 0) - ringDramaRef.current) * 0.05;
+      ringDramaRef.current = damp(
+        ringDramaRef.current,
+        isSelected ? 1 : 0,
+        0.05,
+        delta,
+      );
     }
     const drama = ringDramaRef.current;
     const glow = drama > 0 ? 1 + Math.sin(drama * Math.PI) * 0.5 : 1;
@@ -310,6 +354,24 @@ export function MLogo() {
     // this dips mid-transition then swells back up — capped well under full
     // opacity so the glow doesn't dominate the view once selected.
     const ringFade = Math.max(op, drama) * 0.65;
+
+    // Idle easter-egg trigger — see idleTimerRef/idleSpinBoostRef above.
+    // Gated on the M actually being prominent (near the top, nothing
+    // selected) so it never fires while the M has drifted far away or a
+    // tech box has taken over the scene.
+    if (!reducedMotion) {
+      idleTimerRef.current += delta;
+      const idleEligible =
+        !isSelected && scrollStore.progress < IDLE_FLOURISH_SCROLL_CUTOFF;
+      if (idleEligible && idleTimerRef.current >= IDLE_FLOURISH_THRESHOLD_S) {
+        // Reset rather than latch — lets the flourish repeat every
+        // threshold's worth of continued inactivity instead of firing once.
+        idleTimerRef.current = 0;
+        idleSpinBoostRef.current = 1;
+        for (let i = 0; i < 3; i++) ringGlowPhaseRef.current[i] = 0.0001;
+      }
+      idleSpinBoostRef.current = damp(idleSpinBoostRef.current, 0, 0.06, delta);
+    }
 
     for (let i = 0; i < 3; i++) {
       if (!ringRefsArrRef.current[i].current) continue;
@@ -441,10 +503,12 @@ export function MLogo() {
     if (reducedMotion) {
       ringTiltRef.current = tiltTarget;
     } else {
-      ringTiltRef.current += (tiltTarget - ringTiltRef.current) * 0.028;
+      ringTiltRef.current = damp(ringTiltRef.current, tiltTarget, 0.028, delta);
     }
 
-    const spinMult = 1 + drama * 5; // spin up to 6× on selection
+    // Spin up to 6× on selection, plus a brief transient boost from the
+    // idle-flourish trigger above (decays back to 0 via damp()).
+    const spinMult = 1 + drama * 5 + idleSpinBoostRef.current * 2;
     // Flatten rings back toward saturn as M retreats — held at the resting
     // (unselected) tilt under reduced motion instead, so selecting a box
     // doesn't snap the rings into a different shape/orientation.

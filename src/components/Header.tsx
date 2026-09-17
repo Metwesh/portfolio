@@ -1,7 +1,7 @@
 import { refractive } from "@hashintel/refractive";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ANIMATION_CONFIG } from "../constants/animations";
-import { LOGO_GRADIENT_STOPS, NAV_LINKS } from "../constants/misc";
+import { LOGO_GRADIENT_STOPS, LOGO_PATH, NAV_LINKS } from "../constants/misc";
 import { cn } from "../lib/utils";
 import { MobileMenu } from "./MobileMenu";
 
@@ -106,10 +106,7 @@ export const Header = memo(({ scrollY }: { scrollY: number }) => {
             className="h-9 w-9 drop-shadow-lg"
             aria-hidden="true"
           >
-            <path
-              d="M39 39C69 109 69 319 39 399C79.6667 397 164.5 399 119 439C137 439 159 406 159 359C159 279 150.5 275 99 275C109 255 109 219 99 199C119 209 159 209 179 199L239 419L299 199C319 209 359 209 379 199C369 219 369 255 379 275C327.5 275 319 279 319 359C319 406 341 439 359 439C313.5 399 398.333 397 439 399C409 319 409 109 439 39C418.5 52.5 311.4 71.4 279 39L239 199L199 39C166.6 71.4 59.5 52.5 39 39Z"
-              fill="url(#header-logo-gradient)"
-            />
+            <path d={LOGO_PATH} fill="url(#header-logo-gradient)" />
             <defs>
               <linearGradient
                 id="header-logo-gradient"

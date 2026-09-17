@@ -3,6 +3,7 @@ import { useRef } from "react";
 import type { PerspectiveCamera as ThreePerspectiveCamera } from "three";
 import { Vector3 } from "three";
 import { CAMERA_WAYPOINTS } from "../constants/cameraWaypoints";
+import { useIsMobile } from "../hooks/useIsMobile";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { scrollStore } from "../stores/scrollStore";
 import { damp, dampAlpha } from "../utils/damp";
@@ -27,6 +28,7 @@ export function CameraRig({ mouse }: CameraRigProps) {
   const { camera } = useThree();
   const cam = camera as ThreePerspectiveCamera;
   const reducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
 
   // Smooth weight for the projects-section camera lock (0 = free, 1 = locked).
   const projectLockRef = useRef(0);
@@ -57,6 +59,17 @@ export function CameraRig({ mouse }: CameraRigProps) {
     _targetPos.lerpVectors(prev.position, next.position, t);
     _targetLookAt.lerpVectors(prev.lookAt, next.lookAt, t);
 
+    // Mobile camera override (position.z / fov only) — read live via
+    // useIsMobile() so a resize or orientation change re-frames correctly,
+    // instead of a `window.innerWidth` check baked into the waypoint data
+    // at module load (see CameraWaypoint.mobile). Waypoints with no
+    // `mobile` override just keep their desktop framing.
+    if (isMobile) {
+      const prevMobileZ = prev.mobile?.z ?? prev.position.z;
+      const nextMobileZ = next.mobile?.z ?? next.position.z;
+      _targetPos.z = prevMobileZ + (nextMobileZ - prevMobileZ) * t;
+    }
+
     // Smooth-lock camera to the projects view while the gallery is pinned —
     // snapped directly under reduced motion instead of eased, same
     // convention as every other selection/state ramp in the scene.
@@ -75,7 +88,12 @@ export function CameraRig({ mouse }: CameraRigProps) {
     _targetPos.y += mouse.current.y * 0.7;
 
     // Target FOV
-    const targetFov = prev.fov + (next.fov - prev.fov) * t;
+    let targetFov = prev.fov + (next.fov - prev.fov) * t;
+    if (isMobile) {
+      const prevMobileFov = prev.mobile?.fov ?? prev.fov;
+      const nextMobileFov = next.mobile?.fov ?? next.fov;
+      targetFov = prevMobileFov + (nextMobileFov - prevMobileFov) * t;
+    }
 
     if (reducedMotion) {
       // No cinematic lag — the eased chase below keeps the camera drifting
