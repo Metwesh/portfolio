@@ -1,0 +1,1 @@
+import{r as e}from"./SectionHeading-BgLPpi3N.js";var t=e.cyan;function n(e){let t=document.querySelector(`meta[name="theme-color"]`);t&&t.setAttribute(`content`,e)}export{n,t};
