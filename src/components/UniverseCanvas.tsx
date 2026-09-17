@@ -77,8 +77,9 @@ function TechConstellation() {
   const isActiveRef = useRef(false);
   useEffect(() => {
     const handler = (e: Event) => {
-      isActiveRef.current = (e as CustomEvent<{ active: boolean }>).detail
-        .active;
+      isActiveRef.current = (
+        e as CustomEvent<{ active: boolean }>
+      ).detail.active;
     };
     document.addEventListener("universe:interactive", handler);
     return () => document.removeEventListener("universe:interactive", handler);
@@ -177,7 +178,7 @@ function TechConstellation() {
       const scale = selectedIndex === null ? 1 : selectedIndex === i ? 0.3 : 2;
       targetPositionsRef.current[i].copy(points[i]).multiplyScalar(scale);
     }
-  }, [selectedIndex, points]);
+  }, [selectedIndex, points, targetPositionsRef.current]);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
