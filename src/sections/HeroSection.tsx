@@ -178,9 +178,7 @@ export function HeroSection() {
 
     let tween: ReturnType<typeof gsap.to> | null = null;
 
-    import("gsap/ScrollTrigger").then(({ ScrollTrigger: ST }) => {
-      gsap.registerPlugin(ST);
-
+    import("gsap/ScrollTrigger").then(() => {
       tween = gsap.to(sectionRef.current, {
         opacity: 0,
         y: -80,

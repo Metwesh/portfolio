@@ -22,18 +22,9 @@ export function useLenisScroll() {
     let lastSetY = 0;
     lenis.on(
       "scroll",
-      ({
-        scroll,
-        progress,
-        velocity,
-      }: {
-        scroll: number;
-        progress: number;
-        velocity: number;
-      }) => {
+      ({ scroll, progress }: { scroll: number; progress: number }) => {
         scrollStore.raw = scroll;
         scrollStore.progress = progress;
-        scrollStore.velocity = velocity;
 
         // Throttle React re-renders: only update if moved > 20px
         if (Math.abs(scroll - lastSetY) > 20) {

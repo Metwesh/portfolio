@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Euler as ThreeEuler, type Mesh as ThreeMesh } from "three";
 import BoxShader from "../shaders/BoxShader";
 import { scrollStore } from "../stores/scrollStore";
+import { isTapGesture } from "../utils/gesture";
 
 interface TechBoxProps {
   data: {
@@ -14,11 +15,13 @@ interface TechBoxProps {
   onClick: () => void;
   isSelected?: boolean;
   index: number;
-  // Render-only now — all per-frame position/scale/rotation/entry-exit math
-  // lives in TechConstellation's single useFrame (see UniverseCanvas.tsx),
-  // batched across every box the same way GalleryCards batches its cards
-  // (ProjectGallery.tsx) instead of each of the 43 boxes subscribing its
-  // own useFrame.
+  // Position/scale/rotation/selection math lives in TechConstellation's
+  // single useFrame (see UniverseCanvas.tsx), batched across every box the
+  // same way GalleryCards batches its cards (ProjectGallery.tsx) instead of
+  // each box independently animating its own transform. The <Float> wrapper
+  // below still runs its own per-box useFrame for the idle bob/wobble
+  // (cheap: a couple of trig calls) — not literally zero extra subscriptions,
+  // just the position/scale/rotation/selection math that's batched.
   onMount: (index: number, meshRef: React.RefObject<ThreeMesh | null>) => void;
   // Singular, like ProjectGallery's hoveredIndexRef — only one box can be
   // hovered at a time (pointerEnter/Leave already stopPropagation to the
@@ -71,12 +74,7 @@ export function TechBox({
     // Check if this was a tap (not a drag)
     if (!pointerDown.current) return;
 
-    const deltaX = Math.abs(e.clientX - pointerDown.current.x);
-    const deltaY = Math.abs(e.clientY - pointerDown.current.y);
-    const deltaTime = Date.now() - pointerDown.current.time;
-
-    // Consider it a tap if movement is minimal and time is short
-    const isTap = deltaX < 10 && deltaY < 10 && deltaTime < 300;
+    const isTap = isTapGesture(pointerDown.current, e);
 
     if (
       isTap &&

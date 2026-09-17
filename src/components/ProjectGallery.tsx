@@ -12,6 +12,7 @@ import { MathUtils, type MeshBasicMaterial, Shape, ShapeGeometry } from "three";
 import { PROJECTS } from "../constants/projects";
 import { scrollStore } from "../stores/scrollStore";
 import { damp } from "../utils/damp";
+import { isTapGesture } from "../utils/gesture";
 
 // Module-level exit progress (0 = fully visible, 1 = fully gone).
 let _exitProgress = 0;
@@ -34,6 +35,14 @@ const BORDER_PAD = 0.14;
 const CARD_SPACING = 9;
 const N = PROJECTS.length;
 const APPROACH_Y = 12;
+
+// Continuous "active card index" derived from projectProgress — 0 at the
+// first card, N-1 at the last. Shared by GalleryCards' per-frame banding
+// (kept as a float) and ProjectCard3D's click handler (rounded to the
+// nearest index) so the two can't drift apart if this mapping changes.
+function projectActiveF(progress: number): number {
+  return progress * (N - 1);
+}
 
 function makeRoundedRect(w: number, h: number, r: number): ShapeGeometry {
   const hw = w / 2;
@@ -164,10 +173,7 @@ function ProjectCard3D({
     const down = pointerDownRef.current;
     pointerDownRef.current = null;
     if (!down) return;
-    const dx = Math.abs(e.clientX - down.x);
-    const dy = Math.abs(e.clientY - down.y);
-    const dt = Date.now() - down.time;
-    if (dx >= 10 || dy >= 10 || dt >= 300) return;
+    if (!isTapGesture(down, e)) return;
     // Cards are always mounted and raycastable, and fly into their resting
     // position well before the section is actually "active" (see the
     // approach logic in GalleryCards' useFrame) — without this guard, a
@@ -180,7 +186,7 @@ function ProjectCard3D({
     // Clicking the already-active (centered) card has nothing left to
     // "center", so it opens the project instead — clicking a peeking
     // neighbor still just brings it to focus (see ProjectsSection).
-    const activeIndex = Math.round(scrollStore.projectProgress * (N - 1));
+    const activeIndex = Math.round(projectActiveF(scrollStore.projectProgress));
     if (activeIndex === index && link) {
       window.open(link, "_blank", "noopener,noreferrer");
       return;
@@ -307,7 +313,7 @@ function GalleryCards() {
     );
     groupRef.current.scale.setScalar(responsiveScale);
 
-    const activeF = p * (N - 1);
+    const activeF = projectActiveF(p);
     const targetX = -activeF * CARD_SPACING * responsiveScale;
     groupRef.current.position.x = damp(
       groupRef.current.position.x,

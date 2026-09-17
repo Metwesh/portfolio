@@ -8,8 +8,6 @@ export const scrollStore = {
   raw: 0,
   /** Normalized scroll progress 0–1 (0 = top, 1 = bottom of page) */
   progress: 0,
-  /** Lenis velocity */
-  velocity: 0,
   /** Projects section scroll progress 0–1 (written by GSAP onUpdate in ProjectsSection) */
   projectProgress: 0,
   /** True while the sticky projects section is pinned (GSAP enter/leave callbacks) */

@@ -18,6 +18,7 @@ import { useReducedMotion } from "../hooks/useReducedMotion";
 import { LIGHT_ARGUMENTS } from "../shaders/FogArguments";
 import { scrollStore } from "../stores/scrollStore";
 import { damp, dampAlpha } from "../utils/damp";
+import { isTapGesture } from "../utils/gesture";
 import { QualityTierEnum, qualityTier } from "../utils/performance";
 import { AnimatedStars } from "./AnimatedStars";
 import { CameraRig } from "./CameraRig";
@@ -70,6 +71,14 @@ const TECHBOX_MIN_SCALE = 0.05;
 // Exit target = current sphere position pushed further out along the same
 // radial direction — away from the centerpiece, into open space.
 const TECHBOX_EXIT_DISTANCE_MULTIPLIER = 3;
+
+// ─── Idle-attract constants ────────────────────────────────────────────────
+// After the sphere sits untouched (no drag, hover, selection, or scroll)
+// for this long, it ramps into a slow, sustained rotation to invite
+// interaction — unlike the scroll-driven flywheel above, this holds a
+// constant rate instead of decaying, and only while genuinely idle.
+const IDLE_ATTRACT_DELAY_S = 4;
+const IDLE_ATTRACT_SPEED = 0.12; // radians/second at full ramp-in
 
 // ─── Tech Constellation ──────────────────────────────────────────────────────
 // Only ever mounted when !prefersReducedMotion (see UniverseCanvas below) —
@@ -133,6 +142,8 @@ function TechConstellation() {
   const rotYRef = useRef(0);
   const rotXRef = useRef(0);
   const scrollVelRef = useRef(0);
+  const idleElapsedRef = useRef(0);
+  const idleSpinRef = useRef(0);
 
   // ─── TechBox batched animation state ─────────────────────────────────────
   // All 43 boxes are driven from this single useFrame below instead of each
@@ -242,6 +253,21 @@ function TechConstellation() {
     const decayFactor = selected || hovered || dragging ? 0.07 : 0.03;
     scrollVelRef.current = damp(scrollVelRef.current, 0, decayFactor, delta);
     rotYRef.current += scrollVelRef.current;
+
+    // Idle-attract — a second, independent rotation source from the
+    // flywheel above. After the sphere sits genuinely untouched (in view,
+    // no drag/hover/selection, no scroll) for IDLE_ATTRACT_DELAY_S, it
+    // ramps into a slow, sustained rotation to invite interaction, and
+    // ramps back out the instant the user touches it again. Sustained
+    // rate (rad/s, delta-multiplied) rather than impulse-and-decay — same
+    // convention as TECHBOX_SELF_ROTATION_SPEED below, not scrollVelRef's.
+    const untouched =
+      inView && !selected && !hovered && !dragging && Math.abs(rawDelta) < 0.01;
+    idleElapsedRef.current = untouched ? idleElapsedRef.current + delta : 0;
+    const idleTarget =
+      idleElapsedRef.current > IDLE_ATTRACT_DELAY_S ? IDLE_ATTRACT_SPEED : 0;
+    idleSpinRef.current = damp(idleSpinRef.current, idleTarget, 0.04, delta);
+    rotYRef.current += idleSpinRef.current * delta;
 
     // Clamp X tilt so the sphere never flips completely upside-down
     rotXRef.current = Math.max(-1.2, Math.min(1.2, rotXRef.current));
@@ -399,10 +425,7 @@ function TechConstellation() {
 
   const handleButtonPointerUp = (e: ReactPointerEvent<HTMLButtonElement>) => {
     if (!buttonPointerDown.current) return;
-    const dx = Math.abs(e.clientX - buttonPointerDown.current.x);
-    const dy = Math.abs(e.clientY - buttonPointerDown.current.y);
-    const dt = Date.now() - buttonPointerDown.current.time;
-    if (dx < 10 && dy < 10 && dt < 200) handleClose();
+    if (isTapGesture(buttonPointerDown.current, e)) handleClose();
     buttonPointerDown.current = null;
   };
 
@@ -545,6 +568,23 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
     };
   }, []);
 
+  // Tooltip a11y — drei's <Html> portals the selected-tech tooltip into this
+  // wrapper by default (gl.domElement.parentNode), which is otherwise
+  // aria-hidden since the wrapper is pure decorative canvas. Lift aria-hidden
+  // only while a tooltip's real, focusable close button is actually mounted.
+  useEffect(() => {
+    const handleBoxSelected = (e: Event) => {
+      if (!wrapperRef.current) return;
+      const selected = (e as CustomEvent<{ selected: boolean }>).detail
+        .selected;
+      if (selected) wrapperRef.current.removeAttribute("aria-hidden");
+      else wrapperRef.current.setAttribute("aria-hidden", "true");
+    };
+    document.addEventListener("universe:boxselected", handleBoxSelected);
+    return () =>
+      document.removeEventListener("universe:boxselected", handleBoxSelected);
+  }, []);
+
   // Globe drag — handled at DOM level so R3F raycasting for TechBox clicks is
   // completely unaffected. setPointerCapture ensures pointermove keeps firing on
   // mobile even when the finger moves outside the element.
@@ -623,10 +663,12 @@ export function UniverseCanvas({ onReady }: UniverseCanvasProps) {
         // gsap.ticker callback that drives Lenis + ScrollTrigger, so scroll
         // and camera share one clock instead of racing two independent rAF
         // loops (R3F's default "always" loop vs GSAP's ticker). Tab-hidden
-        // pause and reduced-motion throttling both live in that ticker
-        // callback (see useLenisScroll) rather than here — flipping this
-        // prop's string at runtime resets R3F's internal clock, which
-        // produced a one-frame delta spike on every tab switch.
+        // pause lives in that ticker callback (see useLenisScroll) rather
+        // than here — flipping this prop's string at runtime resets R3F's
+        // internal clock, which produced a one-frame delta spike on every
+        // tab switch. Reduced motion isn't a render-rate throttle (removed
+        // deliberately, see useLenisScroll) — it's handled below by simply
+        // not mounting TechConstellation/ProjectGallery.
         frameloop="never"
         performance={{ min: 0.5 }}
       >

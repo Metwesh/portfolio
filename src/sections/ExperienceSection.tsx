@@ -55,9 +55,8 @@ export function ExperienceSection() {
     });
     trackObserver.observe(line);
 
-    import("gsap/ScrollTrigger").then(({ ScrollTrigger: ST }) => {
+    import("gsap/ScrollTrigger").then(() => {
       if (cancelled) return;
-      gsap.registerPlugin(ST);
 
       lineTween = gsap.fromTo(
         line,
