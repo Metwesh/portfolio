@@ -1,4 +1,10 @@
-import { actLogo, eAndLogo, sideupWhiteLogo, tahLogo } from "../assets";
+import {
+  actLogo,
+  eAndLogo,
+  freelanceLogo,
+  sideupWhiteLogo,
+  tahLogo,
+} from "../assets";
 import { ACCENT_COLORS } from "./misc";
 
 export const EXPERIENCES = [
@@ -162,7 +168,7 @@ export const EXPERIENCES = [
     company: "Self-Employed",
     abbreviation: "FREELANCE",
     link: "",
-    icon: "/favicons/logo-no-background.svg",
+    icon: freelanceLogo,
     date: "Jul 2021 - Present",
     color: ACCENT_COLORS.cyan,
     points: [

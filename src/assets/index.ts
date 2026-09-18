@@ -17,6 +17,7 @@ import brgrLogo from "./companies/BRGR.webp";
 import dartSpaceLogo from "./companies/DArt-Space.webp";
 import eAndLogo from "./companies/E-And.svg";
 import marqLogo from "./companies/MARQ.svg";
+import freelanceLogo from "./companies/m-logo.svg";
 import sideupLogo from "./companies/SIDEUP.svg";
 import sideupWhiteLogo from "./companies/SIDEUP-white.svg";
 import tahLogo from "./companies/TAH.svg";
@@ -136,6 +137,7 @@ export {
   Figma,
   Firebase,
   faceDetectApp,
+  freelanceLogo,
   Git,
   Github,
   GoogleCloud,
