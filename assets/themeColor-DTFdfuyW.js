@@ -1,0 +1,1 @@
+import{i as e}from"./SectionHeading-CMspEJ4R.js";var t=e.cyan;function n(e){let t=document.querySelector(`meta[name="theme-color"]`);t&&t.setAttribute(`content`,e)}export{n,t};
