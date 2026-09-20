@@ -1,12 +1,9 @@
 import { useEffect } from "react";
+import { GlassCard } from "../components/GlassCard";
 import { SectionHeading } from "../components/SectionHeading";
 import { INTERSECTION_OBSERVER_CONFIG } from "../constants/animations";
 import { CERTIFICATES } from "../constants/certificates";
-import {
-  GLASS_CARD_CLASS,
-  LOGO_GRADIENT_STOPS,
-  LOGO_PATH,
-} from "../constants/misc";
+import { LOGO_GRADIENT_STOPS, LOGO_PATH } from "../constants/misc";
 import { useCardHolographicTilt } from "../hooks/useCardHolographicTilt";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { DEFAULT_THEME_COLOR, setThemeColor } from "../lib/themeColor";
@@ -32,12 +29,9 @@ function MLLogoCard() {
       {/* Outer glow */}
       <div className="absolute -inset-2 rounded-3xl bg-linear-to-r from-cyan-400/50 via-blue-500/50 to-purple-600/50 opacity-0 blur-2xl transition-all duration-700 group-hover:opacity-100" />
 
-      <div
+      <GlassCard
         ref={cardRef}
-        className={cn(
-          GLASS_CARD_CLASS,
-          "relative flex h-full min-h-52 flex-col items-center justify-center overflow-hidden opacity-0 transition-[border-color,box-shadow] duration-500 will-change-transform group-hover:border-white/20 group-hover:shadow-2xl",
-        )}
+        className="relative flex h-full min-h-52 flex-col items-center justify-center overflow-hidden opacity-0 transition-[border-color,box-shadow] duration-500 will-change-transform group-hover:border-white/20 group-hover:shadow-2xl"
       >
         {/* Ambient gradient blobs */}
         <div className="pointer-events-none absolute inset-0 opacity-40">
@@ -154,7 +148,7 @@ function MLLogoCard() {
         {/* Corner accents */}
         <div className="pointer-events-none absolute top-0 left-0 h-20 w-20 rounded-full bg-linear-to-br from-cyan-400/60 to-transparent opacity-0 blur-lg transition-all duration-700 group-hover:opacity-60" />
         <div className="pointer-events-none absolute right-0 bottom-0 h-20 w-20 rounded-full bg-linear-to-tl from-purple-600/60 to-transparent opacity-0 blur-lg transition-all duration-700 group-hover:opacity-60" />
-      </div>
+      </GlassCard>
     </article>
   );
 }
@@ -169,13 +163,13 @@ function CertCard({
   const { cardRef, shimmerRef } = useCardHolographicTilt<HTMLAnchorElement>();
 
   return (
-    <a
+    <GlassCard
+      as="a"
       ref={cardRef}
       href={cert.link}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        GLASS_CARD_CLASS,
         "group relative flex min-h-52 flex-col overflow-hidden p-6 opacity-0 will-change-transform md:p-8",
         isFeatured ? "md:col-span-2" : "md:col-span-1",
       )}
@@ -284,7 +278,7 @@ function CertCard({
           </div>
         </div>
       </div>
-    </a>
+    </GlassCard>
   );
 }
 

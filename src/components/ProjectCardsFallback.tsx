@@ -1,6 +1,7 @@
-import { GLASS_CARD_CLASS } from "../constants/misc";
 import { PROJECTS } from "../constants/projects";
 import { cn } from "../lib/utils";
+import { GlassCard } from "./GlassCard";
+import { TagPill } from "./TagPill";
 import { TagsPopover } from "./TagsPopover";
 
 // Reduced-motion fallback for the 3D project card gallery — a plain, static
@@ -9,12 +10,10 @@ export function ProjectCardsFallback() {
   return (
     <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {PROJECTS.map((project) => (
-        <article
+        <GlassCard
+          as="article"
           key={project.name}
-          className={cn(
-            GLASS_CARD_CLASS,
-            "group relative flex flex-col overflow-hidden transition-[border-color,box-shadow] duration-500 hover:border-white/20 hover:shadow-2xl",
-          )}
+          className="group relative flex flex-col overflow-hidden transition-[border-color,box-shadow] duration-500 hover:border-white/20 hover:shadow-2xl"
           style={{ boxShadow: `0 8px 32px -10px ${project.color}30` }}
         >
           {/* Ambient glow */}
@@ -96,11 +95,12 @@ export function ProjectCardsFallback() {
                 />
               )}
               {project.link && (
-                <a
+                <TagPill
+                  as="a"
                   href={project.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ms-auto flex items-center gap-1.5 rounded-full border border-white/20 bg-white/8 px-3 py-1 font-semibold text-white text-xs transition-colors duration-300 hover:border-white/40 hover:bg-white/15"
+                  className="ms-auto flex items-center gap-1.5 border-white/20 bg-white/8 text-white transition-colors duration-300 hover:border-white/40 hover:bg-white/15"
                   style={{ boxShadow: `0 0 16px ${project.color}40` }}
                 >
                   Visit
@@ -118,11 +118,11 @@ export function ProjectCardsFallback() {
                       d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                     />
                   </svg>
-                </a>
+                </TagPill>
               )}
             </div>
           </div>
-        </article>
+        </GlassCard>
       ))}
     </div>
   );

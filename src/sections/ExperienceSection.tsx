@@ -1,9 +1,9 @@
 import gsap from "gsap";
 import { useEffect, useRef } from "react";
+import { GlassCard } from "../components/GlassCard";
 import { SectionHeading } from "../components/SectionHeading";
 import { INTERSECTION_OBSERVER_CONFIG } from "../constants/animations";
 import { EXPERIENCES, LINEAR_GRADIENT } from "../constants/experiences";
-import { GLASS_CARD_CLASS } from "../constants/misc";
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { DEFAULT_THEME_COLOR, setThemeColor } from "../lib/themeColor";
@@ -188,12 +188,11 @@ export function ExperienceSection() {
               />
 
               {/* Card */}
-              <div
+              <GlassCard
                 ref={(el) => {
                   cardRefs.current[index] = el;
                 }}
                 className={cn(
-                  GLASS_CARD_CLASS,
                   "relative overflow-hidden opacity-0",
                   // Card lift on hover — kept fully static under reduced
                   // motion instead of letting the global CSS rule (which
@@ -311,7 +310,7 @@ export function ExperienceSection() {
                     backgroundImage: `linear-gradient(110deg, transparent 25%, ${experience.color}10 50%, transparent 75%)`,
                   }}
                 />
-              </div>
+              </GlassCard>
             </li>
           ))}
         </ul>

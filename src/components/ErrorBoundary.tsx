@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex min-h-svh cursor-auto flex-col items-center justify-center bg-linear-to-br from-gray-900 to-black px-4 text-center *:cursor-auto">
           <div className="max-w-md space-y-6">
-            <h1 className="bg-linear-to-r from-red-400 to-pink-600 bg-clip-text font-extrabold text-6xl text-transparent">
+            <h1 className="bg-linear-to-r from-red-400 to-pink-600 bg-clip-text font-extrabold text-5xl text-transparent sm:text-6xl">
               Oops!
             </h1>
             <h2 className="font-bold text-2xl text-white">

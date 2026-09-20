@@ -91,6 +91,9 @@ const _right = new ThreeVector3();
 const _up = new ThreeVector3();
 const _fwd = new ThreeVector3();
 const _camPos = new ThreeVector3();
+const _upAxis = new ThreeVector3(0, 1, 0);
+const _velDir = new ThreeVector3();
+const _quat = new ThreeQuaternion();
 
 const SPAWN_INTERVAL = 2.2;
 const BURST_INTERVAL = 0.35;
@@ -218,11 +221,9 @@ export function ShootingStars({ count = 20 }: ShootingStarsProps) {
           .normalize()
           .multiplyScalar(speed);
 
-        const q = new ThreeQuaternion().setFromUnitVectors(
-          new ThreeVector3(0, 1, 0),
-          freeSlot.velocity.clone().normalize(),
-        );
-        freeSlot.group.quaternion.copy(q);
+        _velDir.copy(freeSlot.velocity).normalize();
+        _quat.setFromUnitVectors(_upAxis, _velDir);
+        freeSlot.group.quaternion.copy(_quat);
 
         freeSlot.opacity = 0;
         freeSlot.lifetime = 0;

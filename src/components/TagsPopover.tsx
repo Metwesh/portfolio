@@ -2,7 +2,7 @@ import gsap from "gsap";
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import type { ProjectTag } from "../constants/projects";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import { cn } from "../lib/utils";
+import { TagPill } from "./TagPill";
 import TagsPopoverPortal from "./TagsPopoverPortal";
 
 interface TagsPopoverProps {
@@ -44,9 +44,6 @@ export function TagsPopover({
   const popoverRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const popoverId = useId();
-  const tagClass = cn(
-    "rounded-full border border-white/10 bg-black/60 px-3 py-1 font-semibold text-white/90 text-xs transition-all duration-300 hover:scale-110 hover:border-white/20 hover:bg-white/10",
-  );
   const visibleTags = tags.slice(0, visibleCount);
   const hiddenTags = tags.slice(visibleCount);
 
@@ -169,9 +166,12 @@ export function TagsPopover({
     <div className="flex flex-wrap gap-2">
       {/* Visible tags */}
       {visibleTags.map((tag) => (
-        <span key={tag.name} className={tagClass}>
+        <TagPill
+          key={tag.name}
+          className="border-white/10 bg-black/60 text-white/90 transition-all duration-300 hover:scale-110 hover:border-white/20 hover:bg-white/10"
+        >
           {tag.name}
-        </span>
+        </TagPill>
       ))}
 
       {/* +N badge with popover */}
@@ -184,9 +184,10 @@ export function TagsPopover({
           onMouseLeave={() => setIsOpen(false)}
         >
           {/* Badge trigger */}
-          <button
+          <TagPill
+            as="button"
             type="button"
-            className="cursor-pointer rounded-full border border-white/10 bg-black/60 px-3 py-1 font-semibold text-white/70 text-xs transition-all duration-300 hover:scale-110 hover:text-white"
+            className="cursor-pointer border-white/10 bg-black/60 text-white/70 transition-all duration-300 hover:scale-110 hover:text-white"
             style={{
               borderColor: isOpen
                 ? `${projectColor}60`
@@ -202,7 +203,7 @@ export function TagsPopover({
             aria-describedby={popoverId}
           >
             {`+${hiddenTags.length} more`}
-          </button>
+          </TagPill>
 
           {/* Popover — portaled to body, positioned via inline left/top set
               in the effect above (see comment there for why). */}
@@ -211,7 +212,6 @@ export function TagsPopover({
             popoverId={popoverId}
             contentRef={contentRef}
             hiddenTags={hiddenTags}
-            tagClass={tagClass}
           />
         </div>
       )}

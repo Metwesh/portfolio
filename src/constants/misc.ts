@@ -77,18 +77,12 @@ const BREAKPOINTS = {
   desktop: 1280,
 } as const;
 
-// Shared glass-card base, reused by CertificatesSection and ExperienceSection
-// cards so the look stays in sync across both.
-const GLASS_CARD_CLASS =
-  "rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl";
-
 const SKILL_CATEGORIES = ["Frontend", "Backend", "DevOps", "Tooling", "Design"];
 
 export {
   ACCENT_COLORS,
   BREAKPOINTS,
   CENTERPIECE_PATH,
-  GLASS_CARD_CLASS,
   LOGO_GRADIENT_STOPS,
   LOGO_PATH,
   NAV_LINKS,

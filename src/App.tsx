@@ -101,7 +101,7 @@ export default function App() {
         "#loading-screen .ls-m",
         {
           scale: 2.2,
-          filter: "drop-shadow(0 0 60px #00eeff) drop-shadow(0 0 30px #a855f7)",
+          filter: "drop-shadow(0 0 60px #00eaff) drop-shadow(0 0 30px #a855f7)",
           duration: 0.35,
           ease: "power2.out",
         },

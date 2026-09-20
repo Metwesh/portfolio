@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { Odometer, type OdometerHandle } from "../components/Odometer";
 import { ProjectCardsFallback } from "../components/ProjectCardsFallback";
 import { SectionHeading } from "../components/SectionHeading";
+import { TagPill } from "../components/TagPill";
 import { TagsPopover } from "../components/TagsPopover";
 import { PROJECTS } from "../constants/projects";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -716,11 +717,12 @@ function ProjectsSectionAnimated() {
                   />
                 )}
                 {project.link && (
-                  <a
+                  <TagPill
+                    as="a"
                     href={project.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/8 px-3 py-1 font-semibold text-white text-xs transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/15"
+                    className="flex items-center gap-1.5 border-white/20 bg-white/8 text-white transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/15"
                     style={{ boxShadow: `0 0 16px ${project.color}40` }}
                   >
                     Visit
@@ -738,7 +740,7 @@ function ProjectsSectionAnimated() {
                         d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                       />
                     </svg>
-                  </a>
+                  </TagPill>
                 )}
               </div>
             ))}

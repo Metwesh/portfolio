@@ -1,18 +1,17 @@
 import type React from "react";
 import { createPortal } from "react-dom";
+import { TagPill } from "./TagPill";
 
 export default function TagsPopoverPortal({
   popoverRef,
   popoverId,
   contentRef,
   hiddenTags,
-  tagClass,
 }: {
   popoverRef: React.RefObject<HTMLDivElement | null>;
   popoverId: string;
   contentRef: React.RefObject<HTMLDivElement | null>;
   hiddenTags: { name: string }[];
-  tagClass: string;
 }) {
   return createPortal(
     <div
@@ -31,9 +30,12 @@ export default function TagsPopoverPortal({
       >
         <div className="relative flex flex-wrap gap-2">
           {hiddenTags.map((tag) => (
-            <span key={tag.name} className={tagClass}>
+            <TagPill
+              key={tag.name}
+              className="border-white/10 bg-black/60 text-white/90 transition-all duration-300 hover:scale-110 hover:border-white/20 hover:bg-white/10"
+            >
               {tag.name}
-            </span>
+            </TagPill>
           ))}
         </div>
       </div>

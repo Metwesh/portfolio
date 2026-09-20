@@ -186,6 +186,7 @@ function TechConstellation() {
   // box on every render like the old getBoxPosition() did.
   const targetPositionsRef = useLazyRef(() => points.map((p) => p.clone()));
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: targetPositionsRef is a stable ref (useLazyRef) mutated in place, never reassigned — .current never changes across re-runs
   useEffect(() => {
     for (let i = 0; i < points.length; i++) {
       // Non-selected boxes scatter outward to 2x their sphere radius when a
@@ -193,7 +194,7 @@ function TechConstellation() {
       const scale = selectedIndex === null ? 1 : selectedIndex === i ? 0.3 : 2;
       targetPositionsRef.current[i].copy(points[i]).multiplyScalar(scale);
     }
-  }, [selectedIndex, points, targetPositionsRef.current]);
+  }, [selectedIndex, points]);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;

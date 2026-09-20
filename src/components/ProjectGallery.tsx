@@ -35,6 +35,7 @@ const BORDER_PAD = 0.14;
 const CARD_SPACING = 9;
 const N = PROJECTS.length;
 const APPROACH_Y = 12;
+const IMAGE_URLS = PROJECTS.map((p) => p.image);
 
 // Continuous "active card index" derived from projectProgress — 0 at the
 // first card, N-1 at the last. Shared by GalleryCards' per-frame banding
@@ -239,8 +240,7 @@ function ProjectCard3D({
 
 // ─── Gallery group — single useFrame drives all card + group animation ────────
 function GalleryCards() {
-  const imageUrls = PROJECTS.map((p) => p.image);
-  const textures = useTexture(imageUrls);
+  const textures = useTexture(IMAGE_URLS);
   const groupRef = useRef<THREE.Group>(null);
   const exitBaseRef = useRef<number>(-1);
 

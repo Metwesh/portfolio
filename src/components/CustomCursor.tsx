@@ -136,12 +136,12 @@ export function CustomCursor() {
       <refractive.div
         ref={ringRef}
         aria-hidden="true"
-        className="pointer-events-none fixed top-0 left-0 z-9998 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40 [transition:border-color_200ms_ease,box-shadow_200ms_ease]"
+        className="pointer-events-none fixed top-0 left-0 z-9998 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40 [transition:border-color_200ms_ease,box-shadow_200ms_ease]"
         refraction={{
-          blur: 0.5,
-          radius: 16,
-          glassThickness: 16,
-          bezelWidth: 32,
+          blur: 0.25,
+          radius: 20,
+          glassThickness: 20,
+          bezelWidth: 40,
           refractiveIndex: 3,
         }}
       />
